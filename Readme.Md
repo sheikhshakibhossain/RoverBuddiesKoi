@@ -1,24 +1,23 @@
-
 # RoverBuddiesKoi
 
 > **Know who's available before asking.**
 
-RoverBuddiesKoi is an AI-powered team availability management platform built for engineering teams like **UIU Mars Rover Team (UMRT)**. It automatically imports members' university class schedules, calculates their real-time availability, and helps team leads quickly find the right people for meetings and tasks.
+RoverBuddiesKoi is an AI-powered availability management platform designed for organizations with multiple teams and subteams, such as research labs, robotics teams, and engineering clubs. It automatically imports members' university class schedules, calculates real-time availability, and helps leaders quickly find the right people for meetings, collaboration, and project work.
 
 ---
 
 # Problem
 
-Engineering teams often rely on group chats to ask:
+Engineering organizations often rely on group chats to ask:
 
 * Who is free right now?
 * Who can join a meeting?
 * When is the best time for everyone?
 * Which Software/Mechanical/Electrical members are available?
 
-This process is slow, repetitive, and inefficient.
+This process is repetitive, time-consuming, and inefficient.
 
-RoverBuddiesKoi solves this by automatically calculating every member's availability from their class routine.
+RoverBuddiesKoi solves this by automatically calculating every member's availability from their class routine and providing powerful search and visualization tools.
 
 ---
 
@@ -30,28 +29,78 @@ RoverBuddiesKoi solves this by automatically calculating every member's availabi
 * Improve collaboration between teams and subteams.
 * Reduce unnecessary communication.
 * Provide a centralized member directory.
+* Help organizations schedule meetings efficiently.
 
 ---
 
 # Target Users
 
-* UMRT Members
-* Subteam Leads
-* Team Leads
-* Administrators
+The platform is designed for organizations consisting of multiple teams and subteams.
 
-Although designed for UMRT, the platform can easily be adapted for any university club, research lab, or engineering organization.
+Examples include:
+
+* Research Labs
+* Robotics Teams
+* University Clubs
+* Engineering Organizations
+* Startup Teams
+
+Example hierarchy:
+
+```text
+Organization
+└── CAIR Lab
+    ├── UMRT
+    ├── URRT
+    └── Team XYZ
+```
+
+Although initially developed for **CAIR Lab**, the platform is designed to support any organization with a similar structure.
+
+---
+
+# Organization Structure
+
+```text
+Organization
+│
+├── Team
+│   ├── Subteam
+│   │   └── Members
+│   └── Subteam
+│
+├── Team
+│   ├── Subteam
+│   └── Subteam
+│
+└── Team
+    ├── Subteam
+    └── Subteam
+```
+
+A member may belong to multiple subteams within the same team.
 
 ---
 
 # User Roles
 
-## Super Admin
+## Organization Admin
 
-* Manage the platform
-* Create teams and subteams
-* Manage permissions
-* Manage all users
+* Manage the organization
+* Create and manage teams
+* Assign Team Admins
+* Manage organization members
+* View organization-wide analytics
+
+---
+
+## Team Admin
+
+* Manage a team
+* Create and manage subteams
+* Assign Subteam Leads
+* Manage team members
+* View team availability
 
 ---
 
@@ -71,39 +120,43 @@ Although designed for UMRT, the platform can easily be adapted for any universit
 * Update profile
 * Upload class routine
 * View schedules
-* View team availability
+* View availability
 
 ---
 
 # Core Features
 
-## Team Management
+## Organization Management
 
-* Teams
-* Subteams
-* Multiple subteam membership
-* Multiple leads per subteam
-* Role-based permissions
+Features include:
+
+* Multiple Organizations
+* Multiple Teams
+* Multiple Subteams
+* Multiple Team Admins
+* Multiple Subteam Leads
+* Multiple Subteam Membership
+* Role-Based Access Control (RBAC)
 
 ---
 
 ## Routine Upload
 
-Supported formats
+Supported formats:
 
 * UCAM XLSX
 * PDF *(future support)*
 
 The backend automatically extracts:
 
-* Day
 * Course
+* Day
 * Start Time
 * End Time
 
-and stores the weekly schedule in the database.
+The parsed schedule is stored in the database automatically.
 
-No manual data entry required.
+No manual data entry is required.
 
 ---
 
@@ -125,14 +178,15 @@ Dashboard displays:
 
 ---
 
-## Search Members
+## Member Search
 
-Search members by:
+Search members using filters such as:
 
-* Day
-* Time
+* Organization
 * Team
 * Subteam
+* Day
+* Time
 * Role
 * Availability
 
@@ -146,13 +200,15 @@ Example:
 
 Each member profile includes:
 
-* Basic information
-* Team/Subteam(s)
-* Weekly class schedule
-* Today's schedule
-* Current availability
-* Next available time
-* WhatsApp contact
+* Basic Information
+* Organization
+* Team
+* Subteam(s)
+* Weekly Class Schedule
+* Today's Schedule
+* Current Availability
+* Next Available Time
+* WhatsApp Contact
 
 ---
 
@@ -164,18 +220,19 @@ One-click messaging using WhatsApp.
 
 ## Availability Heatmap
 
-Visualize member availability across the week using an interactive heatmap.
+Visualize availability across the week using interactive heatmaps.
 
-The system aggregates schedules and displays availability for the entire organization or selected teams/subteams, making it easy to identify the best time slots for meetings and collaboration.
+The system aggregates schedules and displays availability at multiple organizational levels.
 
 ### Views
 
-* Overall Team Availability
+* Organization-wide Availability
 * Team-wise Availability
 * Subteam-wise Availability
 
 ### Filters
 
+* Organization
 * Team
 * Subteam
 * Academic Batch
@@ -188,15 +245,23 @@ Display exact availability counts.
 
 Example:
 
+| Time  |         UMRT |      AI Team |  Drone Team |
+| ----- | -----------: | -----------: | ----------: |
+| 10:00 | 18 / 22 Free |  9 / 14 Free | 6 / 10 Free |
+| 11:00 | 21 / 22 Free | 13 / 14 Free | 9 / 10 Free |
+
+Or drill down into a specific team.
+
 | Time  |     Software |   Mechanical |  Electrical |
 | ----- | -----------: | -----------: | ----------: |
 | 10:00 | 18 / 22 Free |  9 / 14 Free | 6 / 10 Free |
 | 11:00 | 21 / 22 Free | 13 / 14 Free | 9 / 10 Free |
 
-Use cases:
+### Use Cases
 
 * Find the best meeting time
-* Compare availability across teams
+* Compare team availability
+* Compare subteam availability
 * Identify peak collaboration hours
 * Reduce scheduling conflicts
 
@@ -208,9 +273,11 @@ Use cases:
 
 Select:
 
-* Teams/Subteams
-* Required members
-* Meeting duration
+* Organization
+* Team(s)
+* Subteam(s)
+* Required Members
+* Meeting Duration
 
 The system recommends the optimal meeting time.
 
@@ -218,7 +285,9 @@ The system recommends the optimal meeting time.
 
 ## Skill-Based Search
 
-Members can maintain skill tags such as:
+Members can maintain skill tags.
+
+Examples:
 
 * React
 * Python
@@ -229,7 +298,7 @@ Members can maintain skill tags such as:
 * Machine Learning
 * UI/UX
 
-Example:
+Example query:
 
 > Find an available React developer.
 
@@ -239,7 +308,8 @@ Example:
 
 * Missing routine reminders
 * Semester update reminders
-* Meeting notifications
+* Meeting reminders
+* Upcoming availability alerts
 
 ---
 
@@ -255,7 +325,9 @@ Natural language queries such as:
 
 * Who is free after 3 PM today?
 * Find two available Software members.
+* Which Mechanical members are free tomorrow?
 * When can Software and Mechanical meet together?
+* Which team has the highest availability this afternoon?
 
 ---
 
@@ -277,10 +349,14 @@ Store Weekly Schedule
 Generate Availability Timeline
       │
       ▼
-Dashboard & Search Engine
+Availability Engine
       │
       ▼
-Leads Find Available Members
+Dashboard
+Search
+Heatmaps
+Profiles
+Meeting Planner
 ```
 
 ---
@@ -289,37 +365,66 @@ Leads Find Available Members
 
 ## Frontend
 
-* Next.js
 * React
 * TypeScript
+* Vite
 * Tailwind CSS
 * shadcn/ui
+* React Router
+
+---
 
 ## Backend
 
-* Next.js Server Actions / API Routes
+* Node.js
+* Vercel Serverless Functions
 * Prisma ORM
-* PostgreSQL (Neon)
+
+---
+
+## Database
+
+* PostgreSQL (Neon Free Tier)
+
+---
 
 ## Authentication
 
-* Clerk or Auth.js
+* JWT
+* bcrypt
 
-## File Parsing
+---
 
-* SheetJS (XLSX)
-* PDF Parser *(future)*
+## File Processing
+
+* SheetJS (`xlsx`)
+* `pdf-parse` *(future support)*
+
+---
+
+## Development
+
+* Git
+* GitHub
+* ESLint
+* Prettier
+* Postman
+
+---
 
 ## Deployment
 
 * Vercel
+* Neon PostgreSQL
 
 ---
 
 # MVP Scope
 
 * Authentication
-* Team & Subteam Management
+* Organization Management
+* Team Management
+* Subteam Management
 * Role-Based Access Control
 * Member Profiles
 * Routine Upload (XLSX)
@@ -336,7 +441,7 @@ Leads Find Available Members
 
 # Success Criteria
 
-The platform should allow team leads to answer questions instantly, without asking in group chats.
+The platform should enable leaders to answer questions instantly without asking in group chats.
 
 Examples:
 
@@ -344,7 +449,8 @@ Examples:
 * Who will be free next?
 * Which Software members are available?
 * Who is available tomorrow at 3 PM?
-* When should we schedule a meeting?
-* Which subteam has the highest availability this afternoon?
+* Which team has the highest availability?
+* Which subteam is mostly free this afternoon?
+* When is the best time to schedule a meeting?
 
 If these questions can be answered within seconds, RoverBuddiesKoi has achieved its goal.
