@@ -1,9 +1,9 @@
 
-# TeamRadar
+# RoverBuddiesKoi
 
 > **Know who's available before asking.**
 
-TeamRadar is an AI-powered team availability management platform built for engineering teams like **UIU Mars Rover Team (UMRT)**. It automatically imports members' university class schedules, calculates their real-time availability, and helps team leads quickly find the right people for meetings and tasks.
+RoverBuddiesKoi is an AI-powered team availability management platform built for engineering teams like **UIU Mars Rover Team (UMRT)**. It automatically imports members' university class schedules, calculates their real-time availability, and helps team leads quickly find the right people for meetings and tasks.
 
 ---
 
@@ -18,7 +18,7 @@ Engineering teams often rely on group chats to ask:
 
 This process is slow, repetitive, and inefficient.
 
-TeamRadar solves this by automatically calculating every member's availability from their class routine.
+RoverBuddiesKoi solves this by automatically calculating every member's availability from their class routine.
 
 ---
 
@@ -347,4 +347,4 @@ Examples:
 * When should we schedule a meeting?
 * Which subteam has the highest availability this afternoon?
 
-If these questions can be answered within seconds, TeamRadar has achieved its goal.
+If these questions can be answered within seconds, RoverBuddiesKoi has achieved its goal.
