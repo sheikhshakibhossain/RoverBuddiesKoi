@@ -17,7 +17,7 @@ Engineering organizations often rely on group chats to ask:
 
 This process is repetitive, time-consuming, and inefficient.
 
-RoverBuddiesKoi solves this by automatically calculating every member's availability from their class routine and providing powerful search and visualization tools.
+RoverBuddiesKoi solves this by automatically calculating every member's availability from their class routine and providing powerful search, visualization, and scheduling tools.
 
 ---
 
@@ -30,6 +30,7 @@ RoverBuddiesKoi solves this by automatically calculating every member's availabi
 * Reduce unnecessary communication.
 * Provide a centralized member directory.
 * Help organizations schedule meetings efficiently.
+* Enforce semester-based routine submission for accurate availability.
 
 ---
 
@@ -82,45 +83,103 @@ A member may belong to multiple subteams within the same team.
 
 ---
 
-# User Roles
+# Access Control
 
-## Organization Admin
+The platform uses **Role-Based Access Control (RBAC)**.
+
+## Organization Owner
+
+Highest privilege.
+
+Permissions:
 
 * Manage the organization
-* Create and manage teams
-* Assign Team Admins
-* Manage organization members
+* Manage all teams
+* Manage all subteams
+* Manage all users
+* Assign and revoke roles
+* Configure semesters/trimesters
+* Approve skills globally
 * View organization-wide analytics
 
 ---
 
-## Team Admin
+## Team Manager
 
-* Manage a team
+Permissions:
+
+* Manage assigned team
 * Create and manage subteams
-* Assign Subteam Leads
+* Assign Subteam Managers
 * Manage team members
-* View team availability
+* Approve member skills
+* View team analytics
+
+Cannot access other teams.
 
 ---
 
-## Subteam Lead
+## Subteam Manager
 
-* Manage assigned subteams
+Permissions:
+
+* Manage assigned subteam
 * Add or remove members
-* View member schedules
-* Search member availability
+* Approve member skills
+* View subteam schedules
+* View subteam analytics
 
-> Multiple leads can exist within the same subteam.
+Cannot manage other subteams.
 
 ---
 
 ## Member
 
-* Update profile
+Permissions:
+
 * Upload class routine
-* View schedules
+* Update profile
+* Request new skills
 * View availability
+* Search members within assigned subteam(s)
+* Contact teammates
+
+Members **cannot view other teams or subteams** unless explicitly granted permission.
+
+---
+
+# Semester Management
+
+Each organization defines its academic calendar.
+
+For every semester or trimester, an Organization Owner configures:
+
+* Semester Name
+* Start Date
+* End Date
+* Routine Upload Deadline
+
+Example:
+
+```text
+Fall 2026
+
+Start:
+1 September
+
+End:
+31 December
+
+Routine Upload Deadline:
+10 September
+```
+
+After the upload deadline:
+
+* Members who uploaded a valid routine continue using the platform normally.
+* Members without a valid routine are restricted until they upload their latest class routine.
+
+This ensures availability information always reflects the current academic schedule.
 
 ---
 
@@ -133,8 +192,8 @@ Features include:
 * Multiple Organizations
 * Multiple Teams
 * Multiple Subteams
-* Multiple Team Admins
-* Multiple Subteam Leads
+* Multiple Team Managers
+* Multiple Subteam Managers
 * Multiple Subteam Membership
 * Role-Based Access Control (RBAC)
 
@@ -154,7 +213,7 @@ The backend automatically extracts:
 * Start Time
 * End Time
 
-The parsed schedule is stored in the database automatically.
+The parsed schedule is stored automatically.
 
 No manual data entry is required.
 
@@ -167,7 +226,7 @@ Automatically determines whether a member is:
 * 🟢 Free
 * 🔴 In Class
 * 🟡 Class Starting Soon
-* ⚪ No Routine Uploaded
+* ⚪ Routine Missing / Expired
 
 Dashboard displays:
 
@@ -180,35 +239,81 @@ Dashboard displays:
 
 ## Member Search
 
-Search members using filters such as:
+Search members using filters:
 
 * Organization
 * Team
 * Subteam
 * Day
 * Time
-* Role
 * Availability
+* Skill
+
+Results are restricted according to user permissions.
 
 Example:
 
-> Find Software members available on Wednesday at 4:00 PM.
+> Find available Software members on Wednesday at 4:00 PM.
 
 ---
 
 ## Member Profile
 
-Each member profile includes:
+Each profile contains:
 
 * Basic Information
 * Organization
 * Team
 * Subteam(s)
-* Weekly Class Schedule
+* Weekly Schedule
 * Today's Schedule
 * Current Availability
 * Next Available Time
+* Approved Skills
 * WhatsApp Contact
+
+Visibility depends on the user's role and permissions.
+
+---
+
+## Skill Management
+
+Members can select skills from a predefined catalog.
+
+Examples:
+
+* React
+* TypeScript
+* Python
+* ROS
+* Embedded Systems
+* PCB Design
+* CAD
+* Machine Learning
+* UI/UX
+* DevOps
+
+### Skill Approval Workflow
+
+```text
+Member
+    │
+    ▼
+Select Skill
+    │
+    ▼
+Pending Approval
+    │
+    ▼
+Team Manager / Subteam Manager
+    │
+Approve / Reject
+    │
+    ▼
+Approved Skill Appears on Profile
+```
+
+Only approved skills become searchable.
 
 ---
 
@@ -222,13 +327,13 @@ One-click messaging using WhatsApp.
 
 Visualize availability across the week using interactive heatmaps.
 
-The system aggregates schedules and displays availability at multiple organizational levels.
+Availability can be viewed at multiple levels.
 
 ### Views
 
-* Organization-wide Availability
-* Team-wise Availability
-* Subteam-wise Availability
+* Organization
+* Team
+* Subteam
 
 ### Filters
 
@@ -245,12 +350,12 @@ Display exact availability counts.
 
 Example:
 
-| Time  |         UMRT |      AI Team |  Drone Team |
-| ----- | -----------: | -----------: | ----------: |
-| 10:00 | 18 / 22 Free |  9 / 14 Free | 6 / 10 Free |
-| 11:00 | 21 / 22 Free | 13 / 14 Free | 9 / 10 Free |
+| Time  |         UMRT |         URRT |   Team XYZ |
+| ----- | -----------: | -----------: | ---------: |
+| 10:00 | 18 / 22 Free |  9 / 12 Free | 6 / 9 Free |
+| 11:00 | 21 / 22 Free | 10 / 12 Free | 8 / 9 Free |
 
-Or drill down into a specific team.
+Or drill into a specific team.
 
 | Time  |     Software |   Mechanical |  Electrical |
 | ----- | -----------: | -----------: | ----------: |
@@ -260,8 +365,8 @@ Or drill down into a specific team.
 ### Use Cases
 
 * Find the best meeting time
-* Compare team availability
-* Compare subteam availability
+* Compare teams
+* Compare subteams
 * Identify peak collaboration hours
 * Reduce scheduling conflicts
 
@@ -283,42 +388,6 @@ The system recommends the optimal meeting time.
 
 ---
 
-## Skill-Based Search
-
-Members can maintain skill tags.
-
-Examples:
-
-* React
-* Python
-* ROS
-* Embedded Systems
-* CAD
-* PCB
-* Machine Learning
-* UI/UX
-
-Example query:
-
-> Find an available React developer.
-
----
-
-## Notifications
-
-* Missing routine reminders
-* Semester update reminders
-* Meeting reminders
-* Upcoming availability alerts
-
----
-
-## QR Meeting Attendance
-
-Generate QR codes for meetings and automatically record attendance.
-
----
-
 ## AI Assistant
 
 Natural language queries such as:
@@ -331,32 +400,57 @@ Natural language queries such as:
 
 ---
 
+## Notifications
+
+* Missing routine reminders
+* Semester reminders
+* Routine expiration reminders
+* Meeting reminders
+* Upcoming availability alerts
+
+---
+
+## QR Meeting Attendance
+
+Generate QR codes for meetings and automatically record attendance.
+
+---
+
+## Calendar Integration
+
+Sync meetings with Google Calendar and Outlook.
+
+---
+
 # Workflow
 
 ```text
 Member Login
       │
       ▼
-Upload UCAM Routine
+Role & Permission Validation
       │
       ▼
-Backend Parses XLSX
+Semester Validation
       │
       ▼
-Store Weekly Schedule
+Routine Uploaded?
       │
-      ▼
-Generate Availability Timeline
-      │
-      ▼
+ ┌────┴─────┐
+ │          │
+Yes        No
+ │          │
+ ▼          ▼
+Dashboard  Upload Routine
+ │
+ ▼
 Availability Engine
-      │
-      ▼
-Dashboard
-Search
-Heatmaps
-Profiles
-Meeting Planner
+ │
+ ├── Dashboard
+ ├── Member Search
+ ├── Heatmaps
+ ├── Member Profiles
+ └── AI Meeting Planner
 ```
 
 ---
@@ -425,23 +519,25 @@ Meeting Planner
 * Organization Management
 * Team Management
 * Subteam Management
-* Role-Based Access Control
+* Role-Based Access Control (RBAC)
+* Semester Management
 * Member Profiles
 * Routine Upload (XLSX)
 * Automatic Routine Parsing
 * Schedule Storage
 * Real-Time Availability Calculation
-* Dashboard
 * Member Search
-* Availability Heatmap
+* Availability Heatmaps
+* Skill Approval Workflow
 * WhatsApp Integration
-* Admin Dashboard
+* Organization Dashboard
+* Team Dashboard
 
 ---
 
 # Success Criteria
 
-The platform should enable leaders to answer questions instantly without asking in group chats.
+The platform should enable leaders to answer operational questions instantly without asking in group chats.
 
 Examples:
 
@@ -451,6 +547,7 @@ Examples:
 * Who is available tomorrow at 3 PM?
 * Which team has the highest availability?
 * Which subteam is mostly free this afternoon?
+* Which members have approved React skills and are currently free?
 * When is the best time to schedule a meeting?
 
-If these questions can be answered within seconds, RoverBuddiesKoi has achieved its goal.
+If these questions can be answered within seconds while maintaining accurate schedules, proper access control, and up-to-date member information, RoverBuddiesKoi has achieved its goal.
