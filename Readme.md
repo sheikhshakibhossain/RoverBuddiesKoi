@@ -551,3 +551,261 @@ Examples:
 * When is the best time to schedule a meeting?
 
 If these questions can be answered within seconds while maintaining accurate schedules, proper access control, and up-to-date member information, RoverBuddiesKoi has achieved its goal.
+
+
+# Phase 2 – Advanced Collaboration & Project Intelligence
+
+## AI Meeting Scheduler
+
+Schedule meetings intelligently instead of manually searching for available members.
+
+The scheduler analyzes member availability, skills, team memberships, workload, and user preferences to recommend the optimal meeting time.
+
+### Scheduling Parameters
+
+* Date or Date Range
+* Preferred Time *(Optional)*
+* Meeting Duration
+* Organization
+* Team(s)
+* Subteam(s)
+* Required Skills *(Optional)*
+* Specific Members *(Optional)*
+* Minimum Required Participants *(Optional)*
+* Priority Level *(Optional)*
+
+### AI Output
+
+The system recommends one or more meeting slots based on:
+
+* Maximum participant availability
+* Required skills
+* Existing schedules
+* Preferred time
+* Meeting duration
+
+For each recommendation, the system displays:
+
+* Available members
+* Busy members
+* Expected attendance percentage
+* Conflicting schedules
+* Suggested alternative slots
+
+Example:
+
+```text
+Recommended Meeting
+
+Wednesday
+4:00 PM – 5:00 PM
+
+Attendance
+15 / 17 Members
+
+Available Members
+
+✓ Shakib
+✓ Rakib
+✓ Fahim
+✓ Hasan
+
+Unavailable
+
+✗ Mahin (Class)
+✗ Rifat (Meeting)
+
+Confidence Score
+96%
+```
+
+---
+
+## Project & Task Management
+
+Managers can organize projects, assign members, and track work within the platform.
+
+This module provides lightweight project management similar to Jira or Kanban boards while remaining focused on engineering teams.
+
+### Project Features
+
+* Create Projects
+* Archive Projects
+* Project Timeline
+* Project Description
+* Team Assignment
+* Member Assignment
+* Labels
+* Priority
+* Milestones
+
+---
+
+## Task Management
+
+Each project contains multiple tasks.
+
+Task information includes:
+
+* Title
+* Description
+* Assignee(s)
+* Due Date
+* Priority
+* Status
+* Attachments
+* Comments
+* Activity History
+
+### Task Status
+
+* Backlog
+* To Do
+* In Progress
+* Review
+* Testing
+* Completed
+
+Tasks can be viewed in:
+
+* Kanban Board
+* List View
+* Calendar View
+
+---
+
+## Permission Model
+
+### Organization Owner
+
+* Manage every project
+* View all projects
+
+### Team Manager
+
+* Create projects within assigned teams
+* Manage project members
+* Assign tasks
+
+### Subteam Manager
+
+* Manage projects within assigned subteams
+* Assign tasks
+* Review task progress
+
+### Member
+
+* View assigned projects
+* Update assigned tasks
+* Comment on tasks
+* Upload attachments
+* Mark tasks as completed
+
+Members cannot modify projects outside their assigned teams.
+
+---
+
+## Work History
+
+Every completed contribution automatically becomes part of the member's organizational portfolio.
+
+Profile includes:
+
+* Active Projects
+* Completed Projects
+* Completed Tasks
+* Leadership Roles
+* Contribution Timeline
+* Skills Used
+* Technologies Used
+* Performance Statistics
+
+Example:
+
+```text
+Work History
+
+2026
+
+Autonomous Navigation
+Software Team
+
+Role
+Backend Developer
+
+Completed Tasks
+18
+
+Skills
+
+ROS2
+Python
+OpenCV
+
+Status
+
+Completed
+```
+
+This creates a living portfolio of each member's contributions inside the organization.
+
+---
+
+## Team Dashboard
+
+Managers can monitor project progress through dashboards.
+
+Metrics include:
+
+* Active Projects
+* Completed Projects
+* Overdue Tasks
+* Team Productivity
+* Task Distribution
+* Member Workload
+* Sprint Progress
+* Upcoming Deadlines
+
+---
+
+## AI Task Recommendation *(Future)*
+
+The AI recommends task assignments based on:
+
+* Required skills
+* Current workload
+* Availability
+* Previous project experience
+* Task completion history
+
+Example:
+
+> Recommend three available members experienced in React and TypeScript for the Dashboard module.
+
+---
+
+## AI Workload Balancer *(Future)*
+
+Detects overloaded members and recommends redistributing tasks to teammates with similar skills and greater availability.
+
+---
+
+## Organization Portfolio
+
+The platform automatically builds a searchable portfolio for every member based on their work history.
+
+Instead of asking:
+
+> "Have you worked with ROS before?"
+
+Leaders can instantly see:
+
+* Projects participated in
+* Technologies used
+* Tasks completed
+* Leadership experience
+* Contribution history
+* Availability
+* Verified skills
+
+This provides objective evidence of a member's experience and contributions within the organization.
