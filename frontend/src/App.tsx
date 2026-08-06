@@ -5,7 +5,7 @@ import {
   Shield, Calendar, LogOut, User, HelpCircle, RefreshCw,
   CheckCircle2, XCircle, AlertCircle, Minus, ArrowUpRight,
   Upload, Building2, ChevronDown, Lock, Layers, Plus, Pencil,
-  Clock, AlertTriangle, Save, ArrowLeft
+  Clock, AlertTriangle, Save, ArrowLeft, Menu, X
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button }           from "@/components/ui/button"
@@ -200,96 +200,126 @@ const ALL_NAV: { id: NavPage; label: string; icon: React.ReactNode }[] = [
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
-function Sidebar({ page, setPage }: { page: NavPage; setPage: (p: NavPage) => void }) {
+// ─── Sidebar ──────────────────────────────────────────────────────────────────
+
+function Sidebar({ page, setPage, mobileOpen, setMobileOpen }: {
+  page: NavPage;
+  setPage: (p: NavPage) => void;
+  mobileOpen: boolean;
+  setMobileOpen: (o: boolean) => void;
+}) {
   const { user, pagePerms } = useUserCtx()
   const nav  = ALL_NAV.filter(n => (pagePerms[user.role] ?? []).includes(n.id))
 
   return (
-    <aside className="fixed inset-y-0 left-0 w-56 flex flex-col bg-sidebar border-r border-sidebar-border">
-      <div className="h-14 flex items-center gap-3 px-4 border-b border-sidebar-border shrink-0">
-        <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center shrink-0">
-          <Building2 size={13} className="text-primary-foreground" />
-        </div>
-        <div className="min-w-0">
-          <p className="text-sm font-semibold text-sidebar-foreground leading-none">RoverBuddies</p>
-          <p className="text-[10px] font-mono text-sidebar-muted-foreground mt-0.5">CAIR Lab</p>
-        </div>
-      </div>
-
-      <ScrollArea className="flex-1 py-3">
-        <nav className="px-3 space-y-0.5">
-          <p className="px-2 mb-2 text-[10px] font-semibold uppercase tracking-widest text-sidebar-muted-foreground">
-            Navigation
-          </p>
-          {nav.map(({ id, label, icon }) => (
-            <button
-              key={id}
-              onClick={() => setPage(id)}
-              className={cn(
-                "w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors text-left",
-                page === id
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-sidebar-foreground/70 hover:bg-sidebar-muted hover:text-sidebar-foreground"
-              )}
-            >
-              {icon} {label}
-            </button>
-          ))}
-        </nav>
-
-        <div className="px-3 mt-4">
-          <p className="px-2 mb-2 text-[10px] font-semibold uppercase tracking-widest text-sidebar-muted-foreground">Your Scope</p>
-          <div className="px-2 space-y-1 text-xs text-sidebar-muted-foreground">
-            {user.role === "org-owner"
-              ? <div className="flex items-center gap-1.5"><Shield size={10}/>All teams</div>
-              : <div className="flex items-center gap-1.5"><Shield size={10}/>{user.team}</div>
-            }
-            {(user.role === "subteam-manager" || user.role === "member") && (
-              <div className="flex items-center gap-1.5"><Layers size={10}/>{user.subteam}</div>
-            )}
-          </div>
-        </div>
-      </ScrollArea>
-
-      <div className="px-3 pb-4 shrink-0">
-        <div className="rounded-lg bg-sidebar-muted border border-sidebar-border p-3">
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <Calendar size={11} className="text-sidebar-muted-foreground" />
-            <span className="text-[10px] font-mono uppercase tracking-widest text-sidebar-muted-foreground">Semester</span>
-          </div>
-          <p className="text-sm font-semibold text-sidebar-foreground">Fall 2026</p>
-          <div className="mt-2.5 space-y-1">
-            <div className="flex justify-between text-[10px] text-sidebar-muted-foreground">
-              <span>Upload deadline</span><span>Sep 10</span>
+    <>
+      {/* Mobile Backdrop */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm md:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+      <aside className={cn(
+        "fixed inset-y-0 left-0 z-50 w-56 flex flex-col bg-sidebar border-r border-sidebar-border transition-transform duration-200 ease-in-out md:translate-x-0",
+        mobileOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
+        <div className="h-14 flex items-center justify-between px-4 border-b border-sidebar-border shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center shrink-0">
+              <Building2 size={13} className="text-primary-foreground" />
             </div>
-            <Progress value={62} className="h-1 bg-sidebar-border" indicatorClassName="bg-primary" />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-sidebar-foreground leading-none">RoverBuddies</p>
+              <p className="text-[10px] font-mono text-sidebar-muted-foreground mt-0.5">CAIR Lab</p>
+            </div>
+          </div>
+          <Button variant="ghost" size="icon" className="h-7 w-7 md:hidden" onClick={() => setMobileOpen(false)}>
+            <X size={15} />
+          </Button>
+        </div>
+
+        <ScrollArea className="flex-1 py-3">
+          <nav className="px-3 space-y-0.5">
+            <p className="px-2 mb-2 text-[10px] font-semibold uppercase tracking-widest text-sidebar-muted-foreground">
+              Navigation
+            </p>
+            {nav.map(({ id, label, icon }) => (
+              <button
+                key={id}
+                onClick={() => {
+                  setPage(id)
+                  setMobileOpen(false)
+                }}
+                className={cn(
+                  "w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors text-left",
+                  page === id
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                    : "text-sidebar-foreground/70 hover:bg-sidebar-muted hover:text-sidebar-foreground"
+                )}
+              >
+                {icon} {label}
+              </button>
+            ))}
+          </nav>
+
+          <div className="px-3 mt-4">
+            <p className="px-2 mb-2 text-[10px] font-semibold uppercase tracking-widest text-sidebar-muted-foreground">Your Scope</p>
+            <div className="px-2 space-y-1 text-xs text-sidebar-muted-foreground">
+              {user.role === "org-owner"
+                ? <div className="flex items-center gap-1.5"><Shield size={10}/>All teams</div>
+                : <div className="flex items-center gap-1.5"><Shield size={10}/>{user.team}</div>
+              }
+              {(user.role === "subteam-manager" || user.role === "member") && (
+                <div className="flex items-center gap-1.5"><Layers size={10}/>{user.subteam}</div>
+              )}
+            </div>
+          </div>
+        </ScrollArea>
+
+        <div className="px-3 pb-4 shrink-0">
+          <div className="rounded-lg bg-sidebar-muted border border-sidebar-border p-3">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <Calendar size={11} className="text-sidebar-muted-foreground" />
+              <span className="text-[10px] font-mono uppercase tracking-widest text-sidebar-muted-foreground">Semester</span>
+            </div>
+            <p className="text-sm font-semibold text-sidebar-foreground">Fall 2026</p>
+            <div className="mt-2.5 space-y-1">
+              <div className="flex justify-between text-[10px] text-sidebar-muted-foreground">
+                <span>Upload deadline</span><span>Sep 10</span>
+              </div>
+              <Progress value={62} className="h-1 bg-sidebar-border" indicatorClassName="bg-primary" />
+            </div>
           </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+    </>
   )
 }
 
 // ─── Top Bar ──────────────────────────────────────────────────────────────────
 
-function TopBar({ page, onSignOut, onOpenProfile }: {
-  page: NavPage; onSignOut: () => void; onOpenProfile: () => void
+function TopBar({ page, onSignOut, onOpenProfile, onToggleMobileMenu }: {
+  page: NavPage; onSignOut: () => void; onOpenProfile: () => void; onToggleMobileMenu: () => void
 }) {
   const user  = useUser()
   const label = ALL_NAV.find(n => n.id === page)?.label
 
   return (
-    <header className="sticky top-0 z-20 h-14 flex items-center gap-2 px-6 border-b bg-card/80 backdrop-blur-md">
-      <span className="text-xs text-muted-foreground">CAIR Lab</span>
-      <ChevronRight size={12} className="text-muted-foreground" />
-      <span className="text-sm font-medium text-foreground">{label}</span>
+    <header className="sticky top-0 z-20 h-14 flex items-center gap-2 px-4 sm:px-6 border-b bg-card/80 backdrop-blur-md">
+      <Button variant="ghost" size="icon" className="h-8 w-8 md:hidden mr-1" onClick={onToggleMobileMenu}>
+        <Menu size={18} />
+      </Button>
+      <span className="text-xs text-muted-foreground hidden sm:inline">CAIR Lab</span>
+      <ChevronRight size={12} className="text-muted-foreground hidden sm:inline" />
+      <span className="text-sm font-medium text-foreground truncate max-w-[150px] sm:max-w-none">{label}</span>
 
-      <div className="ml-auto flex items-center gap-2">
-        <Badge variant="success" className="gap-1.5 text-[11px]">
+      <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+        <Badge variant="success" className="gap-1.5 text-[11px] px-2">
           <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse inline-block" />
-          Live
+          <span className="hidden sm:inline">Live</span>
         </Badge>
-        <Separator orientation="vertical" className="h-5 mx-1" />
+        <Separator orientation="vertical" className="h-5 mx-0.5 sm:mx-1" />
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="w-8 h-8"><Bell size={15} /></Button>
@@ -299,11 +329,11 @@ function TopBar({ page, onSignOut, onOpenProfile }: {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="gap-2 h-8 px-2">
+            <Button variant="ghost" className="gap-2 h-8 px-1.5 sm:px-2">
               <Avatar className="w-6 h-6">
                 <AvatarFallback className="text-[10px] bg-primary text-primary-foreground">{user.initials}</AvatarFallback>
               </Avatar>
-              <span className="text-sm font-medium">{user.name}</span>
+              <span className="text-sm font-medium hidden sm:inline">{user.name}</span>
               <ChevronDown size={13} className="text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
@@ -584,16 +614,16 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
 
       <PendingApprovals />
 
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Free Now"   value={free}    sub={`${Math.round((free/Math.max(pool.length,1))*100)}% of scope`} icon={<CheckCircle2 size={16}/>} variant="success" />
         <StatCard label="In Class"   value={inClass} sub="Currently unavailable"                                          icon={<XCircle size={16}/>}      variant="destructive" />
         <StatCard label="Class Soon" value={soon}    sub="Free within 30 min"                                             icon={<AlertCircle size={16}/>}  variant="warning" />
         <StatCard label="No Routine" value={missing} sub="Action required"                                                icon={<Shield size={16}/>}       variant="muted" />
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Live table */}
-        <Card className="col-span-2">
+        <Card className="col-span-1 lg:col-span-2">
           <CardHeader className="pb-0">
             <div className="flex items-center justify-between">
               <div>
@@ -1488,7 +1518,7 @@ function HeatmapPage() {
 
           {/* ── By Team view ── */}
           <TabsContent value="team" className="mt-4">
-            <div className={`grid gap-4 ${teams.length === 1 ? "grid-cols-1 max-w-lg" : "grid-cols-3"}`}>
+            <div className={`grid gap-4 ${teams.length === 1 ? "grid-cols-1 max-w-lg" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"}`}>
               {teams.map((team: string) => (
                 <Card key={team}>
                   <CardHeader className="pb-3">
@@ -1691,7 +1721,7 @@ function SkillsPage() {
 
       {/* Member view */}
       {isMember && (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base">My Approved Skills</CardTitle>
@@ -1732,8 +1762,8 @@ function SkillsPage() {
 
       {/* Manager / Owner view */}
       {!isMember && (
-        <div className="grid grid-cols-3 gap-4">
-          <div className="col-span-2">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="col-span-1 lg:col-span-2">
             <Card>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
@@ -2443,7 +2473,7 @@ function MeetingPlannerPage() {
         <p className="text-muted-foreground text-sm mt-0.5">Find optimal meeting slots based on live routines, skills, and member availability</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <Card className="col-span-1">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2"><Zap size={16} className="text-primary"/> Meeting Criteria</CardTitle>
@@ -2482,7 +2512,7 @@ function MeetingPlannerPage() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-2">
+        <Card className="col-span-1 lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2"><TrendingUp size={16} className="text-success"/> Recommended Meeting Slot</CardTitle>
             <CardDescription className="text-xs">Highest expected attendance based on parsed class routines</CardDescription>
@@ -2525,7 +2555,7 @@ function PortfolioPage() {
         <p className="text-muted-foreground text-sm mt-0.5">Verified record of team contributions, completed tasks, and leadership</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <Card className="col-span-1">
           <CardContent className="pt-6 space-y-4 text-center">
             <Avatar className="w-20 h-20 mx-auto">
@@ -2549,7 +2579,7 @@ function PortfolioPage() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-2">
+        <Card className="col-span-1 lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-base">Contribution History</CardTitle>
             <CardDescription className="text-xs">Projects and verified task completions in CAIR Lab</CardDescription>
@@ -2582,6 +2612,7 @@ export default function App() {
   const [page,          setPage]          = useState<NavPage>(() => (localStorage.getItem("activePage") as NavPage) || "dashboard")
   const [profileOpen,   setProfileOpen]   = useState(false)
   const [routineOpen,   setRoutineOpen]   = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [chatMember,    setChatMember]    = useState<Member | null>(null)
   const [pagePerms,     setPagePerms]     = useState<Record<string, string[]>>(DEFAULT_PAGE_PERMS)
   const [featurePerms,  setFeaturePerms]  = useState<Record<string, string[]>>(DEFAULT_FEATURE_PERMS)
@@ -2677,10 +2708,10 @@ export default function App() {
     <UserContext.Provider value={{ user, pagePerms, setPagePerms, featurePerms, setFeaturePerms }}>
       <TooltipProvider>
         <div className="min-h-screen flex bg-background">
-          <Sidebar page={page} setPage={setPage}/>
-          <div className="flex-1 ml-56 flex flex-col min-h-screen">
-            <TopBar page={page} onSignOut={handleSignOut} onOpenProfile={() => setProfileOpen(true)}/>
-            <main className="flex-1 p-6">
+          <Sidebar page={page} setPage={setPage} mobileOpen={mobileMenuOpen} setMobileOpen={setMobileMenuOpen} />
+          <div className="flex-1 ml-0 md:ml-56 flex flex-col min-h-screen w-full max-w-full overflow-x-hidden">
+            <TopBar page={page} onSignOut={handleSignOut} onOpenProfile={() => setProfileOpen(true)} onToggleMobileMenu={() => setMobileMenuOpen(o => !o)} />
+            <main className="flex-1 p-3 sm:p-6 max-w-full overflow-x-hidden">
               {pageContent()}
             </main>
           </div>
