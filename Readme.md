@@ -1,811 +1,179 @@
-# RoverBuddiesKoi
+# RoverBuddiesKoi — Production AI Availability Management Platform
 
 > **Know who's available before asking.**
 
-RoverBuddiesKoi is an AI-powered availability management platform designed for organizations with multiple teams and subteams, such as research labs, robotics teams, and engineering clubs. It automatically imports members' university class schedules, calculates real-time availability, and helps leaders quickly find the right people for meetings, collaboration, and project work.
+RoverBuddiesKoi is an AI-powered real-time availability management platform designed for multi-team engineering organizations (e.g., CAIR Lab, robotics teams, research labs). It automatically parses university class schedule spreadsheets (UCAM XLSX), calculates real-time member availability, enforces semester deadlines, supports skill approval workflows, renders availability heatmaps, and provides natural-language AI schedule search.
 
 ---
 
-# Problem
+## 🛠️ Tech Stack
 
-Engineering organizations often rely on group chats to ask:
-
-* Who is free right now?
-* Who can join a meeting?
-* When is the best time for everyone?
-* Which Software/Mechanical/Electrical members are available?
-
-This process is repetitive, time-consuming, and inefficient.
-
-RoverBuddiesKoi solves this by automatically calculating every member's availability from their class routine and providing powerful search, visualization, and scheduling tools.
+- **Frontend**: Vite, React 19, TypeScript, Tailwind CSS v4, Radix UI, Lucide Icons
+- **Backend**: Node.js, Express.js, TypeScript, Prisma ORM, Zod, Helmet, CORS, Rate Limiter, Multer, XLSX
+- **Database**: Neon PostgreSQL (Cloud serverless PostgreSQL)
+- **Deployment**: Vercel (Backend Serverless + Frontend Web App)
+- **Authentication**: JWT (Access Tokens + Database-persisted Refresh Tokens) + bcryptjs Hashing
 
 ---
 
-# Goals
-
-* Automatically import member class routines.
-* Calculate real-time availability.
-* Make finding available members effortless.
-* Improve collaboration between teams and subteams.
-* Reduce unnecessary communication.
-* Provide a centralized member directory.
-* Help organizations schedule meetings efficiently.
-* Enforce semester-based routine submission for accurate availability.
-
----
-
-# Target Users
-
-The platform is designed for organizations consisting of multiple teams and subteams.
-
-Examples include:
-
-* Research Labs
-* Robotics Teams
-* University Clubs
-* Engineering Organizations
-* Startup Teams
-
-Example hierarchy:
+## 📁 Repository Folder Structure
 
 ```text
-Organization
-└── CAIR Lab
-    ├── UMRT
-    ├── URRT
-    └── Team XYZ
-```
-
-Although initially developed for **CAIR Lab**, the platform is designed to support any organization with a similar structure.
-
----
-
-# Organization Structure
-
-```text
-Organization
-│
-├── Team
-│   ├── Subteam
-│   │   └── Members
-│   └── Subteam
-│
-├── Team
-│   ├── Subteam
-│   └── Subteam
-│
-└── Team
-    ├── Subteam
-    └── Subteam
-```
-
-A member may belong to multiple subteams within the same team.
-
----
-
-# Access Control
-
-The platform uses **Role-Based Access Control (RBAC)**.
-
-## Organization Owner
-
-Highest privilege.
-
-Permissions:
-
-* Manage the organization
-* Manage all teams
-* Manage all subteams
-* Manage all users
-* Assign and revoke roles
-* Configure semesters/trimesters
-* Approve skills globally
-* View organization-wide analytics
-
----
-
-## Team Manager
-
-Permissions:
-
-* Manage assigned team
-* Create and manage subteams
-* Assign Subteam Managers
-* Manage team members
-* Approve member skills
-* View team analytics
-
-Cannot access other teams.
-
----
-
-## Subteam Manager
-
-Permissions:
-
-* Manage assigned subteam
-* Add or remove members
-* Approve member skills
-* View subteam schedules
-* View subteam analytics
-
-Cannot manage other subteams.
-
----
-
-## Member
-
-Permissions:
-
-* Upload class routine
-* Update profile
-* Request new skills
-* View availability
-* Search members within assigned subteam(s)
-* Contact teammates
-
-Members **cannot view other teams or subteams** unless explicitly granted permission.
-
----
-
-# Semester Management
-
-Each organization defines its academic calendar.
-
-For every semester or trimester, an Organization Owner configures:
-
-* Semester Name
-* Start Date
-* End Date
-* Routine Upload Deadline
-
-Example:
-
-```text
-Fall 2026
-
-Start:
-1 September
-
-End:
-31 December
-
-Routine Upload Deadline:
-10 September
-```
-
-After the upload deadline:
-
-* Members who uploaded a valid routine continue using the platform normally.
-* Members without a valid routine are restricted until they upload their latest class routine.
-
-This ensures availability information always reflects the current academic schedule.
-
----
-
-# Core Features
-
-## Organization Management
-
-Features include:
-
-* Multiple Organizations
-* Multiple Teams
-* Multiple Subteams
-* Multiple Team Managers
-* Multiple Subteam Managers
-* Multiple Subteam Membership
-* Role-Based Access Control (RBAC)
-
----
-
-## Routine Upload
-
-Supported formats:
-
-* UCAM XLSX
-* PDF *(future support)*
-
-The backend automatically extracts:
-
-* Course
-* Day
-* Start Time
-* End Time
-
-The parsed schedule is stored automatically.
-
-No manual data entry is required.
-
----
-
-## Real-Time Availability
-
-Automatically determines whether a member is:
-
-* 🟢 Free
-* 🔴 In Class
-* 🟡 Class Starting Soon
-* ⚪ Routine Missing / Expired
-
-Dashboard displays:
-
-* Members currently free
-* Members currently busy
-* Members becoming free next
-* Remaining class duration
-
----
-
-## Member Search
-
-Search members using filters:
-
-* Organization
-* Team
-* Subteam
-* Day
-* Time
-* Availability
-* Skill
-
-Results are restricted according to user permissions.
-
-Example:
-
-> Find available Software members on Wednesday at 4:00 PM.
-
----
-
-## Member Profile
-
-Each profile contains:
-
-* Basic Information
-* Organization
-* Team
-* Subteam(s)
-* Weekly Schedule
-* Today's Schedule
-* Current Availability
-* Next Available Time
-* Approved Skills
-* WhatsApp Contact
-
-Visibility depends on the user's role and permissions.
-
----
-
-## Skill Management
-
-Members can select skills from a predefined catalog.
-
-Examples:
-
-* React
-* TypeScript
-* Python
-* ROS
-* Embedded Systems
-* PCB Design
-* CAD
-* Machine Learning
-* UI/UX
-* DevOps
-
-### Skill Approval Workflow
-
-```text
-Member
-    │
-    ▼
-Select Skill
-    │
-    ▼
-Pending Approval
-    │
-    ▼
-Team Manager / Subteam Manager
-    │
-Approve / Reject
-    │
-    ▼
-Approved Skill Appears on Profile
-```
-
-Only approved skills become searchable.
-
----
-
-## WhatsApp Integration
-
-One-click messaging using WhatsApp.
-
----
-
-## Availability Heatmap
-
-Visualize availability across the week using interactive heatmaps.
-
-Availability can be viewed at multiple levels.
-
-### Views
-
-* Organization
-* Team
-* Subteam
-
-### Filters
-
-* Organization
-* Team
-* Subteam
-* Academic Batch
-* Day
-* Time Range
-
-### Statistics Mode
-
-Display exact availability counts.
-
-Example:
-
-| Time  |         UMRT |         URRT |   Team XYZ |
-| ----- | -----------: | -----------: | ---------: |
-| 10:00 | 18 / 22 Free |  9 / 12 Free | 6 / 9 Free |
-| 11:00 | 21 / 22 Free | 10 / 12 Free | 8 / 9 Free |
-
-Or drill into a specific team.
-
-| Time  |     Software |   Mechanical |  Electrical |
-| ----- | -----------: | -----------: | ----------: |
-| 10:00 | 18 / 22 Free |  9 / 14 Free | 6 / 10 Free |
-| 11:00 | 21 / 22 Free | 13 / 14 Free | 9 / 10 Free |
-
-### Use Cases
-
-* Find the best meeting time
-* Compare teams
-* Compare subteams
-* Identify peak collaboration hours
-* Reduce scheduling conflicts
-
----
-
-# Future Features
-
-## AI Meeting Planner
-
-Select:
-
-* Organization
-* Team(s)
-* Subteam(s)
-* Required Members
-* Meeting Duration
-
-The system recommends the optimal meeting time.
-
----
-
-## AI Assistant
-
-Natural language queries such as:
-
-* Who is free after 3 PM today?
-* Find two available Software members.
-* Which Mechanical members are free tomorrow?
-* When can Software and Mechanical meet together?
-* Which team has the highest availability this afternoon?
-
----
-
-## Notifications
-
-* Missing routine reminders
-* Semester reminders
-* Routine expiration reminders
-* Meeting reminders
-* Upcoming availability alerts
-
----
-
-## QR Meeting Attendance
-
-Generate QR codes for meetings and automatically record attendance.
-
----
-
-## Calendar Integration
-
-Sync meetings with Google Calendar and Outlook.
-
----
-
-# Workflow
-
-```text
-Member Login
-      │
-      ▼
-Role & Permission Validation
-      │
-      ▼
-Semester Validation
-      │
-      ▼
-Routine Uploaded?
-      │
- ┌────┴─────┐
- │          │
-Yes        No
- │          │
- ▼          ▼
-Dashboard  Upload Routine
- │
- ▼
-Availability Engine
- │
- ├── Dashboard
- ├── Member Search
- ├── Heatmaps
- ├── Member Profiles
- └── AI Meeting Planner
+RoverBuddiesKoi/
+├── .env.example                # Master environment variables template
+├── Readme.md                   # System specifications and documentation
+├── backend/
+│   ├── .env.example            # Backend environment template
+│   ├── package.json            # Node.js backend dependencies & scripts
+│   ├── tsconfig.json           # TypeScript configuration
+│   ├── vercel.json             # Vercel serverless deployment config
+│   ├── prisma/
+│   │   ├── schema.prisma       # Database schema (PostgreSQL / Neon)
+│   │   └── seed.ts             # Production seed script with 10 test users & routines
+│   └── src/
+│       ├── server.ts           # Express app entrypoint & middleware setup
+│       ├── db.ts               # Prisma Client singleton
+│       ├── config/             # Zod environment variable validator
+│       ├── controllers/        # REST API controllers
+│       │   ├── ai.ts           # AI assistant natural language query engine
+│       │   ├── auth.ts         # Register, Login, Refresh, Logout, Profile
+│       │   ├── heatmap.ts      # Heatmap availability matrix calculator
+│       │   ├── members.ts      # Member directory & real-time status API
+│       │   ├── routines.ts     # UCAM XLSX schedule upload & parser
+│       │   ├── semesters.ts    # Academic terms & deadline configurations
+│       │   ├── skills.ts       # Skill catalog & manager approval workflow
+│       │   └── teams.ts        # Structural organization metadata
+│       ├── middlewares/
+│       │   ├── auth.ts         # JWT authentication & session resolution
+│       │   ├── rbac.ts         # Role-Based Access Control guards
+│       │   └── validate.ts     # Zod request validation wrapper
+│       ├── routes/             # Express API route modules
+│       ├── services/
+│       │   ├── availability.ts # Real-time schedule calculation engine
+│       │   └── routineParser.ts# UCAM XLSX spreadsheet parser
+│       └── utils/
+│           └── errors.ts       # Operational AppError classes
+└── frontend/
+    ├── package.json            # React frontend dependencies
+    ├── tsconfig.json
+    ├── vercel.json             # Vercel SPA deployment config
+    └── src/
+        ├── App.tsx             # Main dashboard shell & navigation
+        ├── Auth.tsx            # Auth pages (Login, Register, Role Selector)
+        ├── components/
+        │   ├── AIChat.tsx      # Natural language AI Assistant drawer
+        │   └── ui/             # Radix UI components
+        └── lib/
+            ├── api.ts          # Centralized API client (JWT refresh + typed endpoints)
+            └── user-context.tsx# User session context & RBAC helpers
 ```
 
 ---
 
-# Tech Stack
+## ⚡ Step-by-Step Neon PostgreSQL Setup Guide (Phase 11)
 
-## Frontend
-
-* React
-* TypeScript
-* Vite
-* Tailwind CSS
-* shadcn/ui
-* React Router
-
----
-
-## Backend
-
-* Node.js
-* Vercel Serverless Functions
-* Prisma ORM
-
----
-
-## Database
-
-* PostgreSQL (Neon Free Tier)
-
----
-
-## Authentication
-
-* JWT
-* bcrypt
+1. **Create Neon Account**:
+   - Go to [Neon.tech](https://neon.tech) and sign up for a free cloud PostgreSQL account.
+2. **Create Project**:
+   - Click **New Project**, name it `roverbuddies-db`, select region (e.g. US East or Frankfurt).
+3. **Copy Database Connection String**:
+   - In Neon Dashboard, navigate to **Dashboard** -> **Connection Details**.
+   - Select **Pooled connection** string.
+   - Copy string formatted like:
+     `postgresql://<username>:<password>@<endpoint>.neon.tech/neondb?sslmode=require`
+4. **Paste Environment Variable**:
+   - Create `backend/.env` file.
+   - Set `DATABASE_URL="postgresql://<username>:<password>@<endpoint>.neon.tech/neondb?sslmode=require"`.
+5. **Run Migrations & Seed**:
+   ```bash
+   cd backend
+   npm install
+   npx prisma migrate dev --name init
+   npm run prisma:seed
+   ```
+6. **Verify Tables**:
+   - Open Neon Dashboard -> **Tables** tab.
+   - Verify 10 tables created: `Organization`, `Team`, `Subteam`, `User`, `UserSubteam`, `RefreshToken`, `Semester`, `ClassRoutine`, `Skill`, `UserSkill`.
 
 ---
 
-## File Processing
+## 🚀 Step-by-Step Vercel Deployment Guide (Phase 12 & 13)
 
-* SheetJS (`xlsx`)
-* `pdf-parse` *(future support)*
+### Deploying Backend to Vercel:
+1. Install Vercel CLI or connect GitHub repository to Vercel:
+   ```bash
+   npm i -g vercel
+   cd backend
+   vercel login
+   vercel
+   ```
+2. In Vercel Project Settings -> **Environment Variables**:
+   - `DATABASE_URL`: Your Neon PostgreSQL URL.
+   - `JWT_SECRET`: Random 64-character secret key.
+   - `JWT_REFRESH_SECRET`: Random 64-character refresh key.
+   - `NODE_ENV`: `production`
+   - `CLIENT_URL`: Your frontend Vercel deployment URL (e.g. `https://roverbuddies-app.vercel.app`).
+3. Deploy to production:
+   ```bash
+   vercel --prod
+   ```
+4. Verify backend health endpoint:
+   - Visit `https://<your-backend-vercel-url>/api/health`.
+   - Returns `{ "status": "ok", "service": "RoverBuddiesKoi API" }`.
 
----
-
-## Development
-
-* Git
-* GitHub
-* ESLint
-* Prettier
-* Postman
-
----
-
-## Deployment
-
-* Vercel
-* Neon PostgreSQL
-
----
-
-# MVP Scope
-
-* Authentication
-* Organization Management
-* Team Management
-* Subteam Management
-* Role-Based Access Control (RBAC)
-* Semester Management
-* Member Profiles
-* Routine Upload (XLSX)
-* Automatic Routine Parsing
-* Schedule Storage
-* Real-Time Availability Calculation
-* Member Search
-* Availability Heatmaps
-* Skill Approval Workflow
-* WhatsApp Integration
-* Organization Dashboard
-* Team Dashboard
+### Deploying Frontend to Vercel:
+1. Navigate to frontend directory:
+   ```bash
+   cd frontend
+   ```
+2. Set Environment Variable in Vercel Project Settings:
+   - `VITE_API_BASE_URL`: Your backend Vercel API URL (e.g. `https://roverbuddies-backend.vercel.app`).
+3. Deploy:
+   ```bash
+   vercel --prod
+   ```
 
 ---
 
-# Success Criteria
+## 🔑 Default Seed Demo User Credentials
 
-The platform should enable leaders to answer operational questions instantly without asking in group chats.
+All seed accounts are initialized with password: **`Password123!`**
 
-Examples:
-
-* Who is free right now?
-* Who will be free next?
-* Which Software members are available?
-* Who is available tomorrow at 3 PM?
-* Which team has the highest availability?
-* Which subteam is mostly free this afternoon?
-* Which members have approved React skills and are currently free?
-* When is the best time to schedule a meeting?
-
-If these questions can be answered within seconds while maintaining accurate schedules, proper access control, and up-to-date member information, RoverBuddiesKoi has achieved its goal.
-
-
-# Phase 2 – Advanced Collaboration & Project Intelligence
-
-## AI Meeting Scheduler
-
-Schedule meetings intelligently instead of manually searching for available members.
-
-The scheduler analyzes member availability, skills, team memberships, workload, and user preferences to recommend the optimal meeting time.
-
-### Scheduling Parameters
-
-* Date or Date Range
-* Preferred Time *(Optional)*
-* Meeting Duration
-* Organization
-* Team(s)
-* Subteam(s)
-* Required Skills *(Optional)*
-* Specific Members *(Optional)*
-* Minimum Required Participants *(Optional)*
-* Priority Level *(Optional)*
-
-### AI Output
-
-The system recommends one or more meeting slots based on:
-
-* Maximum participant availability
-* Required skills
-* Existing schedules
-* Preferred time
-* Meeting duration
-
-For each recommendation, the system displays:
-
-* Available members
-* Busy members
-* Expected attendance percentage
-* Conflicting schedules
-* Suggested alternative slots
-
-Example:
-
-```text
-Recommended Meeting
-
-Wednesday
-4:00 PM – 5:00 PM
-
-Attendance
-15 / 17 Members
-
-Available Members
-
-✓ Shakib
-✓ Rakib
-✓ Fahim
-✓ Hasan
-
-Unavailable
-
-✗ Mahin (Class)
-✗ Rifat (Meeting)
-
-Confidence Score
-96%
-```
+| Role | Email | Scope |
+| :--- | :--- | :--- |
+| **Organization Owner** | `tanvir@cairlab.org` | All teams (UMRT, URRT, Team XYZ) |
+| **Team Manager** | `rezwan@cairlab.org` | URRT Team |
+| **Subteam Manager** | `nusrat@cairlab.org` | UMRT -> Electrical Subteam |
+| **Member** | `aryan@cairlab.org` | UMRT -> Software Subteam |
 
 ---
 
-## Project & Task Management
+## 📚 REST API Reference (Phase 8)
 
-Managers can organize projects, assign members, and track work within the platform.
+### Authentication
+- `POST /api/auth/register` — Register user profile (supports XLSX routine file attachment)
+- `POST /api/auth/login` — Login user, returns access & refresh tokens
+- `POST /api/auth/refresh` — Issue new access token using refresh token
+- `POST /api/auth/logout` — Revoke active refresh token
+- `GET /api/auth/me` — Fetch active session profile
 
-This module provides lightweight project management similar to Jira or Kanban boards while remaining focused on engineering teams.
+### Members & Availability
+- `GET /api/members` — Fetch scoped list of members with real-time availability status
+- `GET /api/members/:id` — Fetch member profile with schedule
 
-### Project Features
+### Routines & Schedules
+- `POST /api/routines/upload` — Upload UCAM XLSX schedule spreadsheet
+- `GET /api/routines/me` — Retrieve logged-in user's routine schedule
 
-* Create Projects
-* Archive Projects
-* Project Timeline
-* Project Description
-* Team Assignment
-* Member Assignment
-* Labels
-* Priority
-* Milestones
+### Skills & Approvals
+- `GET /api/skills` — Get catalog of skills & user's skills
+- `POST /api/skills/request` — Submit skill request
+- `GET /api/skills/pending` — Manager view pending skill requests
+- `PUT /api/skills/:id/approve` — Approve skill request
+- `PUT /api/skills/:id/reject` — Reject skill request
 
----
+### Availability Heatmap
+- `GET /api/heatmap` — Generate organization/team/subteam availability matrix counts across hours
 
-## Task Management
-
-Each project contains multiple tasks.
-
-Task information includes:
-
-* Title
-* Description
-* Assignee(s)
-* Due Date
-* Priority
-* Status
-* Attachments
-* Comments
-* Activity History
-
-### Task Status
-
-* Backlog
-* To Do
-* In Progress
-* Review
-* Testing
-* Completed
-
-Tasks can be viewed in:
-
-* Kanban Board
-* List View
-* Calendar View
-
----
-
-## Permission Model
-
-### Organization Owner
-
-* Manage every project
-* View all projects
-
-### Team Manager
-
-* Create projects within assigned teams
-* Manage project members
-* Assign tasks
-
-### Subteam Manager
-
-* Manage projects within assigned subteams
-* Assign tasks
-* Review task progress
-
-### Member
-
-* View assigned projects
-* Update assigned tasks
-* Comment on tasks
-* Upload attachments
-* Mark tasks as completed
-
-Members cannot modify projects outside their assigned teams.
-
----
-
-## Work History
-
-Every completed contribution automatically becomes part of the member's organizational portfolio.
-
-Profile includes:
-
-* Active Projects
-* Completed Projects
-* Completed Tasks
-* Leadership Roles
-* Contribution Timeline
-* Skills Used
-* Technologies Used
-* Performance Statistics
-
-Example:
-
-```text
-Work History
-
-2026
-
-Autonomous Navigation
-Software Team
-
-Role
-Backend Developer
-
-Completed Tasks
-18
-
-Skills
-
-ROS2
-Python
-OpenCV
-
-Status
-
-Completed
-```
-
-This creates a living portfolio of each member's contributions inside the organization.
-
----
-
-## Team Dashboard
-
-Managers can monitor project progress through dashboards.
-
-Metrics include:
-
-* Active Projects
-* Completed Projects
-* Overdue Tasks
-* Team Productivity
-* Task Distribution
-* Member Workload
-* Sprint Progress
-* Upcoming Deadlines
-
----
-
-## AI Task Recommendation *(Future)*
-
-The AI recommends task assignments based on:
-
-* Required skills
-* Current workload
-* Availability
-* Previous project experience
-* Task completion history
-
-Example:
-
-> Recommend three available members experienced in React and TypeScript for the Dashboard module.
-
----
-
-## AI Workload Balancer *(Future)*
-
-Detects overloaded members and recommends redistributing tasks to teammates with similar skills and greater availability.
-
----
-
-## Organization Portfolio
-
-The platform automatically builds a searchable portfolio for every member based on their work history.
-
-Instead of asking:
-
-> "Have you worked with ROS before?"
-
-Leaders can instantly see:
-
-* Projects participated in
-* Technologies used
-* Tasks completed
-* Leadership experience
-* Contribution history
-* Availability
-* Verified skills
-
-This provides objective evidence of a member's experience and contributions within the organization.
+### AI Assistant
+- `POST /api/ai/chat` — Process natural language queries regarding availability, skills, and meeting times

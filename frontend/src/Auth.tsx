@@ -10,7 +10,8 @@ import {
   Shield, Users, Layers, User, Eye, EyeOff,
 } from "lucide-react"
 import type { AppUser, UserRole } from "@/lib/user-context"
-import { roleLabel } from "@/lib/user-context"
+import { roleLabel, normalizeRole } from "@/lib/user-context"
+import { authApi } from "@/lib/api"
 
 // ─── Demo profiles (one per role) ─────────────────────────────────────────────
 
@@ -109,7 +110,6 @@ function Field({
           placeholder={placeholder}
           value={value}
           onChange={e => onChange(e.target.value)}
-          required
           className="h-10 text-sm pr-9"
           style={{ background: BG_INPUT, borderColor: BORDER }}
         />
@@ -289,20 +289,17 @@ function RoleSelector({ onSelect }: { onSelect: (role: UserRole) => void }) {
   )
 }
 
-// ─── Step 2 — Login & Register for a specific role ────────────────────────────
+// ─── Step 2 — Login & Register ───────────────────────────────────────────────
 
-function AuthForms({
-  roleCard,
-  onBack,
-  onLogin,
+export function AuthForms({
+  initialTab = "login",
+  onLogin
 }: {
-  roleCard: RoleCard
-  onBack: () => void
+  initialTab?: "login" | "register"
   onLogin: (user: AppUser) => void
 }) {
-  const [tab,       setTab]       = useState<"login" | "register">("login")
+  const [tab,       setTab]       = useState<"login" | "register">(initialTab)
   const [loading,   setLoading]   = useState(false)
-  const [showDone,  setShowDone]  = useState(false)
 
   // Login fields
   const [lEmail,    setLEmail]    = useState("")
@@ -315,43 +312,89 @@ function AuthForms({
   const [rConfirm,  setRConfirm]  = useState("")
 
   // Role-specific register fields
+  const [rRole,     setRRole]     = useState("member")            // new role selector state
   const [rOrg,      setROrg]      = useState("")                  // org-owner
   const [rTeam,     setRTeam]     = useState("UMRT")              // team-manager, subteam-manager, member
   const [rSubteam,  setRSubteam]  = useState("Software")          // subteam-manager, member
   const [rBatch,    setRBatch]    = useState("2024")              // member
   const [rWhatsapp, setRWhatsapp] = useState("")                  // member
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
-  const role = roleCard.role
-
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    setErrorMsg(null)
+
+    if (!lEmail.trim() || !lPassword.trim()) {
+      setErrorMsg("Please enter your email and password.")
+      return
+    }
+
     setLoading(true)
-    setTimeout(() => {
+
+    try {
+      const user = await authApi.login(lEmail.trim(), lPassword.trim())
+      onLogin({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        initials: user.initials,
+        role: normalizeRole(user.role),
+        team: user.team,
+        subteam: user.subteam,
+        batch: user.batch,
+        whatsapp: user.whatsapp,
+      })
+    } catch (err: any) {
+      setErrorMsg(err.message || "Invalid email or password.")
+    } finally {
       setLoading(false)
-      onLogin(DEMO_BY_ROLE[role])
-    }, 1100)
+    }
   }
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (rPassword !== rConfirm) return
+    setErrorMsg(null)
+
+    if (!rName.trim() || !rEmail.trim() || !rPassword.trim()) {
+      setErrorMsg("Please fill in all required fields.")
+      return
+    }
+
+    if (rPassword !== rConfirm) {
+      setErrorMsg("Passwords do not match.")
+      return
+    }
+
     setLoading(true)
-    setTimeout(() => {
+
+    try {
+      const formData = new FormData()
+      formData.append("name", rName.trim())
+      formData.append("email", rEmail.trim())
+      formData.append("password", rPassword.trim())
+      formData.append("role", rRole === "org-owner" ? "ORG_OWNER" : rRole === "team-manager" ? "TEAM_MANAGER" : rRole === "subteam-manager" ? "SUBTEAM_MANAGER" : "MEMBER")
+      if (rTeam) formData.append("teamName", rTeam)
+      if (rSubteam) formData.append("subteamNames", JSON.stringify([rSubteam]))
+      if (rBatch) formData.append("batch", rBatch)
+      if (rWhatsapp) formData.append("whatsapp", rWhatsapp.trim() || "880123456789")
+
+      const user = await authApi.register(formData)
+      onLogin({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        initials: user.initials,
+        role: normalizeRole(user.role),
+        team: user.team,
+        subteam: user.subteam,
+        batch: user.batch,
+        whatsapp: user.whatsapp,
+      })
+    } catch (err: any) {
+      setErrorMsg(err.message || "Registration failed. Email may already be registered.")
+    } finally {
       setLoading(false)
-      const initials = rName.split(" ").map(w => w[0]).join("").slice(0,2).toUpperCase()
-      const newUser: AppUser = {
-        id:       "new-" + Date.now(),
-        name:     rName,
-        initials,
-        email:    rEmail,
-        role,
-        team:     role === "org-owner" ? (rOrg || "CAIR Lab") : rTeam,
-        subteam:  (role === "subteam-manager" || role === "member") ? rSubteam : "Software",
-        batch:    role === "member" ? rBatch : "2024",
-        whatsapp: rWhatsapp || "880100000000",
-      }
-      onLogin(newUser)
-    }, 1100)
+    }
   }
 
   const TEAMS    = [
@@ -376,32 +419,9 @@ function AuthForms({
         background: "radial-gradient(ellipse 700px 400px at 50% 45%, oklch(0.20 0.005 285 / 0.3) 0%, transparent 70%)",
       }} />
 
-      <AuthCard
-        footer={
-          <button
-            onClick={onBack}
-            className="flex items-center gap-1.5 text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
-          >
-            <ArrowLeft size={12} /> Back to role selection
-          </button>
-        }
-      >
-        {/* Brand + role badge */}
+      <AuthCard>
         <div className="space-y-6">
           <div className="flex flex-col items-center gap-3 text-center">
-            {/* Role icon pill */}
-            <div
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium"
-              style={{
-                borderColor: roleCard.accentVar + "44",
-                background:  roleCard.accentVar + "12",
-                color:        roleCard.accentVar,
-              }}
-            >
-              {roleCard.icon}
-              {roleCard.label}
-            </div>
-
             <div
               className="w-12 h-12 rounded-[12px] flex items-center justify-center"
               style={{ background: "oklch(0.98 0 0)", boxShadow: "0 4px 20px oklch(0 0 0 / 0.4)" }}
@@ -436,6 +456,12 @@ function AuthForms({
                   </div>
                 </div>
 
+                {errorMsg && (
+                  <div className="p-2.5 rounded-lg border border-destructive/30 bg-destructive/10 text-destructive text-xs font-medium text-center">
+                    {errorMsg}
+                  </div>
+                )}
+
                 <Button type="submit" className="w-full h-10 text-sm font-semibold mt-1" disabled={loading}>
                   {loading
                     ? <><Loader2 size={14} className="animate-spin" /> Signing in...</>
@@ -452,16 +478,29 @@ function AuthForms({
                 <Field id="r-email" label="Work Email" type="email" placeholder="name@cairlab.org" value={rEmail} onChange={setREmail} />
 
                 {/* Role-specific extra fields */}
-                {role === "org-owner" && (
+                <SelectField 
+                  id="r-role" 
+                  label="Role" 
+                  value={rRole} 
+                  onChange={setRRole} 
+                  options={[
+                    { value: "member", label: "Member" },
+                    { value: "subteam-manager", label: "Subteam Manager" },
+                    { value: "team-manager", label: "Team Manager" },
+                    { value: "org-owner", label: "Organization Owner" },
+                  ]} 
+                />
+
+                {rRole === "org-owner" && (
                   <Field id="r-org" label="Organization Name" placeholder="e.g. CAIR Lab" value={rOrg} onChange={setROrg} />
                 )}
-                {(role === "team-manager" || role === "subteam-manager" || role === "member") && (
+                {(rRole === "team-manager" || rRole === "subteam-manager" || rRole === "member") && (
                   <SelectField id="r-team" label="Team" value={rTeam} onChange={setRTeam} options={TEAMS} />
                 )}
-                {(role === "subteam-manager" || role === "member") && (
+                {(rRole === "subteam-manager" || rRole === "member") && (
                   <SelectField id="r-sub" label="Subteam" value={rSubteam} onChange={setRSubteam} options={SUBTEAMS} />
                 )}
-                {role === "member" && (
+                {rRole === "member" && (
                   <div className="grid grid-cols-2 gap-3">
                     <SelectField id="r-batch"    label="Batch"    value={rBatch}    onChange={setRBatch}    options={BATCHES} />
                     <Field       id="r-whatsapp" label="WhatsApp" placeholder="880..." value={rWhatsapp} onChange={setRWhatsapp} />
@@ -473,6 +512,12 @@ function AuthForms({
 
                 {rConfirm && rPassword !== rConfirm && (
                   <p className="text-xs text-destructive">Passwords do not match</p>
+                )}
+
+                {errorMsg && (
+                  <div className="p-2.5 rounded-lg border border-destructive/30 bg-destructive/10 text-destructive text-xs font-medium text-center">
+                    {errorMsg}
+                  </div>
                 )}
 
                 <Button
@@ -504,7 +549,6 @@ function PasswordInput({ id, value, onChange }: { id: string; value: string; onC
         type={show ? "text" : "password"}
         value={value}
         onChange={e => onChange(e.target.value)}
-        required
         className="h-10 text-sm pr-9"
         style={{ background: BG_INPUT, borderColor: BORDER }}
       />
@@ -608,17 +652,17 @@ function OnboardingModal({ onComplete }: { onComplete: () => void }) {
 
 // ─── Root AuthPage ─────────────────────────────────────────────────────────────
 
-type AuthStep = "role-select" | "auth-forms" | "onboarding"
+type AuthStep = "auth-forms" | "onboarding"
 
-export function AuthPage({ onLogin }: { onLogin: (user: AppUser) => void }) {
-  const [step,      setStep]      = useState<AuthStep>("role-select")
-  const [roleCard,  setRoleCard]  = useState<RoleCard | null>(null)
+export function AuthPage({ 
+  onLogin, 
+  initialTab = "login" 
+}: { 
+  onLogin: (user: AppUser) => void;
+  initialTab?: "login" | "register";
+}) {
+  const [step, setStep] = useState<AuthStep>("auth-forms")
   const [pendingUser, setPendingUser] = useState<AppUser | null>(null)
-
-  const handleRoleSelect = (role: UserRole) => {
-    setRoleCard(ROLE_CARDS.find(c => c.role === role)!)
-    setStep("auth-forms")
-  }
 
   const handleAuthComplete = (user: AppUser) => {
     if (user.role === "member") {
@@ -629,15 +673,10 @@ export function AuthPage({ onLogin }: { onLogin: (user: AppUser) => void }) {
     }
   }
 
-  if (step === "role-select") {
-    return <RoleSelector onSelect={handleRoleSelect} />
-  }
-
-  if (step === "auth-forms" && roleCard) {
+  if (step === "auth-forms") {
     return (
       <AuthForms
-        roleCard={roleCard}
-        onBack={() => setStep("role-select")}
+        initialTab={initialTab}
         onLogin={handleAuthComplete}
       />
     )

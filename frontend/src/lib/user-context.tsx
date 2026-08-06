@@ -36,6 +36,16 @@ export function useUser(): AppUser {
 
 // ─── Role helpers ─────────────────────────────────────────────────────────────
 
+export function normalizeRole(roleStr: string): UserRole {
+  if (!roleStr) return "member"
+  const lower = roleStr.toLowerCase().replace("_", "-")
+  if (lower.includes("owner")) return "org-owner"
+  if (lower.includes("team-manager")) return "team-manager"
+  if (lower.includes("subteam-manager")) return "subteam-manager"
+  if (lower.includes("team") && !lower.includes("subteam")) return "team-manager"
+  return "member"
+}
+
 export function roleLabel(role: UserRole): string {
   const map: Record<UserRole, string> = {
     "org-owner":       "Organization Owner",
@@ -43,28 +53,34 @@ export function roleLabel(role: UserRole): string {
     "subteam-manager": "Subteam Manager",
     "member":          "Member",
   }
-  return map[role]
+  return map[role] || "Member"
 }
 
 export function canAccessPage(role: UserRole, page: string): boolean {
+  const norm = normalizeRole(role)
   const matrix: Record<string, UserRole[]> = {
     dashboard: ["org-owner", "team-manager", "subteam-manager", "member"],
     members:   ["org-owner", "team-manager", "subteam-manager"],
     search:    ["org-owner", "team-manager", "subteam-manager", "member"],
     heatmap:   ["org-owner", "team-manager", "subteam-manager"],
     skills:    ["org-owner", "team-manager", "subteam-manager", "member"],
+    projects:  ["org-owner", "team-manager", "subteam-manager", "member"],
+    "meeting-planner": ["org-owner", "team-manager", "subteam-manager", "member"],
+    portfolio: ["org-owner", "team-manager", "subteam-manager", "member"],
     settings:  ["org-owner", "team-manager", "member"],
   }
-  return (matrix[page] ?? []).includes(role)
+  return (matrix[page] ?? []).includes(norm)
 }
 
 // Scope helpers used by pages to filter data
 export function teamScope(user: AppUser): string | null {
-  if (user.role === "org-owner") return null              // no restriction
+  const norm = normalizeRole(user.role)
+  if (norm === "org-owner") return null                   // no restriction
   return user.team                                        // everyone else scoped to own team
 }
 
 export function subteamScope(user: AppUser): string | null {
-  if (user.role === "org-owner" || user.role === "team-manager") return null
+  const norm = normalizeRole(user.role)
+  if (norm === "org-owner" || norm === "team-manager") return null
   return user.subteam                                     // subteam-manager and member
 }

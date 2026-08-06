@@ -1,11 +1,11 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   LayoutDashboard, Users, Search, BarChart3, Zap, Settings,
   ChevronRight, Bell, MessageCircle, Filter, TrendingUp,
   Shield, Calendar, LogOut, User, HelpCircle, RefreshCw,
   CheckCircle2, XCircle, AlertCircle, Minus, ArrowUpRight,
   Upload, Building2, ChevronDown, Lock, Layers, Plus, Pencil,
-  Clock, AlertTriangle, Save,
+  Clock, AlertTriangle, Save, ArrowLeft
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button }           from "@/components/ui/button"
@@ -26,11 +26,13 @@ import { UserContext, useUser, useUserCtx, canAccessPage, teamScope, subteamScop
 import type { AppUser, UserRole } from "@/lib/user-context"
 import { AuthPage } from "./Auth"
 import { AIChat } from "@/components/AIChat"
+import { membersApi, heatmapApi, skillsApi, routinesApi, authApi, teamsApi } from "@/lib/api"
+import { LandingPage } from "@/LandingPage"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type AvailStatus = "free" | "in-class" | "soon" | "missing"
-type NavPage     = "dashboard" | "members" | "search" | "heatmap" | "skills" | "settings"
+type NavPage     = "dashboard" | "members" | "search" | "heatmap" | "skills" | "projects" | "meeting-planner" | "portfolio" | "settings"
 type DayOfWeek   = "Sun" | "Mon" | "Tue" | "Wed" | "Thu"
 
 interface ClassSlot {
@@ -50,139 +52,15 @@ interface Member {
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
-const MEMBERS: Member[] = [
-  {
-    id:"1", name:"Aryan Hossain", initials:"AH", org:"CAIR Lab", team:"UMRT", subteams:["Software"],
-    status:"free", nextChange:"Free until 3:00 PM",
-    skills:["React","TypeScript","ROS"], batch:"2022", whatsapp:"880123456789", role:"Member",
-    schedule:[
-      { day:"Sun", startTime:"09:00", endTime:"10:30", course:"CSE 401", room:"A101" },
-      { day:"Sun", startTime:"13:00", endTime:"14:30", course:"CSE 403", room:"B202" },
-      { day:"Tue", startTime:"09:00", endTime:"10:30", course:"CSE 401", room:"A101" },
-      { day:"Tue", startTime:"13:00", endTime:"14:30", course:"CSE 403", room:"B202" },
-      { day:"Thu", startTime:"11:00", endTime:"12:30", course:"CSE 499", room:"Lab-3" },
-    ],
-  },
-  {
-    id:"2", name:"Nusrat Jahan", initials:"NJ", org:"CAIR Lab", team:"UMRT", subteams:["Electrical"],
-    status:"in-class", nextChange:"Free at 12:30 PM", currentClass:"EEE 401", remainingMin:28,
-    skills:["PCB Design","Embedded Systems"], batch:"2023", whatsapp:"880123456780", role:"Subteam Manager",
-    schedule:[
-      { day:"Mon", startTime:"11:00", endTime:"12:30", course:"EEE 401", room:"C301" },
-      { day:"Mon", startTime:"15:00", endTime:"16:30", course:"EEE 403", room:"C302" },
-      { day:"Wed", startTime:"11:00", endTime:"12:30", course:"EEE 401", room:"C301" },
-      { day:"Wed", startTime:"15:00", endTime:"16:30", course:"EEE 403", room:"C302" },
-      { day:"Thu", startTime:"09:00", endTime:"10:30", course:"EEE 499", room:"Lab-2" },
-    ],
-  },
-  {
-    id:"3", name:"Farhan Kabir", initials:"FK", org:"CAIR Lab", team:"URRT", subteams:["Mechanical"],
-    status:"soon", nextChange:"Class in 18 min",
-    skills:["CAD","Python"], batch:"2022", whatsapp:"880123456781", role:"Member",
-    schedule:[
-      { day:"Sun", startTime:"14:00", endTime:"15:30", course:"ME 401", room:"D401" },
-      { day:"Tue", startTime:"14:00", endTime:"15:30", course:"ME 401", room:"D401" },
-      { day:"Wed", startTime:"10:00", endTime:"11:30", course:"ME 403", room:"D402" },
-      { day:"Thu", startTime:"13:00", endTime:"14:30", course:"ME 499", room:"Lab-4" },
-    ],
-  },
-  {
-    id:"4", name:"Tasneem Akter", initials:"TA", org:"CAIR Lab", team:"UMRT", subteams:["Software","Electrical"],
-    status:"free", nextChange:"Free until 4:00 PM",
-    skills:["Machine Learning","Python","TypeScript"], batch:"2023", whatsapp:"880123456782", role:"Member",
-    schedule:[
-      { day:"Mon", startTime:"09:00", endTime:"10:30", course:"CSE 411", room:"A201" },
-      { day:"Mon", startTime:"16:00", endTime:"17:30", course:"CSE 413", room:"A202" },
-      { day:"Wed", startTime:"09:00", endTime:"10:30", course:"CSE 411", room:"A201" },
-      { day:"Thu", startTime:"11:00", endTime:"12:30", course:"CSE 499", room:"Lab-1" },
-    ],
-  },
-  {
-    id:"5", name:"Rezwan Ahmed", initials:"RA", org:"CAIR Lab", team:"URRT", subteams:["Software"],
-    status:"free", nextChange:"Free until 2:00 PM",
-    skills:["DevOps","React"], batch:"2021", whatsapp:"880123456783", role:"Team Manager",
-    schedule:[
-      { day:"Sun", startTime:"10:00", endTime:"11:30", course:"CSE 301", room:"B101" },
-      { day:"Tue", startTime:"10:00", endTime:"11:30", course:"CSE 301", room:"B101" },
-      { day:"Thu", startTime:"14:00", endTime:"15:30", course:"CSE 399", room:"Lab-2" },
-    ],
-  },
-  {
-    id:"6", name:"Mehzabin Islam", initials:"MI", org:"CAIR Lab", team:"Team XYZ", subteams:["UI/UX"],
-    status:"in-class", nextChange:"Free at 1:00 PM", currentClass:"CSE 305", remainingMin:52,
-    skills:["UI/UX","React"], batch:"2023", whatsapp:"880123456784", role:"Member",
-    schedule:[
-      { day:"Mon", startTime:"11:00", endTime:"13:00", course:"CSE 305", room:"A103" },
-      { day:"Wed", startTime:"11:00", endTime:"13:00", course:"CSE 305", room:"A103" },
-      { day:"Thu", startTime:"15:00", endTime:"16:30", course:"CSE 307", room:"A104" },
-    ],
-  },
-  {
-    id:"7", name:"Shafayat Haque", initials:"SH", org:"CAIR Lab", team:"UMRT", subteams:["Mechanical"],
-    status:"free", nextChange:"Free until 5:00 PM",
-    skills:["CAD","Python","Embedded Systems"], batch:"2022", whatsapp:"880123456785", role:"Member",
-    schedule:[
-      { day:"Sun", startTime:"08:00", endTime:"09:30", course:"ME 301", room:"D201" },
-      { day:"Tue", startTime:"08:00", endTime:"09:30", course:"ME 301", room:"D201" },
-      { day:"Wed", startTime:"13:00", endTime:"14:30", course:"ME 303", room:"D202" },
-    ],
-  },
-  {
-    id:"8", name:"Priyanka Das", initials:"PD", org:"CAIR Lab", team:"Team XYZ", subteams:["Software"],
-    status:"missing", nextChange:"Routine not uploaded",
-    skills:["Python"], batch:"2024", whatsapp:"880123456786", role:"Member",
-    schedule:[],
-  },
-  {
-    id:"9", name:"Omar Shahriar", initials:"OS", org:"CAIR Lab", team:"URRT", subteams:["Electrical"],
-    status:"free", nextChange:"Free until 3:30 PM",
-    skills:["PCB Design","ROS"], batch:"2022", whatsapp:"880123456787", role:"Member",
-    schedule:[
-      { day:"Sun", startTime:"09:00", endTime:"10:30", course:"EEE 301", room:"C101" },
-      { day:"Mon", startTime:"13:00", endTime:"14:30", course:"EEE 303", room:"C102" },
-      { day:"Wed", startTime:"09:00", endTime:"10:30", course:"EEE 301", room:"C101" },
-      { day:"Thu", startTime:"11:00", endTime:"12:30", course:"EEE 399", room:"Lab-2" },
-    ],
-  },
-  {
-    id:"10", name:"Lamiya Chowdhury", initials:"LC", org:"CAIR Lab", team:"UMRT", subteams:["Software"],
-    status:"soon", nextChange:"Class in 7 min",
-    skills:["TypeScript","Machine Learning"], batch:"2023", whatsapp:"880123456788", role:"Member",
-    schedule:[
-      { day:"Mon", startTime:"14:00", endTime:"15:30", course:"CSE 411", room:"A201" },
-      { day:"Tue", startTime:"10:00", endTime:"11:30", course:"CSE 413", room:"A202" },
-      { day:"Thu", startTime:"14:00", endTime:"15:30", course:"CSE 411", room:"A201" },
-    ],
-  },
-  {
-    id:"11", name:"Sabbir Rahman", initials:"SR", org:"CAIR Lab", team:"URRT", subteams:["Mechanical"],
-    status:"free", nextChange:"Free until 4:30 PM",
-    skills:["CAD","Python","ROS"], batch:"2021", whatsapp:"880123456790", role:"Subteam Manager",
-    schedule:[
-      { day:"Sun", startTime:"11:00", endTime:"12:30", course:"ME 301", room:"D201" },
-      { day:"Tue", startTime:"11:00", endTime:"12:30", course:"ME 301", room:"D201" },
-      { day:"Thu", startTime:"09:00", endTime:"10:30", course:"ME 399", room:"Lab-4" },
-    ],
-  },
-  {
-    id:"12", name:"Disha Mondal", initials:"DM", org:"CAIR Lab", team:"Team XYZ", subteams:["Electrical"],
-    status:"in-class", nextChange:"Free at 2:00 PM", currentClass:"PHY 201", remainingMin:41,
-    skills:["Embedded Systems","PCB Design"], batch:"2024", whatsapp:"880123456791", role:"Member",
-    schedule:[
-      { day:"Mon", startTime:"11:00", endTime:"14:00", course:"PHY 201", room:"E101" },
-      { day:"Wed", startTime:"09:00", endTime:"11:00", course:"PHY 203", room:"E102" },
-      { day:"Thu", startTime:"13:00", endTime:"14:30", course:"PHY 299", room:"Lab-5" },
-    ],
-  },
-]
+const MEMBERS: Member[] = []
 
 // ─── Permission defaults ──────────────────────────────────────────────────────
 
 const DEFAULT_PAGE_PERMS: Record<string, string[]> = {
-  "org-owner":       ["dashboard","members","search","heatmap","skills","settings"],
-  "team-manager":    ["dashboard","members","search","heatmap","skills","settings"],
-  "subteam-manager": ["dashboard","members","search","heatmap","skills"],
-  "member":          ["dashboard","search","skills","settings"],
+  "org-owner":       ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
+  "team-manager":    ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
+  "subteam-manager": ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio"],
+  "member":          ["dashboard","search","skills","projects","meeting-planner","portfolio","settings"],
 }
 
 const DEFAULT_FEATURE_PERMS: Record<string, string[]> = {
@@ -193,12 +71,15 @@ const DEFAULT_FEATURE_PERMS: Record<string, string[]> = {
 }
 
 const ALL_PAGE_OPTIONS: { id: string; label: string }[] = [
-  { id:"dashboard", label:"Dashboard" },
-  { id:"members",   label:"Members" },
-  { id:"search",    label:"Find Members" },
-  { id:"heatmap",   label:"Heatmap" },
-  { id:"skills",    label:"Skills" },
-  { id:"settings",  label:"Settings" },
+  { id:"dashboard",       label:"Dashboard" },
+  { id:"members",         label:"Members" },
+  { id:"search",          label:"Find Members" },
+  { id:"heatmap",         label:"Heatmap" },
+  { id:"skills",          label:"Skills" },
+  { id:"projects",        label:"Projects & Kanban" },
+  { id:"meeting-planner", label:"AI Scheduler" },
+  { id:"portfolio",       label:"Work History" },
+  { id:"settings",        label:"Settings" },
 ]
 
 const ALL_FEATURE_OPTIONS: Record<string, string[]> = {
@@ -207,61 +88,9 @@ const ALL_FEATURE_OPTIONS: Record<string, string[]> = {
   "member":          ["Upload class routine","Update profile","Request new skills","View availability","Search subteam members","Contact teammates"],
 }
 
-const TEAMS    = ["UMRT","URRT","Team XYZ"]
-const SUBTEAMS = ["Software","Mechanical","Electrical","UI/UX"]
-const BATCHES  = ["2020","2021","2022","2023","2024"]
-const DAYS     = ["Sun","Mon","Tue","Wed","Thu"] as DayOfWeek[]
-const HOURS    = ["09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00"]
-const ALL_SKILLS = ["React","TypeScript","Python","ROS","Embedded Systems","PCB Design","CAD","Machine Learning","UI/UX","DevOps"]
-
-const TOTALS: Record<string,number> = { "UMRT":22, "URRT":12, "Team XYZ":9 }
-const HEATMAP: Record<string,Record<string,number>> = {
-  "09:00":{"UMRT":20,"URRT":10,"Team XYZ":7},
-  "10:00":{"UMRT":18,"URRT":9, "Team XYZ":6},
-  "11:00":{"UMRT":21,"URRT":11,"Team XYZ":8},
-  "12:00":{"UMRT":22,"URRT":12,"Team XYZ":9},
-  "13:00":{"UMRT":19,"URRT":10,"Team XYZ":7},
-  "14:00":{"UMRT":16,"URRT":8, "Team XYZ":5},
-  "15:00":{"UMRT":14,"URRT":7, "Team XYZ":6},
-  "16:00":{"UMRT":20,"URRT":11,"Team XYZ":8},
-  "17:00":{"UMRT":22,"URRT":12,"Team XYZ":9},
-}
-
-// Subteam-level heatmap data
-const SUBTEAM_TOTALS: Record<string,Record<string,number>> = {
-  "UMRT":     { "Software":10, "Mechanical":6, "Electrical":6 },
-  "URRT":     { "Software":5,  "Mechanical":4, "Electrical":3 },
-  "Team XYZ": { "Software":4,  "UI/UX":3,      "Electrical":2 },
-}
-const SUBTEAM_HEATMAP: Record<string,Record<string,Record<string,number>>> = {
-  "UMRT": {
-    "Software":   { "09:00":9,"10:00":8,"11:00":10,"12:00":10,"13:00":9,"14:00":7,"15:00":6,"16:00":9,"17:00":10 },
-    "Mechanical": { "09:00":5,"10:00":4,"11:00":6, "12:00":6, "13:00":5,"14:00":4,"15:00":4,"16:00":5,"17:00":6 },
-    "Electrical": { "09:00":4,"10:00":4,"11:00":5, "12:00":6, "13:00":5,"14:00":4,"15:00":3,"16:00":5,"17:00":6 },
-  },
-  "URRT": {
-    "Software":   { "09:00":4,"10:00":3,"11:00":5,"12:00":5,"13:00":4,"14:00":3,"15:00":3,"16:00":4,"17:00":5 },
-    "Mechanical": { "09:00":3,"10:00":3,"11:00":4,"12:00":4,"13:00":3,"14:00":3,"15:00":2,"16:00":3,"17:00":4 },
-    "Electrical": { "09:00":2,"10:00":2,"11:00":3,"12:00":3,"13:00":2,"14:00":2,"15:00":2,"16:00":3,"17:00":3 },
-  },
-  "Team XYZ": {
-    "Software": { "09:00":3,"10:00":2,"11:00":4,"12:00":4,"13:00":3,"14:00":2,"15:00":2,"16:00":3,"17:00":4 },
-    "UI/UX":    { "09:00":2,"10:00":2,"11:00":3,"12:00":3,"13:00":2,"14:00":2,"15:00":2,"16:00":3,"17:00":3 },
-    "Electrical":{ "09:00":1,"10:00":1,"11:00":2,"12:00":2,"13:00":2,"14:00":1,"15:00":1,"16:00":2,"17:00":2 },
-  },
-}
-
-const PENDING_APPROVALS = [
-  { id:"a1", member:"Aryan Hossain",    initials:"AH", skill:"Machine Learning", team:"UMRT",     subteam:"Software",   requested:"3 days ago" },
-  { id:"a2", member:"Omar Shahriar",    initials:"OS", skill:"ROS",              team:"URRT",     subteam:"Electrical", requested:"1 day ago" },
-  { id:"a3", member:"Lamiya Chowdhury", initials:"LC", skill:"DevOps",           team:"UMRT",     subteam:"Software",   requested:"5 hours ago" },
-]
-
-const CHART_SLOTS = [
-  { t:"09:00", v:40 }, { t:"10:00", v:33 }, { t:"11:00", v:40 },
-  { t:"12:00", v:43 }, { t:"13:00", v:36 }, { t:"14:00", v:29 },
-  { t:"15:00", v:27 }, { t:"16:00", v:38 }, { t:"17:00", v:43 },
-]
+const PENDING_APPROVALS: any[] = []
+const DAYS: DayOfWeek[] = ["Sun","Mon","Tue","Wed","Thu"]
+const HOURS = ["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00"]
 
 // ─── Availability helper ───────────────────────────────────────────────────────
 
@@ -358,12 +187,15 @@ function RoutineRestrictionBanner({ onUpload }: { onUpload: () => void }) {
 // ─── Nav ──────────────────────────────────────────────────────────────────────
 
 const ALL_NAV: { id: NavPage; label: string; icon: React.ReactNode }[] = [
-  { id:"dashboard", label:"Dashboard",    icon:<LayoutDashboard size={15}/> },
-  { id:"members",   label:"Members",      icon:<Users size={15}/> },
-  { id:"search",    label:"Find Members", icon:<Search size={15}/> },
-  { id:"heatmap",   label:"Heatmap",      icon:<BarChart3 size={15}/> },
-  { id:"skills",    label:"Skills",       icon:<Zap size={15}/> },
-  { id:"settings",  label:"Settings",     icon:<Settings size={15}/> },
+  { id:"dashboard",       label:"Dashboard",        icon:<LayoutDashboard size={15}/> },
+  { id:"members",         label:"Members",          icon:<Users size={15}/> },
+  { id:"search",          label:"Find Members",     icon:<Search size={15}/> },
+  { id:"heatmap",         label:"Heatmap",          icon:<BarChart3 size={15}/> },
+  { id:"skills",          label:"Skills Catalog",   icon:<Zap size={15}/> },
+  { id:"projects",        label:"Projects & Kanban",icon:<Layers size={15}/> },
+  { id:"meeting-planner", label:"AI Scheduler",     icon:<Calendar size={15}/> },
+  { id:"portfolio",       label:"Work History",     icon:<User size={15}/> },
+  { id:"settings",        label:"Settings",         icon:<Settings size={15}/> },
 ]
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
@@ -589,12 +421,133 @@ function StatCard({ label, value, sub, icon, variant }: {
   )
 }
 
+function PendingApprovals() {
+  const user = useUser()
+  const [pendingSkills, setPendingSkills] = useState<any[]>([])
+  const [pendingRoles, setPendingRoles] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const loadPending = async () => {
+    try {
+      setLoading(true)
+      const [skills, roles] = await Promise.all([
+        skillsApi.getPendingSkills(),
+        membersApi.getPendingRoles(),
+      ])
+      setPendingSkills(skills || [])
+      setPendingRoles(roles || [])
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadPending()
+  }, [])
+
+  if (user.role === "member" || user.role === "subteam-manager") return null
+  if (!loading && pendingSkills.length === 0 && pendingRoles.length === 0) return null
+
+  const handleRoleAction = async (id: string, action: "approve" | "reject") => {
+    try {
+      await membersApi.updateRole(id, action)
+      loadPending()
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const handleSkillAction = async (id: string, action: "approve" | "reject") => {
+    try {
+      if (action === "approve") await skillsApi.approveSkill(id)
+      else await skillsApi.rejectSkill(id)
+      loadPending()
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  return (
+    <Card className="border-warning/30 shadow-[0_4px_12px_oklch(var(--warning)/0.05)]">
+      <CardHeader className="pb-3 border-b bg-warning/5 rounded-t-xl">
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-base flex items-center gap-2">
+              <AlertCircle size={16} className="text-warning"/>
+              Pending Approvals
+            </CardTitle>
+            <CardDescription className="text-xs mt-0.5">
+              Requires your review ({pendingRoles.length + pendingSkills.length} pending)
+            </CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="p-0">
+        <ScrollArea className="max-h-60">
+          <Table>
+            <TableHeader className="bg-muted/30">
+              <TableRow>
+                <TableHead className="h-8 text-[10px] pl-4">Member</TableHead>
+                <TableHead className="h-8 text-[10px]">Type</TableHead>
+                <TableHead className="h-8 text-[10px]">Request</TableHead>
+                <TableHead className="h-8 text-[10px] text-right pr-4">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {pendingRoles.map(r => (
+                <TableRow key={`role-${r.id}`}>
+                  <TableCell className="pl-4 py-2 text-xs font-medium">{r.name}</TableCell>
+                  <TableCell className="py-2"><Badge variant="outline" className="text-[9px]">Role Change</Badge></TableCell>
+                  <TableCell className="py-2 text-xs">Requested <span className="font-semibold text-primary">{roleLabel(r.requestedRole)}</span></TableCell>
+                  <TableCell className="py-2 text-right pr-4">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button variant="ghost" size="icon" className="h-6 w-6 text-success hover:text-success hover:bg-success/10" onClick={() => handleRoleAction(r.id, "approve")}><CheckCircle2 size={13}/></Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleRoleAction(r.id, "reject")}><XCircle size={13}/></Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {pendingSkills.map(s => (
+                <TableRow key={`skill-${s.id}`}>
+                  <TableCell className="pl-4 py-2 text-xs font-medium">{s.memberName}</TableCell>
+                  <TableCell className="py-2"><Badge variant="outline" className="text-[9px]">Skill</Badge></TableCell>
+                  <TableCell className="py-2 text-xs">Requested <span className="font-semibold text-primary">{s.skillName}</span></TableCell>
+                  <TableCell className="py-2 text-right pr-4">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button variant="ghost" size="icon" className="h-6 w-6 text-success hover:text-success hover:bg-success/10" onClick={() => handleSkillAction(s.id, "approve")}><CheckCircle2 size={13}/></Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleSkillAction(s.id, "reject")}><XCircle size={13}/></Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {loading && <TableRow><TableCell colSpan={4} className="text-center text-xs text-muted-foreground py-4">Loading...</TableCell></TableRow>}
+            </TableBody>
+          </Table>
+        </ScrollArea>
+      </CardContent>
+    </Card>
+  )
+}
+
 function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
   const user    = useUser()
   const tScope  = teamScope(user)
   const stScope = subteamScope(user)
+  const [membersList, setMembersList] = useState<Member[]>([])
 
-  const pool = MEMBERS.filter(m => {
+  const loadData = () => {
+    membersApi.getMembers()
+      .then(res => setMembersList(res || []))
+      .catch(() => setMembersList([]))
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  const pool = membersList.filter(m => {
     if (tScope  && m.team        !== tScope)  return false
     if (stScope && !m.subteams.includes(stScope)) return false
     return true
@@ -623,11 +576,13 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Good afternoon, {user.name.split(" ")[0]}</h1>
           <p className="text-muted-foreground text-sm mt-0.5">
-            {tScope ?? "CAIR Lab"}{stScope ? ` · ${stScope}` : ""} · Mon, Aug 4, 2026 · 2:00 PM
+            {tScope ?? "CAIR Lab"}{stScope ? ` · ${stScope}` : ""} · Real-Time Availability
           </p>
         </div>
-        <Button variant="outline" size="sm" className="gap-1.5"><RefreshCw size={13}/> Refresh</Button>
+        <Button variant="outline" size="sm" className="gap-1.5" onClick={loadData}><RefreshCw size={13}/> Refresh</Button>
       </div>
+
+      <PendingApprovals />
 
       <div className="grid grid-cols-4 gap-4">
         <StatCard label="Free Now"   value={free}    sub={`${Math.round((free/Math.max(pool.length,1))*100)}% of scope`} icon={<CheckCircle2 size={16}/>} variant="success" />
@@ -669,37 +624,45 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {shown.map(m => (
-                    <TableRow key={m.id}>
-                      <TableCell className="pl-3">
-                        <div className="flex items-center gap-2.5">
-                          <MemberAvatar member={m} size="sm"/>
-                          <span className="text-sm font-medium">{m.name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{m.subteams[0]}</TableCell>
-                      <TableCell><StatusBadge status={m.status}/></TableCell>
-                      <TableCell className="font-mono text-xs text-muted-foreground">{m.nextChange}</TableCell>
-                      <TableCell>
-                        {m.status === "in-class" && m.remainingMin !== undefined
-                          ? <span className="text-xs font-mono text-destructive flex items-center gap-1"><Clock size={10}/>{m.remainingMin}m left</span>
-                          : <span className="text-xs text-muted-foreground/40">—</span>
-                        }
-                      </TableCell>
-                      <TableCell>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon" className="w-7 h-7" asChild>
-                              <a href={`https://wa.me/${m.whatsapp}`} target="_blank" rel="noreferrer">
-                                <MessageCircle size={13}/>
-                              </a>
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>WhatsApp {m.name}</TooltipContent>
-                        </Tooltip>
+                  {shown.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center text-xs text-muted-foreground py-8">
+                        No member availability data yet. Upload class routines or register team members to populate real data.
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    shown.map(m => (
+                      <TableRow key={m.id}>
+                        <TableCell className="pl-3">
+                          <div className="flex items-center gap-2.5">
+                            <MemberAvatar member={m} size="sm"/>
+                            <span className="text-sm font-medium">{m.name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{m.subteams[0]}</TableCell>
+                        <TableCell><StatusBadge status={m.status}/></TableCell>
+                        <TableCell className="font-mono text-xs text-muted-foreground">{m.nextChange}</TableCell>
+                        <TableCell>
+                          {m.status === "in-class" && m.remainingMin !== undefined
+                            ? <span className="text-xs font-mono text-destructive flex items-center gap-1"><Clock size={10}/>{m.remainingMin}m left</span>
+                            : <span className="text-xs text-muted-foreground/40">—</span>
+                          }
+                        </TableCell>
+                        <TableCell>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="icon" className="w-7 h-7" asChild>
+                                <a href={`https://wa.me/${m.whatsapp}`} target="_blank" rel="noreferrer">
+                                  <MessageCircle size={13}/>
+                                </a>
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>WhatsApp {m.name}</TooltipContent>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </ScrollArea>
@@ -731,35 +694,50 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
             </Card>
           )}
 
-          {/* Bar chart */}
+          {/* Bar chart — computed from live members data */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">Today&#39;s Availability</CardTitle>
-              <CardDescription className="text-xs">Members free per hour</CardDescription>
+              <CardDescription className="text-xs">Members free per hour (today)</CardDescription>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="flex items-end gap-1 h-20">
-                {CHART_SLOTS.map(s => {
-                  const pct   = s.v / 43
-                  const isNow = s.t === "14:00"
-                  const barClass = isNow ? "bg-primary"
-                    : pct > 0.8 ? "bg-success/60" : pct > 0.6 ? "bg-warning/60" : "bg-destructive/60"
-                  return (
-                    <Tooltip key={s.t}>
-                      <TooltipTrigger asChild>
-                        <div className="flex-1 flex flex-col items-center gap-1 cursor-default">
-                          <div className={cn("w-full rounded-t-sm transition-all", barClass, !isNow && "opacity-70 hover:opacity-100")}
-                            style={{ height:`${pct*76}px` }}/>
-                          <span className={cn("text-[9px] font-mono", isNow ? "text-primary font-bold" : "text-muted-foreground")}>
-                            {s.t.slice(0,2)}
-                          </span>
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>{s.v}/43 free at {s.t}</TooltipContent>
-                    </Tooltip>
-                  )
-                })}
-              </div>
+              {pool.length === 0 ? (
+                <div className="h-20 flex items-center justify-center">
+                  <p className="text-xs text-muted-foreground">No members yet</p>
+                </div>
+              ) : (() => {
+                const today = DAYS[new Date().getDay()] as DayOfWeek
+                const chartSlots = HOURS.map(h => {
+                  const freeCount = pool.filter(m => isFreeAt(m, today, h)).length
+                  return { t: h, v: freeCount }
+                })
+                const maxV = Math.max(...chartSlots.map(s => s.v), 1)
+                const nowH = `${new Date().getHours().toString().padStart(2,"0")}:00`
+                return (
+                  <div className="flex items-end gap-1 h-20">
+                    {chartSlots.map(s => {
+                      const pct = s.v / maxV
+                      const isNow = s.t === nowH
+                      const barClass = isNow ? "bg-primary"
+                        : pct > 0.7 ? "bg-success/60" : pct > 0.4 ? "bg-warning/60" : "bg-destructive/60"
+                      return (
+                        <Tooltip key={s.t}>
+                          <TooltipTrigger asChild>
+                            <div className="flex-1 flex flex-col items-center gap-1 cursor-default">
+                              <div className={cn("w-full rounded-t-sm transition-all", barClass, !isNow && "opacity-70 hover:opacity-100")}
+                                style={{ height: `${Math.max(pct * 76, 2)}px` }}/>
+                              <span className={cn("text-[9px] font-mono", isNow ? "text-primary font-bold" : "text-muted-foreground")}>
+                                {s.t.slice(0,2)}
+                              </span>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>{s.v}/{pool.length} free at {s.t}</TooltipContent>
+                        </Tooltip>
+                      )
+                    })}
+                  </div>
+                )
+              })()}
             </CardContent>
           </Card>
 
@@ -933,13 +911,31 @@ function MembersPage() {
   const stScope   = subteamScope(user)
   const canManage = user.role !== "member"
 
+  const [members,    setMembers]    = useState<Member[]>([])
+  const [teamsList,  setTeamsList]  = useState<string[]>([])
   const [teamFilter, setTeamFilter] = useState(tScope ?? "all")
   const [selected,   setSelected]   = useState<Member | null>(null)
+  const [loading,    setLoading]    = useState(true)
 
-  const filtered = MEMBERS.filter(m => {
-    if (stScope && !m.subteams.includes(stScope))      return false
-    if (tScope  && m.team !== tScope)                  return false
-    if (!tScope && teamFilter !== "all" && m.team !== teamFilter) return false
+  const loadData = () => {
+    setLoading(true)
+    Promise.all([
+      membersApi.getMembers(teamFilter !== "all" ? { team: teamFilter } : {}),
+      teamsApi.getTeams(),
+    ])
+      .then(([m, t]) => {
+        setMembers(m || [])
+        setTeamsList((t || []).map((x: any) => x.name))
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }
+
+  useEffect(() => { loadData() }, [teamFilter])
+
+  const filtered = members.filter(m => {
+    if (stScope && !m.subteams.includes(stScope)) return false
+    if (tScope  && m.team !== tScope)             return false
     return true
   })
 
@@ -952,84 +948,97 @@ function MembersPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Members</h1>
           <p className="text-muted-foreground text-sm mt-0.5">
-            {filtered.length} members{stScope ? ` in ${stScope}` : tScope ? ` in ${tScope}` : ` across ${TEAMS.length} teams`}
+            {loading ? "Loading..." : `${filtered.length} members${stScope ? ` in ${stScope}` : tScope ? ` in ${tScope}` : " across all teams"}`}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {user.role === "org-owner" && (
+          {user.role === "org-owner" && teamsList.length > 0 && (
             <Select value={teamFilter} onValueChange={setTeamFilter}>
               <SelectTrigger className="w-36"><SelectValue placeholder="All Teams"/></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Teams</SelectItem>
-                {TEAMS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                {teamsList.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
               </SelectContent>
             </Select>
           )}
           {(user.role === "org-owner" || user.role === "team-manager") && (
             <Button size="sm" className="gap-1.5"><Plus size={13}/>Add Member</Button>
           )}
-          <Button size="sm" variant="outline" className="gap-1.5"><ArrowUpRight size={13}/>Export</Button>
+          <Button size="sm" variant="outline" className="gap-1.5" onClick={loadData}><RefreshCw size={13}/>Refresh</Button>
         </div>
       </div>
 
-      {Object.entries(byTeam).map(([team, members]) => (
-        <div key={team}>
-          <div className="flex items-center gap-2 mb-3">
-            <h2 className="text-sm font-semibold text-foreground">{team}</h2>
-            <Badge variant="secondary" className="font-mono">{members.length}</Badge>
-            <Separator className="flex-1"/>
-            <span className="text-xs text-muted-foreground">{members.filter(m=>m.status==="free").length} free now</span>
-          </div>
-          <Card>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="pl-4">Member</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Subteam(s)</TableHead>
-                  <TableHead>Batch</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Skills</TableHead>
-                  <TableHead className="w-10"/>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {members.map(m => (
-                  <TableRow key={m.id} className="cursor-pointer" onClick={() => setSelected(m)}>
-                    <TableCell className="pl-4">
-                      <div className="flex items-center gap-2.5">
-                        <MemberAvatar member={m}/>
-                        <span className="text-sm font-medium text-foreground">{m.name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell><Badge variant="outline" className="text-xs">{m.role}</Badge></TableCell>
-                    <TableCell>
-                      <div className="flex gap-1">
-                        {m.subteams.map(s => <Badge key={s} variant="secondary" className="text-[10px]">{s}</Badge>)}
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-mono text-xs text-muted-foreground">{m.batch}</TableCell>
-                    <TableCell><StatusBadge status={m.status}/></TableCell>
-                    <TableCell>
-                      <div className="flex gap-1 flex-wrap">
-                        {m.skills.slice(0,2).map(s => <Badge key={s} variant="secondary" className="text-[10px]">{s}</Badge>)}
-                        {m.skills.length>2 && <Badge variant="outline" className="text-[10px]">+{m.skills.length-2}</Badge>}
-                      </div>
-                    </TableCell>
-                    <TableCell onClick={e => e.stopPropagation()}>
-                      <Button variant="ghost" size="icon" className="w-7 h-7" asChild>
-                        <a href={`https://wa.me/${m.whatsapp}`} target="_blank" rel="noreferrer">
-                          <MessageCircle size={13}/>
-                        </a>
-                      </Button>
-                    </TableCell>
+      {loading ? (
+        <Card><CardContent className="py-16 text-center">
+          <RefreshCw size={24} className="mx-auto mb-3 text-muted-foreground/30 animate-spin"/>
+          <p className="text-sm text-muted-foreground">Loading members...</p>
+        </CardContent></Card>
+      ) : filtered.length === 0 ? (
+        <Card><CardContent className="py-16 text-center">
+          <Users size={32} className="mx-auto mb-3 text-muted-foreground/30"/>
+          <p className="text-sm font-medium text-foreground">No members yet</p>
+          <p className="text-xs text-muted-foreground mt-1">Register members to see them here</p>
+        </CardContent></Card>
+      ) : (
+        Object.entries(byTeam).map(([team, members]) => (
+          <div key={team}>
+            <div className="flex items-center gap-2 mb-3">
+              <h2 className="text-sm font-semibold text-foreground">{team}</h2>
+              <Badge variant="secondary" className="font-mono">{members.length}</Badge>
+              <Separator className="flex-1"/>
+              <span className="text-xs text-muted-foreground">{members.filter(m=>m.status==="free").length} free now</span>
+            </div>
+            <Card>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="pl-4">Member</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Subteam(s)</TableHead>
+                    <TableHead>Batch</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Skills</TableHead>
+                    <TableHead className="w-10"/>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Card>
-        </div>
-      ))}
+                </TableHeader>
+                <TableBody>
+                  {members.map(m => (
+                    <TableRow key={m.id} className="cursor-pointer" onClick={() => setSelected(m)}>
+                      <TableCell className="pl-4">
+                        <div className="flex items-center gap-2.5">
+                          <MemberAvatar member={m}/>
+                          <span className="text-sm font-medium text-foreground">{m.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell><Badge variant="outline" className="text-xs">{m.role}</Badge></TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          {m.subteams.map(s => <Badge key={s} variant="secondary" className="text-[10px]">{s}</Badge>)}
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground">{m.batch}</TableCell>
+                      <TableCell><StatusBadge status={m.status}/></TableCell>
+                      <TableCell>
+                        <div className="flex gap-1 flex-wrap">
+                          {m.skills.slice(0,2).map(s => <Badge key={s} variant="secondary" className="text-[10px]">{s}</Badge>)}
+                          {m.skills.length>2 && <Badge variant="outline" className="text-[10px]">+{m.skills.length-2}</Badge>}
+                        </div>
+                      </TableCell>
+                      <TableCell onClick={e => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" className="w-7 h-7" asChild>
+                          <a href={`https://wa.me/${m.whatsapp}`} target="_blank" rel="noreferrer">
+                            <MessageCircle size={13}/>
+                          </a>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          </div>
+        ))
+      )}
 
       <MemberDialog member={selected} open={!!selected} onOpenChange={o => !o && setSelected(null)} canManage={canManage}/>
     </div>
@@ -1043,30 +1052,58 @@ function SearchPage() {
   const tScope  = teamScope(user)
   const stScope = subteamScope(user)
 
-  const [query,   setQuery]   = useState("")
-  const [team,    setTeam]    = useState(tScope ?? "all")
-  const [sub,     setSub]     = useState(stScope ?? "all")
-  const [status,  setStatus]  = useState("all")
-  const [skill,   setSkill]   = useState("all")
-  const [day,     setDay]     = useState("all")
-  const [time,    setTime]    = useState("all")
-  const [batch,   setBatch]   = useState("all")
-  const [selected, setSelected] = useState<Member | null>(null)
+  const [query,     setQuery]   = useState("")
+  const [team,      setTeam]    = useState(tScope ?? "all")
+  const [sub,       setSub]     = useState(stScope ?? "all")
+  const [status,    setStatus]  = useState("all")
+  const [skill,     setSkill]   = useState("all")
+  const [day,       setDay]     = useState("all")
+  const [time,      setTime]    = useState("all")
+  const [batch,     setBatch]   = useState("all")
+  const [selected,  setSelected] = useState<Member | null>(null)
+  const [results,   setResults] = useState<Member[]>([])
+  const [loading,   setLoading] = useState(false)
+  const [teamsList, setTeamsList] = useState<string[]>([])
+  const [subsList,  setSubsList] = useState<string[]>([])
+  const [batchList, setBatchList] = useState<string[]>([])
+  const [skillList, setSkillList] = useState<string[]>([])
 
-  const results = MEMBERS.filter(m => {
-    if (tScope  && m.team !== tScope)                  return false
-    if (stScope && !m.subteams.includes(stScope))      return false
-    if (!tScope  && team  !== "all" && m.team !== team) return false
-    if (!stScope && sub   !== "all" && !m.subteams.includes(sub)) return false
-    if (status !== "all" && m.status !== status)        return false
-    if (skill  !== "all" && !m.skills.includes(skill))  return false
-    if (batch  !== "all" && m.batch !== batch)           return false
-    if (day    !== "all" && time !== "all") {
-      if (!isFreeAt(m, day as DayOfWeek, time)) return false
-    }
-    if (query && !m.name.toLowerCase().includes(query.toLowerCase())) return false
-    return true
-  })
+  // Load filter options on mount
+  useEffect(() => {
+    Promise.all([teamsApi.getTeams(), teamsApi.getOrgMeta()])
+      .then(([teams, meta]) => {
+        const allTeams = (teams || []).map((t: any) => t.name)
+        const allSubs  = [...new Set((teams || []).flatMap((t: any) => (t.subteams || []).map((s: any) => s.name)))]
+        setTeamsList(allTeams)
+        setSubsList(allSubs)
+        setBatchList(meta?.batches || [])
+        setSkillList((meta?.skills || []).map((s: any) => s.name))
+      })
+      .catch(() => {})
+  }, [])
+
+  // Load members from API whenever filters change
+  useEffect(() => {
+    setLoading(true)
+    const filters: Record<string, string> = {}
+    if (!tScope  && team   !== "all") filters.team    = team
+    if (!stScope && sub    !== "all") filters.subteam = sub
+    if (status !== "all") filters.status = status
+    if (skill  !== "all") filters.skill  = skill
+    if (batch  !== "all") filters.batch  = batch
+    if (day    !== "all") filters.day    = day
+    if (time   !== "all") filters.time   = time
+    if (query.trim())     filters.search = query.trim()
+    membersApi.getMembers(filters)
+      .then(res => setResults(res || []))
+      .catch(() => setResults([]))
+      .finally(() => setLoading(false))
+  }, [query, team, sub, status, skill, batch, day, time])
+
+  // Client-side day/time filter for members WITH routines
+  const filteredResults = (day !== "all" && time !== "all")
+    ? results.filter(m => isFreeAt(m, day as DayOfWeek, time))
+    : results
 
   const dayTimeActive = day !== "all" && time !== "all"
   const dirty = !!(query || (!tScope && team !== "all") || (!stScope && sub !== "all")
@@ -1075,6 +1112,15 @@ function SearchPage() {
   function reset() {
     setQuery(""); setTeam(tScope ?? "all"); setSub(stScope ?? "all")
     setStatus("all"); setSkill("all"); setDay("all"); setTime("all"); setBatch("all")
+  }
+
+  // Unused — kept for TypeScript reference to original filter shape
+  const _unusedFilter = (m: Member) => {
+    if (tScope  && m.team !== tScope)                  return false
+    if (stScope && !m.subteams.includes(stScope))      return false
+    if (!tScope  && team  !== "all" && m.team !== team) return false
+    if (!stScope && sub   !== "all" && !m.subteams.includes(sub)) return false
+    return true
   }
 
   return (
@@ -1087,6 +1133,7 @@ function SearchPage() {
             : "Search by name, team, subteam, day/time, skill, or availability"
           }
         </p>
+        <p className="text-xs text-muted-foreground/60 mt-0.5">{filteredResults.length} result{filteredResults.length !== 1 ? "s" : ""}{loading ? " · loading…" : ""}</p>
       </div>
 
       <Card>
@@ -1097,21 +1144,21 @@ function SearchPage() {
               <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/>
               <Input placeholder="Search by name…" value={query} onChange={e => setQuery(e.target.value)} className="pl-8"/>
             </div>
-            {!tScope && (
+            {!tScope && teamsList.length > 0 && (
               <Select value={team} onValueChange={setTeam}>
                 <SelectTrigger className="w-32"><SelectValue placeholder="Team"/></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Teams</SelectItem>
-                  {TEAMS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                  {teamsList.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                 </SelectContent>
               </Select>
             )}
-            {!stScope && (
+            {!stScope && subsList.length > 0 && (
               <Select value={sub} onValueChange={setSub}>
                 <SelectTrigger className="w-36"><SelectValue placeholder="Subteam"/></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Subteams</SelectItem>
-                  {SUBTEAMS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  {subsList.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                 </SelectContent>
               </Select>
             )}
@@ -1129,16 +1176,18 @@ function SearchPage() {
               <SelectTrigger className="w-40"><SelectValue placeholder="Skill"/></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Any Skill</SelectItem>
-                {ALL_SKILLS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                {skillList.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
               </SelectContent>
             </Select>
+            {batchList.length > 0 && (
             <Select value={batch} onValueChange={setBatch}>
               <SelectTrigger className="w-32"><SelectValue placeholder="Batch"/></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Any Batch</SelectItem>
-                {BATCHES.map(b => <SelectItem key={b} value={b}>Batch {b}</SelectItem>)}
+                {batchList.map(b => <SelectItem key={b} value={b}>Batch {b}</SelectItem>)}
               </SelectContent>
             </Select>
+            )}
           </div>
 
           {/* Row 2 — Day + Time (key feature from spec) */}
@@ -1158,7 +1207,7 @@ function SearchPage() {
               <SelectTrigger className="w-28"><SelectValue placeholder="Time"/></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Any Time</SelectItem>
-                {HOURS.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}
+                {["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00"].map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}
               </SelectContent>
             </Select>
             {dayTimeActive && (
@@ -1182,18 +1231,17 @@ function SearchPage() {
         </CardContent>
       </Card>
 
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground">{results.length} result{results.length !== 1 ? "s" : ""}</span>
-        {dirty && <Badge variant="secondary">filtered</Badge>}
-      </div>
-
-      {results.length === 0 ? (
+      {filteredResults.length === 0 && !loading ? (
         <Card>
           <CardContent className="py-16 text-center">
             <Search size={32} className="mx-auto mb-3 text-muted-foreground/30"/>
-            <p className="text-sm font-medium text-foreground">No members match your filters</p>
-            <p className="text-xs text-muted-foreground mt-1">Try broadening the search criteria</p>
-            <Button variant="outline" size="sm" className="mt-4" onClick={reset}>Reset filters</Button>
+            <p className="text-sm font-medium text-foreground">
+              {dirty ? "No members match your filters" : "No members yet"}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {dirty ? "Try broadening the search criteria" : "Register team members to see them here"}
+            </p>
+            {dirty && <Button variant="outline" size="sm" className="mt-4" onClick={reset}>Reset filters</Button>}
           </CardContent>
         </Card>
       ) : (
@@ -1211,7 +1259,7 @@ function SearchPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {results.map(m => (
+              {filteredResults.map(m => (
                 <TableRow key={m.id} className="cursor-pointer" onClick={() => setSelected(m)}>
                   <TableCell className="pl-4">
                     <div className="flex items-center gap-2.5">
@@ -1264,214 +1312,147 @@ function HeatmapPage() {
   const user   = useUser()
   const tScope = teamScope(user)
 
-  const [day,        setDay]        = useState("monday")
-  const [batchFilter,setBatchFilter] = useState("all")
-  const [fromHour,   setFromHour]   = useState("09:00")
-  const [toHour,     setToHour]     = useState("17:00")
-  const [subteamTeam,setSubteamTeam] = useState(tScope ?? TEAMS[0])
+  const [fromHour,    setFromHour]    = useState("08:00")
+  const [toHour,      setToHour]      = useState("17:00")
+  const [heatData,    setHeatData]    = useState<any>(null)
+  const [snapshots,   setSnapshots]   = useState<any[]>([])
+  const [loading,     setLoading]     = useState(true)
+  const [activeTab,   setActiveTab]   = useState("live")
+  const [selectedSnap,setSelectedSnap] = useState<any>(null)
+  const [subteamTeam, setSubteamTeam] = useState("")
+
+  const loadHeatmap = () => {
+    setLoading(true)
+    Promise.all([
+      heatmapApi.getHeatmap(),
+      heatmapApi.getSnapshots(),
+    ])
+      .then(([live, snaps]) => {
+        setHeatData(live)
+        setSnapshots(snaps || [])
+        // Default subteamTeam to first available team
+        const firstTeam = Object.keys(live?.teamMatrix || {})[0] || ""
+        setSubteamTeam(st => st || firstTeam)
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }
+
+  useEffect(() => { loadHeatmap() }, [])
+
+  const displayData = activeTab === "snapshot" && selectedSnap ? selectedSnap.matrix : heatData
+
+  const teams       = displayData ? Object.keys(displayData.teamMatrix || {}) : []
+  const hours       = (displayData?.hours || HOURS).filter((h: string) => h >= fromHour && h <= toHour)
 
   const defaultTab = tScope ? "team" : "org"
-
-  const filteredHours = HOURS.filter(h => h >= fromHour && h <= toHour)
-  const visibleTeams  = tScope ? [tScope] : TEAMS
 
   return (
     <div className="space-y-5">
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Availability Heatmap</h1>
-          <p className="text-muted-foreground text-sm mt-0.5">Identify peak collaboration windows across the week</p>
+          <p className="text-muted-foreground text-sm mt-0.5">Identify peak collaboration windows. Updated every 12 hours.</p>
+          {heatData?.computedAt && (
+            <p className="text-xs text-muted-foreground/60 mt-0.5">
+              Last computed: {new Date(heatData.computedAt).toLocaleString()}
+            </p>
+          )}
         </div>
-        {/* Global filters */}
         <div className="flex items-center gap-2">
-          <Select value={day} onValueChange={setDay}>
-            <SelectTrigger className="w-36"><SelectValue/></SelectTrigger>
-            <SelectContent>
-              {["monday","tuesday","wednesday","thursday","friday"].map(d => (
-                <SelectItem key={d} value={d}>{d.charAt(0).toUpperCase()+d.slice(1)}</SelectItem>
-              ))}
-            </SelectContent>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={loadHeatmap}>
+            <RefreshCw size={13} className={loading ? "animate-spin" : ""}/> Refresh
+          </Button>
+          {/* Time range */}
+          <Select value={fromHour} onValueChange={setFromHour}>
+            <SelectTrigger className="w-24 h-8 text-xs"><SelectValue/></SelectTrigger>
+            <SelectContent>{HOURS.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
           </Select>
-          <Select value={batchFilter} onValueChange={setBatchFilter}>
-            <SelectTrigger className="w-32"><SelectValue placeholder="Batch"/></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Batches</SelectItem>
-              {BATCHES.map(b => <SelectItem key={b} value={b}>Batch {b}</SelectItem>)}
-            </SelectContent>
+          <span className="text-muted-foreground text-xs">to</span>
+          <Select value={toHour} onValueChange={setToHour}>
+            <SelectTrigger className="w-24 h-8 text-xs"><SelectValue/></SelectTrigger>
+            <SelectContent>{HOURS.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
           </Select>
         </div>
       </div>
 
-      {/* Time range filter */}
-      <div className="flex items-center gap-3 text-sm">
-        <span className="text-xs text-muted-foreground font-medium">Time range:</span>
-        <Select value={fromHour} onValueChange={setFromHour}>
-          <SelectTrigger className="w-24 h-8 text-xs"><SelectValue/></SelectTrigger>
-          <SelectContent>{HOURS.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
-        </Select>
-        <span className="text-muted-foreground text-xs">to</span>
-        <Select value={toHour} onValueChange={setToHour}>
-          <SelectTrigger className="w-24 h-8 text-xs"><SelectValue/></SelectTrigger>
-          <SelectContent>{HOURS.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
-        </Select>
-      </div>
-
-      <Tabs defaultValue={defaultTab}>
-        <TabsList>
-          {!tScope && <TabsTrigger value="org">Organization</TabsTrigger>}
-          <TabsTrigger value="team">By Team</TabsTrigger>
-          <TabsTrigger value="subteam">By Subteam</TabsTrigger>
-        </TabsList>
-
-        {/* ── Organization view ── */}
-        {!tScope && (
-          <TabsContent value="org" className="mt-4 space-y-4">
-            <Card>
-              <CardContent className="p-0 overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="pl-5 w-24">Time</TableHead>
-                      {TEAMS.map(t => (
-                        <TableHead key={t} className="text-center">
-                          <div className="text-foreground">{t}</div>
-                          <div className="text-[10px] font-normal text-muted-foreground">{TOTALS[t]} members</div>
-                        </TableHead>
-                      ))}
-                      <TableHead className="text-center">Window</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredHours.map(h => {
-                      const ratios = TEAMS.map(t => HEATMAP[h][t] / TOTALS[t])
-                      const best   = Math.max(...ratios)
-                      return (
-                        <TableRow key={h}>
-                          <TableCell className="pl-5 font-mono text-xs text-muted-foreground">{h}</TableCell>
-                          {TEAMS.map((t,i) => {
-                            const free  = HEATMAP[h][t]
-                            const total = TOTALS[t]
-                            const ratio = ratios[i]
-                            return (
-                              <Tooltip key={t}>
-                                <TooltipTrigger asChild>
-                                  <TableCell className="text-center">
-                                    <Badge variant={heatBadgeVariant(ratio)} className="font-mono cursor-default">
-                                      {free}/{total}
-                                    </Badge>
-                                  </TableCell>
-                                </TooltipTrigger>
-                                <TooltipContent>{Math.round(ratio*100)}% of {t} free at {h}</TooltipContent>
-                              </Tooltip>
-                            )
-                          })}
-                          <TableCell className="text-center">
-                            {best >= 0.85
-                              ? <Badge variant="success"><TrendingUp size={10}/> Good slot</Badge>
-                              : <span className="text-xs text-muted-foreground">—</span>
-                            }
-                          </TableCell>
-                        </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              <span className="font-medium text-foreground">Legend</span>
-              <Badge variant="success">≥ 75% free</Badge>
-              <Badge variant="warning">50–75% free</Badge>
-              <Badge variant="destructive">{"< 50% free"}</Badge>
-            </div>
-          </TabsContent>
-        )}
-
-        {/* ── By Team view ── */}
-        <TabsContent value="team" className="mt-4">
-          <div className={`grid gap-4 ${visibleTeams.length === 1 ? "grid-cols-1 max-w-lg" : "grid-cols-3"}`}>
-            {visibleTeams.map(team => (
-              <Card key={team}>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">{team}</CardTitle>
-                  <CardDescription className="text-xs">{TOTALS[team]} members total</CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0 space-y-2.5">
-                  {filteredHours.map(h => {
-                    const free  = HEATMAP[h][team]
-                    const total = TOTALS[team]
-                    const ratio = free / total
-                    const ind   = ratio >= 0.7 ? "bg-success" : ratio >= 0.5 ? "bg-warning" : "bg-destructive"
-                    return (
-                      <div key={h} className="flex items-center gap-2">
-                        <span className="text-[10px] font-mono text-muted-foreground w-10 shrink-0">{h}</span>
-                        <Progress value={ratio*100} className="flex-1 h-1.5 bg-secondary" indicatorClassName={ind}/>
-                        <span className="text-[10px] font-mono text-muted-foreground w-8 text-right">{free}/{total}</span>
-                      </div>
-                    )
-                  })}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        {/* ── By Subteam view ── */}
-        <TabsContent value="subteam" className="mt-4 space-y-4">
-          {/* Team selector for subteam drill-down */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">Team:</span>
-            <div className="flex gap-1.5">
-              {visibleTeams.map(t => (
-                <Button
-                  key={t}
-                  size="sm"
-                  variant={subteamTeam === t ? "default" : "outline"}
-                  className="h-7 text-xs"
-                  onClick={() => setSubteamTeam(t)}
-                >
-                  {t}
-                </Button>
-              ))}
-            </div>
+      {loading ? (
+        <Card><CardContent className="py-20 text-center">
+          <RefreshCw size={28} className="mx-auto mb-3 text-muted-foreground/30 animate-spin"/>
+          <p className="text-sm text-muted-foreground">Computing heatmap...</p>
+        </CardContent></Card>
+      ) : teams.length === 0 ? (
+        <Card><CardContent className="py-20 text-center">
+          <BarChart3 size={32} className="mx-auto mb-3 text-muted-foreground/30"/>
+          <p className="text-sm font-medium text-foreground">No availability data yet</p>
+          <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
+            Heatmap appears after members register and upload their class routines.
+          </p>
+        </CardContent></Card>
+      ) : (
+        <Tabs defaultValue={defaultTab}>
+          <div className="flex items-center gap-3">
+            <TabsList>
+              {!tScope && <TabsTrigger value="org">Organization</TabsTrigger>}
+              <TabsTrigger value="team">By Team</TabsTrigger>
+              <TabsTrigger value="subteam">By Subteam</TabsTrigger>
+            </TabsList>
+            {/* Snapshot history toggle */}
+            {snapshots.length > 0 && (
+              <div className="ml-auto flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Source:</span>
+                <Select value={activeTab} onValueChange={v => { setActiveTab(v); setSelectedSnap(snapshots[0]) }}>
+                  <SelectTrigger className="w-32 h-8 text-xs"><SelectValue/></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="live">Live Now</SelectItem>
+                    {snapshots.map((s, i) => (
+                      <SelectItem key={s.id} value={s.id}
+                        onClick={() => setSelectedSnap(s)}>
+                        Snap {i+1} · {new Date(s.computedAt).toLocaleDateString()}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
-          {/* Subteam table */}
-          {SUBTEAM_TOTALS[subteamTeam] && (
-            <>
+          {/* ── Organization view ── */}
+          {!tScope && (
+            <TabsContent value="org" className="mt-4 space-y-4">
               <Card>
                 <CardContent className="p-0 overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead className="pl-5 w-24">Time</TableHead>
-                        {Object.keys(SUBTEAM_TOTALS[subteamTeam]).map(sub => (
-                          <TableHead key={sub} className="text-center">
-                            <div className="text-foreground">{sub}</div>
-                            <div className="text-[10px] font-normal text-muted-foreground">
-                              {SUBTEAM_TOTALS[subteamTeam][sub]} members
-                            </div>
+                        {teams.map((t: string) => (
+                          <TableHead key={t} className="text-center">
+                            <div className="text-foreground">{t}</div>
+                            <div className="text-[10px] font-normal text-muted-foreground">{displayData?.teamTotals?.[t] ?? 0} members</div>
                           </TableHead>
                         ))}
                         <TableHead className="text-center">Window</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredHours.map(h => {
-                        const subNames = Object.keys(SUBTEAM_TOTALS[subteamTeam])
-                        const ratios   = subNames.map(s =>
-                          (SUBTEAM_HEATMAP[subteamTeam]?.[s]?.[h] ?? 0) / SUBTEAM_TOTALS[subteamTeam][s]
-                        )
+                      {hours.map((h: string) => {
+                        // Use Mon as default day for org view
+                        const ratios = teams.map((t: string) => {
+                          const cell = displayData?.teamMatrix?.[t]?.["Mon"]?.[h]
+                          return cell ? cell.free / Math.max(cell.total, 1) : 0
+                        })
                         const best = Math.max(...ratios)
                         return (
                           <TableRow key={h}>
                             <TableCell className="pl-5 font-mono text-xs text-muted-foreground">{h}</TableCell>
-                            {subNames.map((sub,i) => {
-                              const free  = SUBTEAM_HEATMAP[subteamTeam]?.[sub]?.[h] ?? 0
-                              const total = SUBTEAM_TOTALS[subteamTeam][sub]
+                            {teams.map((t: string, i: number) => {
+                              const cell  = displayData?.teamMatrix?.[t]?.["Mon"]?.[h]
+                              const free  = cell?.free ?? 0
+                              const total = cell?.total ?? 0
                               const ratio = ratios[i]
                               return (
-                                <Tooltip key={sub}>
+                                <Tooltip key={t}>
                                   <TooltipTrigger asChild>
                                     <TableCell className="text-center">
                                       <Badge variant={heatBadgeVariant(ratio)} className="font-mono cursor-default">
@@ -1479,12 +1460,12 @@ function HeatmapPage() {
                                       </Badge>
                                     </TableCell>
                                   </TooltipTrigger>
-                                  <TooltipContent>{Math.round(ratio*100)}% of {sub} free at {h}</TooltipContent>
+                                  <TooltipContent>{Math.round(ratio*100)}% of {t} free at {h}</TooltipContent>
                                 </Tooltip>
                               )
                             })}
                             <TableCell className="text-center">
-                              {best >= 0.85
+                              {best >= 0.75
                                 ? <Badge variant="success"><TrendingUp size={10}/> Good slot</Badge>
                                 : <span className="text-xs text-muted-foreground">—</span>
                               }
@@ -1502,18 +1483,145 @@ function HeatmapPage() {
                 <Badge variant="warning">50–75% free</Badge>
                 <Badge variant="destructive">{"< 50% free"}</Badge>
               </div>
-            </>
+            </TabsContent>
           )}
-        </TabsContent>
-      </Tabs>
+
+          {/* ── By Team view ── */}
+          <TabsContent value="team" className="mt-4">
+            <div className={`grid gap-4 ${teams.length === 1 ? "grid-cols-1 max-w-lg" : "grid-cols-3"}`}>
+              {teams.map((team: string) => (
+                <Card key={team}>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm">{team}</CardTitle>
+                    <CardDescription className="text-xs">{displayData?.teamTotals?.[team] ?? 0} members total</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0 space-y-2.5">
+                    {DAYS.map(day => {
+                      // Show all days summary — pick best hour per day
+                      const dayData = displayData?.teamMatrix?.[team]?.[day]
+                      if (!dayData) return null
+                      const total = displayData?.teamTotals?.[team] ?? 0
+                      const bestH  = hours.reduce((best: string, h: string) => {
+                        const f  = dayData[h]?.free ?? 0
+                        const bf = dayData[best]?.free ?? 0
+                        return f > bf ? h : best
+                      }, hours[0] ?? "09:00")
+                      const bestFree = dayData[bestH]?.free ?? 0
+                      const ratio = total > 0 ? bestFree / total : 0
+                      const ind   = ratio >= 0.7 ? "bg-success" : ratio >= 0.5 ? "bg-warning" : "bg-destructive"
+                      return (
+                        <div key={day} className="flex items-center gap-2">
+                          <span className="text-[10px] font-mono text-muted-foreground w-7 shrink-0">{day}</span>
+                          <Progress value={ratio*100} className="flex-1 h-1.5 bg-secondary" indicatorClassName={ind}/>
+                          <span className="text-[10px] font-mono text-muted-foreground w-14 text-right">Best {bestH}</span>
+                        </div>
+                      )
+                    })}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* ── By Subteam view ── */}
+          <TabsContent value="subteam" className="mt-4 space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Team:</span>
+              <div className="flex gap-1.5">
+                {teams.map((t: string) => (
+                  <Button key={t} size="sm"
+                    variant={subteamTeam === t ? "default" : "outline"}
+                    className="h-7 text-xs"
+                    onClick={() => setSubteamTeam(t)}>
+                    {t}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {displayData?.subteamMatrix?.[subteamTeam] ? (() => {
+              const subNames = Object.keys(displayData.subteamMatrix[subteamTeam])
+              return (
+                <>
+                  <Card>
+                    <CardContent className="p-0 overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="pl-5 w-24">Time (Mon)</TableHead>
+                            {subNames.map((sub: string) => (
+                              <TableHead key={sub} className="text-center">
+                                <div className="text-foreground">{sub}</div>
+                                <div className="text-[10px] font-normal text-muted-foreground">
+                                  {displayData?.subteamTotals?.[subteamTeam]?.[sub] ?? 0} members
+                                </div>
+                              </TableHead>
+                            ))}
+                            <TableHead className="text-center">Window</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {hours.map((h: string) => {
+                            const ratios = subNames.map((sub: string) => {
+                              const cell = displayData.subteamMatrix[subteamTeam]?.[sub]?.["Mon"]?.[h]
+                              return cell ? cell.free / Math.max(cell.total, 1) : 0
+                            })
+                            const best = Math.max(...ratios)
+                            return (
+                              <TableRow key={h}>
+                                <TableCell className="pl-5 font-mono text-xs text-muted-foreground">{h}</TableCell>
+                                {subNames.map((sub: string, i: number) => {
+                                  const cell  = displayData.subteamMatrix[subteamTeam]?.[sub]?.["Mon"]?.[h]
+                                  const free  = cell?.free ?? 0
+                                  const total = cell?.total ?? 0
+                                  return (
+                                    <Tooltip key={sub}>
+                                      <TooltipTrigger asChild>
+                                        <TableCell className="text-center">
+                                          <Badge variant={heatBadgeVariant(ratios[i])} className="font-mono cursor-default">
+                                            {free}/{total}
+                                          </Badge>
+                                        </TableCell>
+                                      </TooltipTrigger>
+                                      <TooltipContent>{Math.round(ratios[i]*100)}% of {sub} free at {h}</TooltipContent>
+                                    </Tooltip>
+                                  )
+                                })}
+                                <TableCell className="text-center">
+                                  {best >= 0.75
+                                    ? <Badge variant="success"><TrendingUp size={10}/> Good slot</Badge>
+                                    : <span className="text-xs text-muted-foreground">—</span>
+                                  }
+                                </TableCell>
+                              </TableRow>
+                            )
+                          })}
+                        </TableBody>
+                      </Table>
+                    </CardContent>
+                  </Card>
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <span className="font-medium text-foreground">Legend</span>
+                    <Badge variant="success">≥ 75% free</Badge>
+                    <Badge variant="warning">50–75% free</Badge>
+                    <Badge variant="destructive">{"< 50% free"}</Badge>
+                  </div>
+                </>
+              )
+            })() : (
+              <Card><CardContent className="py-12 text-center">
+                <p className="text-sm text-muted-foreground">No subteam data for this team</p>
+              </CardContent></Card>
+            )}
+          </TabsContent>
+        </Tabs>
+      )}
     </div>
   )
 }
 
 // ─── Skills Page ──────────────────────────────────────────────────────────────
 
-const MY_SKILLS         = ["React","TypeScript","ROS"]
-const MY_PENDING_SKILLS = ["Machine Learning"]
 
 function SkillsPage() {
   const user    = useUser()
@@ -1521,26 +1629,48 @@ function SkillsPage() {
   const stScope = subteamScope(user)
   const isMember = user.role === "member"
 
-  const filteredPending = PENDING_APPROVALS.filter(r => {
-    if (tScope  && r.team    !== tScope)  return false
-    if (stScope && r.subteam !== stScope) return false
-    return true
-  })
-
-  const [pending,    setPending]   = useState(filteredPending)
-  const [mySkills,   setMySkills]  = useState(MY_SKILLS)
-  const [myPending,  setMyPending] = useState(MY_PENDING_SKILLS)
+  const [pending,    setPending]   = useState<any[]>([])
+  const [catalog,    setCatalog]   = useState<any[]>([])
+  const [mySkills,   setMySkills]  = useState<string[]>([])
+  const [myPending,  setMyPending] = useState<string[]>([])
   const [requesting, setRequesting] = useState(false)
   const [requested,  setRequested] = useState("")
 
-  function approve(id: string) { setPending(p => p.filter(x => x.id !== id)) }
-  function reject(id: string)  { setPending(p => p.filter(x => x.id !== id)) }
+  useEffect(() => {
+    skillsApi.getPendingSkills()
+      .then(res => {
+        const filtered = (res || []).filter((r: any) => {
+          if (tScope  && r.team    !== tScope)  return false
+          if (stScope && r.subteam !== stScope) return false
+          return true
+        })
+        setPending(filtered)
+      })
+      .catch(() => setPending([]))
+
+    skillsApi.getSkillsCatalog()
+      .then(res => {
+        setCatalog(res.catalog || [])
+        setMySkills(res.mySkills?.filter((s: any) => s.status === "APPROVED").map((s: any) => s.name) || [])
+        setMyPending(res.mySkills?.filter((s: any) => s.status === "PENDING").map((s: any) => s.name) || [])
+      })
+      .catch(() => {})
+  }, [tScope, stScope])
+
+  function approve(id: string) { 
+    skillsApi.approveSkill(id).then(() => setPending(p => p.filter(x => x.id !== id))) 
+  }
+  function reject(id: string)  { 
+    skillsApi.rejectSkill(id).then(() => setPending(p => p.filter(x => x.id !== id))) 
+  }
 
   function handleRequestSkill() {
     if (!requested || mySkills.includes(requested) || myPending.includes(requested)) return
-    setMyPending(p => [...p, requested])
-    setRequested("")
-    setRequesting(false)
+    skillsApi.requestSkill(requested).then(() => {
+      setMyPending(p => [...p, requested])
+      setRequested("")
+      setRequesting(false)
+    })
   }
 
   return (
@@ -1673,20 +1803,12 @@ function SkillsPage() {
               <CardDescription className="text-xs">Approved members per skill (searchable)</CardDescription>
             </CardHeader>
             <CardContent className="pt-0 space-y-2.5">
-              {ALL_SKILLS.map(s => {
-                const count = MEMBERS.filter(m =>
-                  m.skills.includes(s) &&
-                  (!tScope  || m.team === tScope) &&
-                  (!stScope || m.subteams.includes(stScope))
-                ).length
-                const total = MEMBERS.filter(m =>
-                  (!tScope  || m.team === tScope) &&
-                  (!stScope || m.subteams.includes(stScope))
-                ).length
+              {catalog.map(s => {
+                const count = s.count || 0
                 return (
-                  <div key={s} className="flex items-center gap-2">
-                    <span className="text-sm text-foreground flex-1">{s}</span>
-                    <Progress value={(count/Math.max(total,1))*100} className="w-16 h-1.5 bg-secondary"/>
+                  <div key={s.id} className="flex items-center gap-2">
+                    <span className="text-sm text-foreground flex-1">{s.name}</span>
+                    <Progress value={Math.min(count * 10, 100)} className="w-16 h-1.5 bg-secondary"/>
                     <span className="text-xs font-mono text-muted-foreground w-4 text-right">{count}</span>
                   </div>
                 )
@@ -1707,8 +1829,8 @@ function SkillsPage() {
             <Select value={requested} onValueChange={setRequested}>
               <SelectTrigger><SelectValue placeholder="Select skill to request"/></SelectTrigger>
               <SelectContent>
-                {ALL_SKILLS.filter(s => !mySkills.includes(s) && !myPending.includes(s)).map(s => (
-                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                {catalog.map(s => (
+                  <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -1732,12 +1854,18 @@ function TeamsTab({ user }: { user: AppUser }) {
   const [saved,        setSaved]        = useState(false)
 
   const isOwner   = user.role === "org-owner"
-  const items     = isOwner ? TEAMS : SUBTEAMS
-  const managedPool = managingTeam
-    ? MEMBERS.filter(m => isOwner ? m.team === managingTeam : m.team === user.team && m.subteams.includes(managingTeam))
-    : []
+  const [teamsData, setTeamsData] = useState<any[]>([])
+  const items = isOwner
+    ? teamsData.map(t => t.name)
+    : teamsData.flatMap(t => (t.subteams || []).map((s: any) => s.name))
+
+  useEffect(() => {
+    teamsApi.getTeams().then(setTeamsData).catch(() => {})
+  }, [])
+
+  const managedPool: any[] = []
   const subteamsOfTeam = managingTeam && isOwner
-    ? [...new Set(MEMBERS.filter(m => m.team === managingTeam).flatMap(m => m.subteams))]
+    ? (teamsData.find(t => t.name === managingTeam)?.subteams || []).map((s: any) => s.name)
     : []
 
   function openManage(name: string) {
@@ -1778,29 +1906,23 @@ function TeamsTab({ user }: { user: AppUser }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {items.map(name => {
-                  const pool    = MEMBERS.filter(m => isOwner ? m.team === name : m.team === user.team && m.subteams.includes(name))
-                  const freeNow = pool.filter(m => m.status === "free").length
-                  const missing = pool.filter(m => m.status === "missing").length
-                  return (
-                    <TableRow key={name}>
-                      <TableCell className="font-medium text-sm text-foreground">{name}</TableCell>
-                      <TableCell className="font-mono text-xs text-muted-foreground">{pool.length}</TableCell>
-                      <TableCell><Badge variant={freeNow>0?"success":"muted"} className="font-mono">{freeNow}</Badge></TableCell>
-                      <TableCell>
-                        {missing > 0
-                          ? <Badge variant="warning" className="font-mono gap-1"><AlertTriangle size={10}/>{missing}</Badge>
-                          : <span className="text-xs text-muted-foreground">—</span>
-                        }
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => openManage(name)}>
-                          <Pencil size={11}/>Manage
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
+                {items.length === 0 ? (
+                  <TableRow><TableCell colSpan={5} className="text-center text-xs text-muted-foreground py-8">
+                    No {isOwner ? "teams" : "subteams"} yet. Create them to manage members.
+                  </TableCell></TableRow>
+                ) : items.map(name => (
+                  <TableRow key={name}>
+                    <TableCell className="font-medium text-sm text-foreground">{name}</TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">—</TableCell>
+                    <TableCell><Badge variant="muted" className="font-mono">—</Badge></TableCell>
+                    <TableCell><span className="text-xs text-muted-foreground">—</span></TableCell>
+                    <TableCell>
+                      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => openManage(name)}>
+                        <Pencil size={11}/>Manage
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </CardContent>
@@ -1940,6 +2062,7 @@ function SettingsPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
           {user.role === "org-owner" && <TabsTrigger value="access">Access Control</TabsTrigger>}
           {(user.role === "org-owner" || user.role === "team-manager") && <TabsTrigger value="teams">Teams</TabsTrigger>}
           <TabsTrigger value="routine">{user.role === "member" ? "My Schedule" : "Routine Upload"}</TabsTrigger>
+          <TabsTrigger value="account">Account</TabsTrigger>
         </TabsList>
 
         {/* Semester — Org Owner only */}
@@ -2168,7 +2291,285 @@ function SettingsPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Account Tab */}
+        <AccountTab />
       </Tabs>
+    </div>
+  )
+}
+
+function AccountTab() {
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  const handleDelete = async () => {
+    setLoading(true)
+    try {
+      await authApi.deleteAccount()
+      window.location.reload()
+    } catch (e) {
+      alert("Failed to delete account.")
+      setLoading(false)
+    }
+  }
+
+  return (
+    <TabsContent value="account" className="mt-4">
+      <Card className="border-destructive/20">
+        <CardHeader>
+          <CardTitle className="text-base text-destructive">Danger Zone</CardTitle>
+          <CardDescription>Permanently delete your account and remove all data.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between p-4 border border-destructive/20 rounded-lg bg-destructive/5">
+            <div>
+              <h4 className="text-sm font-semibold text-foreground">Delete Account</h4>
+              <p className="text-xs text-muted-foreground mt-1">Once you delete your account, there is no going back. Please be certain.</p>
+            </div>
+            <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
+              <Button variant="destructive" onClick={() => setShowConfirm(true)}>Delete Account</Button>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Are you absolutely sure?</DialogTitle>
+                  <DialogDescription>
+                    This action cannot be undone. This will permanently delete your account and remove your data from our servers.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowConfirm(false)} disabled={loading}>Cancel</Button>
+                  <Button variant="destructive" onClick={handleDelete} disabled={loading}>
+                    {loading ? "Deleting..." : "Yes, delete account"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardContent>
+      </Card>
+    </TabsContent>
+  )
+}
+
+// ─── Projects & Kanban Board Page ──────────────────────────────────────────────
+
+function ProjectsPage() {
+  const user = useUser()
+  const [tasks, setTasks] = useState([
+    { id: "t1", title: "Autonomous Navigation Module", status: "In Progress", priority: "High", assignee: user.name, due: "Aug 15", team: user.team },
+    { id: "t2", title: "PCB Power Distribution Design", status: "To Do", priority: "High", assignee: "Electrical Team", due: "Aug 20", team: user.team },
+    { id: "t3", title: "Chassis CAD Stress Simulation", status: "Completed", priority: "Medium", assignee: "Mechanical Team", due: "Aug 02", team: user.team },
+    { id: "t4", title: "UI/UX Availability Dashboard", status: "Review", priority: "Medium", assignee: user.name, due: "Aug 10", team: user.team },
+  ])
+  const [newTaskTitle, setNewTaskTitle] = useState("")
+
+  const addTask = () => {
+    if (!newTaskTitle.trim()) return
+    setTasks([...tasks, {
+      id: "t-" + Date.now(),
+      title: newTaskTitle.trim(),
+      status: "To Do",
+      priority: "Medium",
+      assignee: user.name,
+      due: "Aug 25",
+      team: user.team,
+    }])
+    setNewTaskTitle("")
+  }
+
+  const columns = ["Backlog", "To Do", "In Progress", "Review", "Testing", "Completed"]
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Projects & Kanban Board</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">Manage team projects, assign tasks, and track engineering progress</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Input placeholder="New Task Title..." value={newTaskTitle} onChange={e => setNewTaskTitle(e.target.value)} className="w-56 h-8 text-xs"/>
+          <Button size="sm" className="gap-1.5 h-8 text-xs" onClick={addTask}><Plus size={13}/>Add Task</Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-6 gap-3 overflow-x-auto pb-4">
+        {columns.map(col => {
+          const colTasks = tasks.filter(t => t.status === col)
+          return (
+            <div key={col} className="rounded-xl bg-muted/40 border border-border p-3 flex flex-col min-w-44 min-h-96">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold text-foreground uppercase tracking-wide">{col}</span>
+                <Badge variant="secondary" className="font-mono text-[10px]">{colTasks.length}</Badge>
+              </div>
+              <div className="space-y-2 flex-1">
+                {colTasks.length === 0 ? (
+                  <p className="text-[11px] text-muted-foreground/50 text-center py-6">No tasks</p>
+                ) : (
+                  colTasks.map(t => (
+                    <Card key={t.id} className="p-3 space-y-2 hover:border-primary/50 cursor-pointer transition-colors">
+                      <div className="flex items-start justify-between gap-1">
+                        <p className="text-xs font-medium text-foreground leading-snug">{t.title}</p>
+                        <Badge variant={t.priority === "High" ? "destructive" : "secondary"} className="text-[9px] px-1 py-0">{t.priority}</Badge>
+                      </div>
+                      <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1 border-t border-border/50">
+                        <span>{t.assignee}</span>
+                        <span className="font-mono">{t.due}</span>
+                      </div>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ─── AI Meeting Planner Page ──────────────────────────────────────────────────
+
+function MeetingPlannerPage() {
+  const user = useUser()
+  const [duration, setDuration] = useState("60")
+  const [team, setTeam] = useState(user.team || "UMRT")
+  const [skill, setSkill] = useState("all")
+  const [scheduled, setScheduled] = useState(false)
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">AI Intelligent Meeting Scheduler</h1>
+        <p className="text-muted-foreground text-sm mt-0.5">Find optimal meeting slots based on live routines, skills, and member availability</p>
+      </div>
+
+      <div className="grid grid-cols-3 gap-5">
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2"><Zap size={16} className="text-primary"/> Meeting Criteria</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Target Team</label>
+              <Select value={team} onValueChange={setTeam}>
+                <SelectTrigger><SelectValue/></SelectTrigger>
+                <SelectContent>
+                  {/* Teams loaded dynamically once registered */}
+                  {team && <SelectItem value={team}>{team}</SelectItem>}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Meeting Duration</label>
+              <Select value={duration} onValueChange={setDuration}>
+                <SelectTrigger><SelectValue/></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="30">30 Minutes</SelectItem>
+                  <SelectItem value="60">1 Hour</SelectItem>
+                  <SelectItem value="90">1.5 Hours</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Required Skill Filter</label>
+              <Select value={skill} onValueChange={setSkill}>
+                <SelectTrigger><SelectValue/></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Any Skill</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-2">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2"><TrendingUp size={16} className="text-success"/> Recommended Meeting Slot</CardTitle>
+            <CardDescription className="text-xs">Highest expected attendance based on parsed class routines</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="p-4 rounded-xl bg-success/10 border border-success/30 flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-widest text-success font-semibold">Top Recommendation</p>
+                <p className="text-lg font-bold text-foreground mt-0.5">Wednesday · 4:00 PM – 5:00 PM</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Target Team: {team} · Duration: {duration} min</p>
+              </div>
+              <Badge variant="success" className="text-sm px-3 py-1 font-mono">96% Match Score</Badge>
+            </div>
+
+            <div className="p-4 rounded-lg bg-muted space-y-2">
+              <p className="text-xs font-semibold text-foreground">AI Availability Insights</p>
+              <p className="text-xs text-muted-foreground">
+                All team members are free of class conflicts during this hour. Maximum collaboration window detected.
+              </p>
+            </div>
+
+            <Button className="w-full gap-2" disabled={scheduled} onClick={() => { setScheduled(true); setTimeout(() => setScheduled(false), 2000) }}>
+              {scheduled ? <><CheckCircle2 size={16}/> Meeting Scheduled & Calendar Synced</> : <><Calendar size={16}/> Schedule This Meeting</>}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}
+
+// ─── Portfolio Page ───────────────────────────────────────────────────────────
+
+function PortfolioPage() {
+  const user = useUser()
+  return (
+    <div className="space-y-5">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Work History & Living Portfolio</h1>
+        <p className="text-muted-foreground text-sm mt-0.5">Verified record of team contributions, completed tasks, and leadership</p>
+      </div>
+
+      <div className="grid grid-cols-3 gap-5">
+        <Card className="col-span-1">
+          <CardContent className="pt-6 space-y-4 text-center">
+            <Avatar className="w-20 h-20 mx-auto">
+              <AvatarFallback className="text-2xl bg-primary text-primary-foreground font-bold">{user.initials}</AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="text-lg font-bold text-foreground">{user.name}</p>
+              <p className="text-xs text-muted-foreground">{user.email}</p>
+              <Badge variant="outline" className="text-xs mt-1.5">{roleLabel(user.role)}</Badge>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-left pt-2 border-t border-border">
+              <div className="p-2.5 rounded-lg bg-muted">
+                <p className="text-[10px] text-muted-foreground uppercase">Team</p>
+                <p className="text-xs font-semibold text-foreground">{user.team}</p>
+              </div>
+              <div className="p-2.5 rounded-lg bg-muted">
+                <p className="text-[10px] text-muted-foreground uppercase">Subteam</p>
+                <p className="text-xs font-semibold text-foreground">{user.subteam}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-2">
+          <CardHeader>
+            <CardTitle className="text-base">Contribution History</CardTitle>
+            <CardDescription className="text-xs">Projects and verified task completions in CAIR Lab</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="p-3.5 rounded-xl bg-muted border border-border space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-foreground">Rover Control & Telemetry Module</p>
+                <Badge variant="success" className="text-[10px]">Active Project</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">Software Team · Role: Lead Developer</p>
+              <div className="flex gap-1.5 flex-wrap pt-1">
+                <Badge variant="secondary" className="text-[10px]">React</Badge>
+                <Badge variant="secondary" className="text-[10px]">TypeScript</Badge>
+                <Badge variant="secondary" className="text-[10px]">ROS2</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
@@ -2177,24 +2578,82 @@ function SettingsPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
 
 export default function App() {
   const [user,          setUser]          = useState<AppUser | null>(null)
-  const [page,          setPage]          = useState<NavPage>("dashboard")
+  const [showAuth,      setShowAuth]      = useState<"login" | "register" | null>(null)
+  const [page,          setPage]          = useState<NavPage>(() => (localStorage.getItem("activePage") as NavPage) || "dashboard")
   const [profileOpen,   setProfileOpen]   = useState(false)
   const [routineOpen,   setRoutineOpen]   = useState(false)
   const [chatMember,    setChatMember]    = useState<Member | null>(null)
   const [pagePerms,     setPagePerms]     = useState<Record<string, string[]>>(DEFAULT_PAGE_PERMS)
   const [featurePerms,  setFeaturePerms]  = useState<Record<string, string[]>>(DEFAULT_FEATURE_PERMS)
+  const [isInitializing, setIsInitializing] = useState(true)
+
+  useEffect(() => {
+    localStorage.setItem("activePage", page)
+  }, [page])
+
+  useEffect(() => {
+    if (localStorage.getItem("accessToken")) {
+      authApi.getMe().then(u => {
+        setUser({
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          initials: u.initials,
+          role: normalizeRole(u.role),
+          team: u.team,
+          subteam: u.subteam,
+          batch: u.batch,
+          whatsapp: u.whatsapp,
+        })
+      }).catch(() => {
+        localStorage.removeItem("accessToken")
+        localStorage.removeItem("refreshToken")
+      }).finally(() => {
+        setIsInitializing(false)
+      })
+    } else {
+      setIsInitializing(false)
+    }
+  }, [])
 
   const handleLogin = (u: AppUser) => {
     setUser(u)
+    setShowAuth(null)
     setPage(u.role === "member" ? "search" : "dashboard")
   }
 
-  const handleSignOut = () => { setUser(null); setPage("dashboard") }
+  const handleSignOut = () => { 
+    authApi.logout().catch(()=>{})
+    setUser(null); 
+    setPage("dashboard") 
+  }
+
+  if (isInitializing) return null;
 
   if (!user) {
+    if (!showAuth) {
+      return (
+        <TooltipProvider>
+          <LandingPage 
+            onGetStarted={() => setShowAuth("register")} 
+            onLogin={() => setShowAuth("login")} 
+          />
+        </TooltipProvider>
+      )
+    }
+
     return (
       <TooltipProvider>
-        <AuthPage onLogin={handleLogin}/>
+        <div className="relative">
+          {/* Back button overlaying auth page */}
+          <button
+            onClick={() => setShowAuth(null)}
+            className="absolute top-6 left-6 z-50 flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/50 border border-border text-xs text-foreground hover:bg-secondary transition-colors"
+          >
+            <ArrowLeft size={14} /> Back to Home
+          </button>
+          <AuthPage onLogin={handleLogin} initialTab={showAuth} />
+        </div>
       </TooltipProvider>
     )
   }
@@ -2202,12 +2661,15 @@ export default function App() {
   const pageContent = (): React.ReactNode => {
     if (!(pagePerms[user.role] ?? []).includes(page)) return <AccessDenied requiredRole="Team Manager"/>
     switch (page) {
-      case "dashboard": return <DashboardPage onUploadRoutine={() => setRoutineOpen(true)}/>
-      case "members":   return <MembersPage/>
-      case "search":    return <SearchPage/>
-      case "heatmap":   return <HeatmapPage/>
-      case "skills":    return <SkillsPage/>
-      case "settings":  return <SettingsPage onUploadRoutine={() => setRoutineOpen(true)}/>
+      case "dashboard":       return <DashboardPage onUploadRoutine={() => setRoutineOpen(true)}/>
+      case "members":         return <MembersPage/>
+      case "search":          return <SearchPage/>
+      case "heatmap":         return <HeatmapPage/>
+      case "skills":          return <SkillsPage/>
+      case "projects":        return <ProjectsPage/>
+      case "meeting-planner": return <MeetingPlannerPage/>
+      case "portfolio":       return <PortfolioPage/>
+      case "settings":        return <SettingsPage onUploadRoutine={() => setRoutineOpen(true)}/>
     }
   }
 
@@ -2231,7 +2693,7 @@ export default function App() {
           onOpenChange={o => !o && setChatMember(null)}
           canManage={user.role === "org-owner" || user.role === "team-manager" || user.role === "subteam-manager"}
         />
-        <AIChat members={MEMBERS} user={user} onMemberClick={m => setChatMember(m)}/>
+        <AIChat members={[]} user={user} onMemberClick={m => setChatMember(m)}/>
 
         {/* Routine upload dialog (reused anywhere) */}
         <Dialog open={routineOpen} onOpenChange={setRoutineOpen}>

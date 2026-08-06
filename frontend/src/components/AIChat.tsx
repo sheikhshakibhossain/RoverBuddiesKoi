@@ -10,6 +10,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { AppUser } from "@/lib/user-context"
+import { aiApi } from "@/lib/api"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -525,7 +526,7 @@ export function AIChat({ members, user, onMemberClick }: AIChatProps) {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages, thinking])
 
-  const sendMessage = (text: string) => {
+  const sendMessage = async (text: string) => {
     if (!text.trim()) return
 
     const userMsg: ChatMessage = {
@@ -538,8 +539,17 @@ export function AIChat({ members, user, onMemberClick }: AIChatProps) {
     setInput("")
     setThinking(true)
 
-    // Simulate short "thinking" delay for realism
-    setTimeout(() => {
+    try {
+      const res = await aiApi.sendChatMessage(text)
+      const botMsg: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: "bot",
+        text: res.reply,
+        members: [],
+        timestamp: new Date(),
+      }
+      setMessages(prev => [...prev, botMsg])
+    } catch {
       const result = resolveQuery(text, members, user.role)
       const botMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -550,8 +560,9 @@ export function AIChat({ members, user, onMemberClick }: AIChatProps) {
         timestamp: new Date(),
       }
       setMessages(prev => [...prev, botMsg])
+    } finally {
       setThinking(false)
-    }, 420)
+    }
   }
 
   const handleSubmit = (e: React.FormEvent) => {
