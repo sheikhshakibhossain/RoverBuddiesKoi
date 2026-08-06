@@ -447,7 +447,7 @@ function PendingApprovals() {
     loadPending()
   }, [])
 
-  if (user.role === "member" || user.role === "subteam-manager") return null
+  if (user.role === "member") return null
   if (!loading && pendingSkills.length === 0 && pendingRoles.length === 0) return null
 
   const handleRoleAction = async (id: string, action: "approve" | "reject") => {

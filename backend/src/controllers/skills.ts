@@ -93,7 +93,6 @@ export async function getPendingSkills(req: Request, res: Response, next: NextFu
     const pending = await prisma.userSkill.findMany({
       where: { 
         status: "PENDING",
-        user: { organizationId: currentUser.organizationId }
       },
       include: {
         user: {
@@ -111,16 +110,24 @@ export async function getPendingSkills(req: Request, res: Response, next: NextFu
     let scopedPending = pending
     if (currentUser.role === "TEAM_MANAGER" && currentUser.teamId) {
       scopedPending = pending.filter((p) => p.user.teamId === currentUser.teamId)
+    } else if (currentUser.role === "SUBTEAM_MANAGER" && currentUser.subteamIds.length > 0) {
+      scopedPending = pending.filter((p) => 
+        p.user.subteams.some((st) => currentUser.subteamIds.includes(st.subteamId))
+      )
     }
 
     const result = scopedPending.map((p) => ({
       id: p.id,
       memberName: p.user.name,
+      member: p.user.name,
+      initials: p.user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U",
       memberRole: p.user.role,
       team: p.user.team?.name || "UMRT",
       subteam: p.user.subteams[0]?.subteam?.name || "Software",
       skillName: p.skill.name,
+      skill: p.skill.name,
       requestedAt: p.createdAt,
+      requested: new Date(p.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
     }))
 
     res.json(result)
