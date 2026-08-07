@@ -10,12 +10,26 @@ export async function uploadRoutine(req: Request, res: Response, next: NextFunct
       throw new ValidationError("Spreadsheet file is required")
     }
 
-    const activeSemester = await prisma.semester.findFirst({
+    // Find active semester — auto-create a default one if none exists
+    let activeSemester = await prisma.semester.findFirst({
       where: { organizationId: req.user!.organizationId, isActive: true },
     })
 
     if (!activeSemester) {
-      throw new ValidationError("No active semester found. Contact organization owner.")
+      // Auto-create a default semester so upload always works
+      const now = new Date()
+      const end = new Date(now)
+      end.setMonth(end.getMonth() + 6)
+      activeSemester = await prisma.semester.create({
+        data: {
+          organizationId: req.user!.organizationId,
+          name: "Current Semester",
+          startDate: now,
+          endDate: end,
+          routineDeadline: end,
+          isActive: true,
+        },
+      })
     }
 
     const parsedSlots = parseRoutineExcel(req.file.buffer)
@@ -23,8 +37,7 @@ export async function uploadRoutine(req: Request, res: Response, next: NextFunct
       console.error("[routineParser] Parsed 0 slots. File size:", req.file.size, "Original name:", req.file.originalname)
       throw new ValidationError(
         "Could not parse class slots from the uploaded file. " +
-        "Please make sure your Excel file has columns: Day, Start Time, End Time, Course, Room " +
-        "(with times like '9:00 AM' or '1:30 PM')."
+        "Please upload a UIU RptStudentClassRoutine.xlsx file."
       )
     }
 
@@ -50,7 +63,7 @@ export async function uploadRoutine(req: Request, res: Response, next: NextFunct
     }
 
     res.json({
-      message: "Routine uploaded and parsed successfully",
+      message: `Routine uploaded successfully! ${createdRoutines.length} class slots synced.`,
       count: createdRoutines.length,
       schedule: createdRoutines,
     })
