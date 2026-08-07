@@ -20,7 +20,12 @@ export async function uploadRoutine(req: Request, res: Response, next: NextFunct
 
     const parsedSlots = parseRoutineExcel(req.file.buffer)
     if (parsedSlots.length === 0) {
-      throw new ValidationError("Could not parse class slots from uploaded file")
+      console.error("[routineParser] Parsed 0 slots. File size:", req.file.size, "Original name:", req.file.originalname)
+      throw new ValidationError(
+        "Could not parse class slots from the uploaded file. " +
+        "Please make sure your Excel file has columns: Day, Start Time, End Time, Course, Room " +
+        "(with times like '9:00 AM' or '1:30 PM')."
+      )
     }
 
     // Replace user's old routines for this semester
