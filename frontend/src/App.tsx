@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import {
   LayoutDashboard, Users, Search, BarChart3, Zap, Settings,
   ChevronRight, Bell, MessageCircle, Filter, TrendingUp,
@@ -59,8 +59,8 @@ const MEMBERS: Member[] = []
 const DEFAULT_PAGE_PERMS: Record<string, string[]> = {
   "org-owner":       ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
   "team-manager":    ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
-  "subteam-manager": ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio"],
-  "member":          ["dashboard","search","skills","projects","meeting-planner","portfolio","settings"],
+  "subteam-manager": ["dashboard","members","search","heatmap","skills","projects","portfolio"],
+  "member":          ["dashboard","search","skills","projects","portfolio","settings"],
 }
 
 const DEFAULT_FEATURE_PERMS: Record<string, string[]> = {
@@ -2604,6 +2604,139 @@ function PortfolioPage() {
   )
 }
 
+// ─── Routine Upload Dialog ───────────────────────────────────────────────────
+
+function RoutineUploadDialog({ open, onOpenChange, onSuccess }: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onSuccess?: () => void
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [file, setFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+
+  const handleSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0])
+      setError(null)
+      setSuccess(null)
+    }
+  }
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setFile(e.dataTransfer.files[0])
+      setError(null)
+      setSuccess(null)
+    }
+  }
+
+  const handleUpload = async () => {
+    if (!file) {
+      setError("Please select a UCAM XLSX file first.")
+      return
+    }
+    try {
+      setUploading(true)
+      setError(null)
+      const res = await routinesApi.uploadRoutine(file)
+      setSuccess(res.message || "Routine uploaded and availability updated successfully!")
+      setTimeout(() => {
+        setFile(null)
+        setSuccess(null)
+        onOpenChange(false)
+        if (onSuccess) onSuccess()
+      }, 1500)
+    } catch (err: any) {
+      setError(err.message || "Failed to upload routine file.")
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleClose = (o: boolean) => {
+    if (!uploading) {
+      setFile(null)
+      setError(null)
+      setSuccess(null)
+      onOpenChange(o)
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-[460px]">
+        <DialogHeader>
+          <DialogTitle>Upload Class Routine</DialogTitle>
+          <DialogDescription>
+            Upload your UCAM XLSX to sync availability. Required before the semester deadline.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="py-3 space-y-3">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleSelectFile}
+            accept=".xlsx, .xls, .csv"
+            className="hidden"
+          />
+          <div
+            className={cn(
+              "rounded-xl border-2 border-dashed border-border bg-muted/30 p-8 text-center cursor-pointer hover:bg-muted/50 transition-colors",
+              file && "border-primary/50 bg-primary/5"
+            )}
+            onClick={() => fileInputRef.current?.click()}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={handleDrop}
+          >
+            <Upload size={28} className="mx-auto mb-2 text-muted-foreground"/>
+            {file ? (
+              <div>
+                <p className="text-sm font-semibold text-primary">{file.name}</p>
+                <p className="text-xs text-muted-foreground mt-0.5 font-mono">
+                  {(file.size / 1024).toFixed(1)} KB
+                </p>
+                <Button variant="outline" size="sm" className="mt-3 text-xs" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>
+                  Change File
+                </Button>
+              </div>
+            ) : (
+              <div>
+                <p className="text-sm font-medium text-foreground mb-1">Click or drag your UCAM XLSX here</p>
+                <p className="text-xs text-muted-foreground">Courses, days, and times are parsed automatically</p>
+                <Button variant="outline" size="sm" className="mt-4" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>
+                  Browse File
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {error && (
+            <p className="text-xs font-medium text-destructive bg-destructive/10 p-2.5 rounded-lg">
+              {error}
+            </p>
+          )}
+
+          {success && (
+            <p className="text-xs font-medium text-success bg-success/10 p-2.5 rounded-lg flex items-center gap-1.5">
+              <CheckCircle2 size={14}/> {success}
+            </p>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" disabled={uploading} onClick={() => handleClose(false)}>Cancel</Button>
+          <Button disabled={!file || uploading} onClick={handleUpload}>
+            {uploading ? "Uploading..." : "Upload & Sync"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
 export default function App() {
@@ -2726,27 +2859,7 @@ export default function App() {
         />
         <AIChat members={[]} user={user} onMemberClick={m => setChatMember(m)}/>
 
-        {/* Routine upload dialog (reused anywhere) */}
-        <Dialog open={routineOpen} onOpenChange={setRoutineOpen}>
-          <DialogContent className="sm:max-w-[460px]">
-            <DialogHeader>
-              <DialogTitle>Upload Class Routine</DialogTitle>
-              <DialogDescription>Upload your UCAM XLSX to sync availability. Required before the semester deadline.</DialogDescription>
-            </DialogHeader>
-            <div className="py-4">
-              <div className="rounded-xl border-2 border-dashed border-border bg-muted/30 p-10 text-center cursor-pointer hover:bg-muted/50 transition-colors">
-                <Upload size={28} className="mx-auto mb-3 text-muted-foreground"/>
-                <p className="text-sm font-medium text-foreground mb-1">Click or drag your UCAM XLSX here</p>
-                <p className="text-xs text-muted-foreground">Courses, days, and times are parsed automatically</p>
-                <Button variant="outline" size="sm" className="mt-4">Browse File</Button>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="ghost" onClick={() => setRoutineOpen(false)}>Cancel</Button>
-              <Button onClick={() => setRoutineOpen(false)}>Upload</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <RoutineUploadDialog open={routineOpen} onOpenChange={setRoutineOpen} />
       </TooltipProvider>
     </UserContext.Provider>
   )
