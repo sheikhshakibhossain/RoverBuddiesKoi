@@ -2740,7 +2740,15 @@ function RoutineUploadDialog({ open, onOpenChange, onSuccess }: {
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [user,          setUser]          = useState<AppUser | null>(null)
+  const [user,          setUser]          = useState<AppUser | null>(() => {
+    const saved = localStorage.getItem("userSession")
+    if (!saved) return null
+    try {
+      return JSON.parse(saved)
+    } catch {
+      return null
+    }
+  })
   const [showAuth,      setShowAuth]      = useState<"login" | "register" | null>(null)
   const [page,          setPage]          = useState<NavPage>(() => (localStorage.getItem("activePage") as NavPage) || "dashboard")
   const [profileOpen,   setProfileOpen]   = useState(false)
@@ -2749,7 +2757,6 @@ export default function App() {
   const [chatMember,    setChatMember]    = useState<Member | null>(null)
   const [pagePerms,     setPagePerms]     = useState<Record<string, string[]>>(DEFAULT_PAGE_PERMS)
   const [featurePerms,  setFeaturePerms]  = useState<Record<string, string[]>>(DEFAULT_FEATURE_PERMS)
-  const [isInitializing, setIsInitializing] = useState(true)
 
   useEffect(() => {
     localStorage.setItem("activePage", page)
@@ -2758,7 +2765,7 @@ export default function App() {
   useEffect(() => {
     if (localStorage.getItem("accessToken")) {
       authApi.getMe().then(u => {
-        setUser({
+        const updatedUser: AppUser = {
           id: u.id,
           name: u.name,
           email: u.email,
@@ -2768,31 +2775,39 @@ export default function App() {
           subteam: u.subteam,
           batch: u.batch,
           whatsapp: u.whatsapp,
-        })
+        }
+        setUser(updatedUser)
+        localStorage.setItem("userSession", JSON.stringify(updatedUser))
       }).catch(() => {
         localStorage.removeItem("accessToken")
         localStorage.removeItem("refreshToken")
-      }).finally(() => {
-        setIsInitializing(false)
+        localStorage.removeItem("userSession")
+        setUser(null)
       })
-    } else {
-      setIsInitializing(false)
     }
   }, [])
 
   const handleLogin = (u: AppUser) => {
     setUser(u)
+    localStorage.setItem("userSession", JSON.stringify(u))
     setShowAuth(null)
-    setPage(u.role === "member" ? "search" : "dashboard")
+    const savedPage = localStorage.getItem("activePage") as NavPage
+    if (savedPage) {
+      setPage(savedPage)
+    } else {
+      setPage(u.role === "member" ? "search" : "dashboard")
+    }
   }
 
   const handleSignOut = () => { 
     authApi.logout().catch(()=>{})
+    localStorage.removeItem("accessToken")
+    localStorage.removeItem("refreshToken")
+    localStorage.removeItem("userSession")
+    localStorage.removeItem("activePage")
     setUser(null); 
     setPage("dashboard") 
   }
-
-  if (isInitializing) return null;
 
   if (!user) {
     if (!showAuth) {
