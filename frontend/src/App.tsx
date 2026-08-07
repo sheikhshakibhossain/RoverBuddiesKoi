@@ -2763,28 +2763,37 @@ export default function App() {
   }, [page])
 
   useEffect(() => {
-    if (localStorage.getItem("accessToken")) {
-      authApi.getMe().then(u => {
-        const updatedUser: AppUser = {
-          id: u.id,
-          name: u.name,
-          email: u.email,
-          initials: u.initials,
-          role: normalizeRole(u.role),
-          team: u.team,
-          subteam: u.subteam,
-          batch: u.batch,
-          whatsapp: u.whatsapp,
-        }
-        setUser(updatedUser)
-        localStorage.setItem("userSession", JSON.stringify(updatedUser))
-      }).catch(() => {
+    const token = localStorage.getItem("accessToken")
+    if (!token) return
+
+    authApi.getMe().then(u => {
+      // Token is still valid — refresh cached profile
+      const updatedUser: AppUser = {
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        initials: u.initials,
+        role: normalizeRole(u.role),
+        team: u.team,
+        subteam: u.subteam,
+        batch: u.batch,
+        whatsapp: u.whatsapp,
+      }
+      setUser(updatedUser)
+      localStorage.setItem("userSession", JSON.stringify(updatedUser))
+    }).catch((err: any) => {
+      // Only log out on a real 401 Unauthorized.
+      // Network errors, CORS, or backend being slow should NOT log the user out.
+      const msg = err?.message || ""
+      const isAuthError = msg.includes("401") || msg.toLowerCase().includes("unauthorized") || msg.toLowerCase().includes("session expired")
+      if (isAuthError) {
         localStorage.removeItem("accessToken")
         localStorage.removeItem("refreshToken")
         localStorage.removeItem("userSession")
         setUser(null)
-      })
-    }
+      }
+      // Otherwise: keep the cached session — user stays logged in
+    })
   }, [])
 
   const handleLogin = (u: AppUser) => {
