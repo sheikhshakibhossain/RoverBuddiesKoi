@@ -60,7 +60,7 @@ export function canAccessPage(role: UserRole, page: string): boolean {
   const norm = normalizeRole(role)
   const matrix: Record<string, UserRole[]> = {
     dashboard: ["org-owner", "team-manager", "subteam-manager", "member"],
-    members:   ["org-owner", "team-manager", "subteam-manager"],
+    members:   ["org-owner", "team-manager", "subteam-manager", "member"],
     search:    ["org-owner", "team-manager", "subteam-manager", "member"],
     heatmap:   ["org-owner", "team-manager", "subteam-manager"],
     skills:    ["org-owner", "team-manager", "subteam-manager", "member"],

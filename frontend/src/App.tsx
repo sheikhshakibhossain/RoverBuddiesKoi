@@ -60,7 +60,7 @@ const DEFAULT_PAGE_PERMS: Record<string, string[]> = {
   "org-owner":       ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
   "team-manager":    ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
   "subteam-manager": ["dashboard","members","search","heatmap","skills","projects","portfolio"],
-  "member":          ["dashboard","search","skills","projects","portfolio","settings"],
+  "member":          ["dashboard","members","search","skills","projects","portfolio","settings"],
 }
 
 const DEFAULT_FEATURE_PERMS: Record<string, string[]> = {
@@ -941,11 +941,14 @@ function MembersPage() {
   const stScope   = subteamScope(user)
   const canManage = user.role !== "member"
 
-  const [members,    setMembers]    = useState<Member[]>([])
-  const [teamsList,  setTeamsList]  = useState<string[]>([])
-  const [teamFilter, setTeamFilter] = useState(tScope ?? "all")
-  const [selected,   setSelected]   = useState<Member | null>(null)
-  const [loading,    setLoading]    = useState(true)
+  const [members,      setMembers]      = useState<Member[]>([])
+  const [teamsList,    setTeamsList]    = useState<string[]>([])
+  const [teamFilter,   setTeamFilter]   = useState(tScope ?? "all")
+  const [subteamView,  setSubteamView]  = useState<"subteam" | "team">(stScope ? "subteam" : "team")
+  const [statusFilter, setStatusFilter] = useState<AvailStatus | "all">("all")
+  const [searchQuery,  setSearchQuery]  = useState("")
+  const [selected,     setSelected]     = useState<Member | null>(null)
+  const [loading,      setLoading]      = useState(true)
 
   const loadData = () => {
     setLoading(true)
@@ -963,101 +966,243 @@ function MembersPage() {
 
   useEffect(() => { loadData() }, [teamFilter])
 
+  // Filter based on scope, subteam toggle, and search
   const filtered = members.filter(m => {
-    if (stScope && !m.subteams.includes(stScope)) return false
-    if (tScope  && m.team !== tScope)             return false
+    if (tScope && m.team !== tScope) return false
+    if (subteamView === "subteam" && stScope && !m.subteams.includes(stScope)) return false
+    if (statusFilter !== "all" && m.status !== statusFilter) return false
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase()
+      const matchName = m.name.toLowerCase().includes(q)
+      const matchSkill = m.skills.some(s => s.toLowerCase().includes(q))
+      const matchSub = m.subteams.some(s => s.toLowerCase().includes(q))
+      if (!matchName && !matchSkill && !matchSub) return false
+    }
     return true
   })
+
+  const freeCount    = filtered.filter(m => m.status === "free").length
+  const inClassCount = filtered.filter(m => m.status === "in-class").length
+  const soonCount    = filtered.filter(m => m.status === "soon").length
 
   const byTeam: Record<string, Member[]> = {}
   filtered.forEach(m => { (byTeam[m.team] = byTeam[m.team] ?? []).push(m) })
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Members</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            {stScope && subteamView === "subteam" ? `${stScope} Subteam Members` : "Team Members Directory"}
+          </h1>
           <p className="text-muted-foreground text-sm mt-0.5">
-            {loading ? "Loading..." : `${filtered.length} members${stScope ? ` in ${stScope}` : tScope ? ` in ${tScope}` : " across all teams"}`}
+            {loading ? "Loading live member availability..." : `Viewing ${filtered.length} members (${freeCount} free right now)`}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Subteam Toggle for Members & Subteam Managers */}
+          {stScope && (
+            <div className="flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
+              <button
+                onClick={() => setSubteamView("subteam")}
+                className={cn(
+                  "px-3 py-1 rounded-md text-xs font-medium transition-all",
+                  subteamView === "subteam" ? "bg-card text-foreground shadow-sm font-semibold" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                My Subteam ({stScope})
+              </button>
+              <button
+                onClick={() => setSubteamView("team")}
+                className={cn(
+                  "px-3 py-1 rounded-md text-xs font-medium transition-all",
+                  subteamView === "team" ? "bg-card text-foreground shadow-sm font-semibold" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                All {user.team || "Team"}
+              </button>
+            </div>
+          )}
+
           {user.role === "org-owner" && teamsList.length > 0 && (
             <Select value={teamFilter} onValueChange={setTeamFilter}>
-              <SelectTrigger className="w-36"><SelectValue placeholder="All Teams"/></SelectTrigger>
+              <SelectTrigger className="w-36 h-8 text-xs"><SelectValue placeholder="All Teams"/></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Teams</SelectItem>
                 {teamsList.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
               </SelectContent>
             </Select>
           )}
+
           {(user.role === "org-owner" || user.role === "team-manager") && (
-            <Button size="sm" className="gap-1.5"><Plus size={13}/>Add Member</Button>
+            <Button size="sm" className="gap-1.5 h-8 text-xs"><Plus size={13}/>Add Member</Button>
           )}
-          <Button size="sm" variant="outline" className="gap-1.5" onClick={loadData}><RefreshCw size={13}/>Refresh</Button>
+          <Button size="sm" variant="outline" className="gap-1.5 h-8 text-xs" onClick={loadData}>
+            <RefreshCw size={13}/>Refresh
+          </Button>
         </div>
       </div>
 
+      {/* Live Availability Status Strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <button
+          onClick={() => setStatusFilter("all")}
+          className={cn(
+            "p-3 rounded-xl border text-left transition-all",
+            statusFilter === "all" ? "border-primary bg-primary/10 shadow-sm" : "border-border/60 bg-card hover:bg-muted/30"
+          )}
+        >
+          <p className="text-lg font-bold text-foreground">{filtered.length}</p>
+          <p className="text-xs text-muted-foreground font-medium">All Members</p>
+        </button>
+
+        <button
+          onClick={() => setStatusFilter("free")}
+          className={cn(
+            "p-3 rounded-xl border text-left transition-all",
+            statusFilter === "free" ? "border-success bg-success/15 shadow-sm ring-1 ring-success/30" : "border-success/20 bg-success/5 hover:bg-success/10"
+          )}
+        >
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-success"/>
+            <p className="text-lg font-bold text-success">{freeCount}</p>
+          </div>
+          <p className="text-xs text-muted-foreground font-medium">Free Right Now</p>
+        </button>
+
+        <button
+          onClick={() => setStatusFilter("in-class")}
+          className={cn(
+            "p-3 rounded-xl border text-left transition-all",
+            statusFilter === "in-class" ? "border-destructive bg-destructive/15 shadow-sm ring-1 ring-destructive/30" : "border-destructive/20 bg-destructive/5 hover:bg-destructive/10"
+          )}
+        >
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-destructive"/>
+            <p className="text-lg font-bold text-destructive">{inClassCount}</p>
+          </div>
+          <p className="text-xs text-muted-foreground font-medium">In Class</p>
+        </button>
+
+        <button
+          onClick={() => setStatusFilter("soon")}
+          className={cn(
+            "p-3 rounded-xl border text-left transition-all",
+            statusFilter === "soon" ? "border-warning bg-warning/15 shadow-sm ring-1 ring-warning/30" : "border-warning/20 bg-warning/5 hover:bg-warning/10"
+          )}
+        >
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-warning"/>
+            <p className="text-lg font-bold text-warning">{soonCount}</p>
+          </div>
+          <p className="text-xs text-muted-foreground font-medium">Class Soon (&lt;30m)</p>
+        </button>
+      </div>
+
+      {/* Search Input */}
+      <div className="relative">
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/>
+        <Input
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          placeholder="Search teammates by name, skill (e.g. ROS2, Python, CAD), or subteam..."
+          className="pl-9 text-xs h-9"
+        />
+      </div>
+
+      {/* Main Members Content */}
       {loading ? (
         <Card><CardContent className="py-16 text-center">
           <RefreshCw size={24} className="mx-auto mb-3 text-muted-foreground/30 animate-spin"/>
-          <p className="text-sm text-muted-foreground">Loading members...</p>
+          <p className="text-sm text-muted-foreground">Loading members live availability...</p>
         </CardContent></Card>
       ) : filtered.length === 0 ? (
         <Card><CardContent className="py-16 text-center">
           <Users size={32} className="mx-auto mb-3 text-muted-foreground/30"/>
-          <p className="text-sm font-medium text-foreground">No members yet</p>
-          <p className="text-xs text-muted-foreground mt-1">Register members to see them here</p>
+          <p className="text-sm font-medium text-foreground">No teammates match this filter</p>
+          <p className="text-xs text-muted-foreground mt-1">Try switching to All Members or resetting the search filter</p>
         </CardContent></Card>
       ) : (
-        Object.entries(byTeam).map(([team, members]) => (
-          <div key={team}>
-            <div className="flex items-center gap-2 mb-3">
+        Object.entries(byTeam).map(([team, teamMembers]) => (
+          <div key={team} className="space-y-3">
+            <div className="flex items-center gap-2">
               <h2 className="text-sm font-semibold text-foreground">{team}</h2>
-              <Badge variant="secondary" className="font-mono">{members.length}</Badge>
+              <Badge variant="secondary" className="font-mono text-xs">{teamMembers.length}</Badge>
               <Separator className="flex-1"/>
-              <span className="text-xs text-muted-foreground">{members.filter(m=>m.status==="free").length} free now</span>
+              <span className="text-xs text-success font-medium flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-success"/>
+                {teamMembers.filter(m => m.status === "free").length} free now
+              </span>
             </div>
-            <Card>
+
+            <Card className="overflow-hidden border-border/80">
               <Table>
-                <TableHeader>
+                <TableHeader className="bg-muted/30">
                   <TableRow>
                     <TableHead className="pl-4">Member</TableHead>
                     <TableHead>Role</TableHead>
                     <TableHead>Subteam(s)</TableHead>
                     <TableHead>Batch</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>Availability Status</TableHead>
                     <TableHead>Skills</TableHead>
-                    <TableHead className="w-10"/>
+                    <TableHead className="w-12 text-right pr-4">Contact</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {members.map(m => (
-                    <TableRow key={m.id} className="cursor-pointer" onClick={() => setSelected(m)}>
-                      <TableCell className="pl-4">
+                  {teamMembers.map(m => (
+                    <TableRow
+                      key={m.id}
+                      className="cursor-pointer hover:bg-muted/40 transition-colors"
+                      onClick={() => setSelected(m)}
+                    >
+                      <TableCell className="pl-4 py-3">
                         <div className="flex items-center gap-2.5">
                           <MemberAvatar member={m}/>
-                          <span className="text-sm font-medium text-foreground">{m.name}</span>
+                          <div>
+                            <p className="text-sm font-semibold text-foreground leading-none">{m.name}</p>
+                            {m.currentClass ? (
+                              <p className="text-[11px] text-muted-foreground mt-1 font-mono">{m.currentClass}</p>
+                            ) : m.status === "free" ? (
+                              <p className="text-[11px] text-success mt-1 font-medium">Free for meeting / work</p>
+                            ) : null}
+                          </div>
                         </div>
                       </TableCell>
-                      <TableCell><Badge variant="outline" className="text-xs">{m.role}</Badge></TableCell>
+                      <TableCell><Badge variant="outline" className="text-xs">{roleLabel(m.role as UserRole)}</Badge></TableCell>
                       <TableCell>
-                        <div className="flex gap-1">
-                          {m.subteams.map(s => <Badge key={s} variant="secondary" className="text-[10px]">{s}</Badge>)}
+                        <div className="flex gap-1 flex-wrap">
+                          {m.subteams.map(s => (
+                            <Badge
+                              key={s}
+                              variant={s === stScope ? "default" : "secondary"}
+                              className="text-[10px]"
+                            >
+                              {s}
+                            </Badge>
+                          ))}
                         </div>
                       </TableCell>
                       <TableCell className="font-mono text-xs text-muted-foreground">{m.batch}</TableCell>
-                      <TableCell><StatusBadge status={m.status}/></TableCell>
                       <TableCell>
-                        <div className="flex gap-1 flex-wrap">
-                          {m.skills.slice(0,2).map(s => <Badge key={s} variant="secondary" className="text-[10px]">{s}</Badge>)}
-                          {m.skills.length>2 && <Badge variant="outline" className="text-[10px]">+{m.skills.length-2}</Badge>}
+                        <div className="space-y-0.5">
+                          <StatusBadge status={m.status}/>
+                          {m.remainingMin !== undefined && m.status === "in-class" && (
+                            <p className="text-[10px] text-muted-foreground font-mono">Free in ~{m.remainingMin}m</p>
+                          )}
                         </div>
                       </TableCell>
-                      <TableCell onClick={e => e.stopPropagation()}>
-                        <Button variant="ghost" size="icon" className="w-7 h-7" asChild>
-                          <a href={`https://wa.me/${m.whatsapp}`} target="_blank" rel="noreferrer">
-                            <MessageCircle size={13}/>
+                      <TableCell>
+                        <div className="flex gap-1 flex-wrap">
+                          {m.skills.slice(0, 2).map(s => <Badge key={s} variant="secondary" className="text-[10px]">{s}</Badge>)}
+                          {m.skills.length > 2 && <Badge variant="outline" className="text-[10px]">+{m.skills.length - 2}</Badge>}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right pr-4" onClick={e => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full text-success hover:text-success hover:bg-success/10" asChild>
+                          <a href={`https://wa.me/${m.whatsapp}`} target="_blank" rel="noreferrer" title="Chat on WhatsApp">
+                            <MessageCircle size={14}/>
                           </a>
                         </Button>
                       </TableCell>
