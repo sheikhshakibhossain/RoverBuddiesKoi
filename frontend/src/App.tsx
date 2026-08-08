@@ -5,7 +5,7 @@ import {
   Shield, Calendar, LogOut, User, HelpCircle, RefreshCw,
   CheckCircle2, XCircle, AlertCircle, Minus, ArrowUpRight,
   Upload, Building2, ChevronDown, Lock, Layers, Plus, Pencil,
-  Clock, AlertTriangle, Save, ArrowLeft, Menu, X
+  Clock, AlertTriangle, Save, ArrowLeft, Menu, X, Eye
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button }           from "@/components/ui/button"
@@ -22,7 +22,7 @@ import { Progress }         from "@/components/ui/progress"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { UserContext, useUser, useUserCtx, canAccessPage, teamScope, subteamScope, roleLabel } from "@/lib/user-context"
+import { UserContext, useUser, useUserCtx, canAccessPage, teamScope, subteamScope, roleLabel, normalizeRole } from "@/lib/user-context"
 import type { AppUser, UserRole } from "@/lib/user-context"
 import { AuthPage } from "./Auth"
 import { AIChat } from "@/components/AIChat"
@@ -32,7 +32,7 @@ import { LandingPage } from "@/LandingPage"
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type AvailStatus = "free" | "in-class" | "soon" | "missing"
-type NavPage     = "dashboard" | "members" | "search" | "heatmap" | "skills" | "projects" | "meeting-planner" | "portfolio" | "settings"
+type NavPage     = "dashboard" | "members" | "search" | "heatmap" | "skills" | "meeting-planner" | "portfolio" | "settings"
 type DayOfWeek   = "Sun" | "Mon" | "Tue" | "Wed" | "Thu"
 
 interface ClassSlot {
@@ -57,10 +57,10 @@ const MEMBERS: Member[] = []
 // ─── Permission defaults ──────────────────────────────────────────────────────
 
 const DEFAULT_PAGE_PERMS: Record<string, string[]> = {
-  "org-owner":       ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
-  "team-manager":    ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
-  "subteam-manager": ["dashboard","members","search","heatmap","skills","projects","portfolio"],
-  "member":          ["dashboard","search","skills","projects","portfolio","settings"],
+  "org-owner":       ["dashboard","members","search","heatmap","skills","meeting-planner","portfolio","settings"],
+  "team-manager":    ["dashboard","members","search","heatmap","skills","meeting-planner","portfolio","settings"],
+  "subteam-manager": ["dashboard","members","search","heatmap","skills","portfolio"],
+  "member":          ["dashboard","search","skills","portfolio","settings"],
 }
 
 const DEFAULT_FEATURE_PERMS: Record<string, string[]> = {
@@ -76,7 +76,6 @@ const ALL_PAGE_OPTIONS: { id: string; label: string }[] = [
   { id:"search",          label:"Find Members" },
   { id:"heatmap",         label:"Heatmap" },
   { id:"skills",          label:"Skills" },
-  { id:"projects",        label:"Projects & Kanban" },
   { id:"meeting-planner", label:"AI Scheduler" },
   { id:"portfolio",       label:"Work History" },
   { id:"settings",        label:"Settings" },
@@ -192,7 +191,6 @@ const ALL_NAV: { id: NavPage; label: string; icon: React.ReactNode }[] = [
   { id:"search",          label:"Find Members",     icon:<Search size={15}/> },
   { id:"heatmap",         label:"Heatmap",          icon:<BarChart3 size={15}/> },
   { id:"skills",          label:"Skills Catalog",   icon:<Zap size={15}/> },
-  { id:"projects",        label:"Projects & Kanban",icon:<Layers size={15}/> },
   { id:"meeting-planner", label:"AI Scheduler",     icon:<Calendar size={15}/> },
   { id:"portfolio",       label:"Work History",     icon:<User size={15}/> },
   { id:"settings",        label:"Settings",         icon:<Settings size={15}/> },
@@ -1991,7 +1989,7 @@ function TeamsTab({ user }: { user: AppUser }) {
               <div className="space-y-1.5">
                 <p className="text-xs font-medium text-muted-foreground">Subteams</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {subteamsOfTeam.map(s => (
+                  {subteamsOfTeam.map((s: string) => (
                     <div key={s} className="flex items-center gap-1 rounded-full bg-secondary border border-border px-2.5 py-0.5">
                       <span className="text-xs text-foreground">{s}</span>
                       <button className="text-muted-foreground hover:text-destructive transition-colors ml-0.5">
@@ -2378,82 +2376,6 @@ function AccountTab() {
         </CardContent>
       </Card>
     </TabsContent>
-  )
-}
-
-// ─── Projects & Kanban Board Page ──────────────────────────────────────────────
-
-function ProjectsPage() {
-  const user = useUser()
-  const [tasks, setTasks] = useState([
-    { id: "t1", title: "Autonomous Navigation Module", status: "In Progress", priority: "High", assignee: user.name, due: "Aug 15", team: user.team },
-    { id: "t2", title: "PCB Power Distribution Design", status: "To Do", priority: "High", assignee: "Electrical Team", due: "Aug 20", team: user.team },
-    { id: "t3", title: "Chassis CAD Stress Simulation", status: "Completed", priority: "Medium", assignee: "Mechanical Team", due: "Aug 02", team: user.team },
-    { id: "t4", title: "UI/UX Availability Dashboard", status: "Review", priority: "Medium", assignee: user.name, due: "Aug 10", team: user.team },
-  ])
-  const [newTaskTitle, setNewTaskTitle] = useState("")
-
-  const addTask = () => {
-    if (!newTaskTitle.trim()) return
-    setTasks([...tasks, {
-      id: "t-" + Date.now(),
-      title: newTaskTitle.trim(),
-      status: "To Do",
-      priority: "Medium",
-      assignee: user.name,
-      due: "Aug 25",
-      team: user.team,
-    }])
-    setNewTaskTitle("")
-  }
-
-  const columns = ["Backlog", "To Do", "In Progress", "Review", "Testing", "Completed"]
-
-  return (
-    <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Projects & Kanban Board</h1>
-          <p className="text-muted-foreground text-sm mt-0.5">Manage team projects, assign tasks, and track engineering progress</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Input placeholder="New Task Title..." value={newTaskTitle} onChange={e => setNewTaskTitle(e.target.value)} className="w-56 h-8 text-xs"/>
-          <Button size="sm" className="gap-1.5 h-8 text-xs" onClick={addTask}><Plus size={13}/>Add Task</Button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-6 gap-3 overflow-x-auto pb-4">
-        {columns.map(col => {
-          const colTasks = tasks.filter(t => t.status === col)
-          return (
-            <div key={col} className="rounded-xl bg-muted/40 border border-border p-3 flex flex-col min-w-44 min-h-96">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-semibold text-foreground uppercase tracking-wide">{col}</span>
-                <Badge variant="secondary" className="font-mono text-[10px]">{colTasks.length}</Badge>
-              </div>
-              <div className="space-y-2 flex-1">
-                {colTasks.length === 0 ? (
-                  <p className="text-[11px] text-muted-foreground/50 text-center py-6">No tasks</p>
-                ) : (
-                  colTasks.map(t => (
-                    <Card key={t.id} className="p-3 space-y-2 hover:border-primary/50 cursor-pointer transition-colors">
-                      <div className="flex items-start justify-between gap-1">
-                        <p className="text-xs font-medium text-foreground leading-snug">{t.title}</p>
-                        <Badge variant={t.priority === "High" ? "destructive" : "secondary"} className="text-[9px] px-1 py-0">{t.priority}</Badge>
-                      </div>
-                      <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1 border-t border-border/50">
-                        <span>{t.assignee}</span>
-                        <span className="font-mono">{t.due}</span>
-                      </div>
-                    </Card>
-                  ))
-                )}
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </div>
   )
 }
 
@@ -2854,7 +2776,6 @@ export default function App() {
       case "search":          return <SearchPage/>
       case "heatmap":         return <HeatmapPage/>
       case "skills":          return <SkillsPage/>
-      case "projects":        return <ProjectsPage/>
       case "meeting-planner": return <MeetingPlannerPage/>
       case "portfolio":       return <PortfolioPage/>
       case "settings":        return <SettingsPage onUploadRoutine={() => setRoutineOpen(true)}/>

@@ -13,6 +13,7 @@ import heatmapRoutes from "./routes/heatmap.js"
 import aiRoutes from "./routes/ai.js"
 import semesterRoutes from "./routes/semesters.js"
 import teamRoutes from "./routes/teams.js"
+import projectRoutes from "./routes/projects.js"
 
 const app = express()
 
@@ -54,7 +55,8 @@ app.use("/api/skills", skillRoutes)
 app.use("/api/heatmap", heatmapRoutes)
 app.use("/api/ai", aiRoutes)
 app.use("/api/semesters", semesterRoutes)
-app.use("/api/teams", teamRoutes)
+app.use("/api/teams",    teamRoutes)
+app.use("/api/projects", projectRoutes)
 
 // 6. 404 Handler
 app.use((_req, res) => {

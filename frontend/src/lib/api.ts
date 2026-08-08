@@ -227,3 +227,55 @@ export const aiApi = {
     })
   },
 }
+
+// ─── Projects & Tasks API ─────────────────────────────────────────────────────
+
+export const projectsApi = {
+  // ── Projects ──────────────────────────────────────────────────────────────
+  getProjects: () =>
+    fetchApi<any[]>("/api/projects"),
+
+  createProject: (data: { name: string; description?: string; color?: string; teamId?: string }) =>
+    fetchApi<any>("/api/projects", { method: "POST", body: JSON.stringify(data) }),
+
+  updateProject: (id: string, data: { name?: string; description?: string; color?: string }) =>
+    fetchApi<any>(`/api/projects/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+
+  deleteProject: (id: string) =>
+    fetchApi<any>(`/api/projects/${id}`, { method: "DELETE" }),
+
+  // ── Tasks ──────────────────────────────────────────────────────────────────
+  getAllTasks: () =>
+    fetchApi<any[]>("/api/projects/tasks/all"),
+
+  getProjectTasks: (projectId: string) =>
+    fetchApi<any[]>(`/api/projects/${projectId}/tasks`),
+
+  createTask: (
+    projectId: string,
+    data: {
+      title: string; description?: string; status?: string; priority?: string
+      assigneeId?: string | null; assigneeLabel?: string; due?: string; tags?: string[]
+    }
+  ) =>
+    fetchApi<any>(`/api/projects/${projectId}/tasks`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  updateTask: (
+    taskId: string,
+    data: {
+      title?: string; description?: string; status?: string; priority?: string
+      assigneeId?: string | null; assigneeLabel?: string; due?: string; tags?: string[]
+    }
+  ) =>
+    fetchApi<any>(`/api/projects/tasks/${taskId}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  deleteTask: (taskId: string) =>
+    fetchApi<any>(`/api/projects/tasks/${taskId}`, { method: "DELETE" }),
+}
+
