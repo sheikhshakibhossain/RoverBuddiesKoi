@@ -636,24 +636,28 @@ export function AIChat({ members, user, onMemberClick }: AIChatProps) {
             </div>
           </ScrollArea>
 
-          {/* Suggestion chips */}
-          {messages.length <= 2 && (
-            <div className="px-4 pb-2 shrink-0">
-              <p className="text-[10px] text-muted-foreground/50 font-mono mb-1.5 uppercase tracking-widest">Try asking</p>
-              <div className="flex flex-wrap gap-1.5">
-                {SUGGESTIONS.slice(0,4).map(s => (
-                  <button
-                    key={s}
-                    onClick={() => sendMessage(s)}
-                    className="text-[11px] px-2.5 py-1 rounded-full border text-muted-foreground hover:text-foreground transition-colors"
-                    style={{ borderColor:"oklch(0.50 0.008 285)", background:"oklch(0.40 0.007 285)" }}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
+          {/* Predefined questions — ALWAYS visible */}
+          <div className="px-4 py-2 shrink-0 border-t" style={{ borderColor: "oklch(0.40 0.008 285)" }}>
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[10px] text-muted-foreground/70 font-semibold tracking-wider uppercase flex items-center gap-1">
+                <Sparkles size={10} className="text-primary"/> Suggested Questions
+              </p>
+              <span className="text-[9px] text-muted-foreground/40 font-mono">1-click ask</span>
             </div>
-          )}
+            <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none" style={{ scrollbarWidth: "none" }}>
+              {SUGGESTIONS.map(s => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => sendMessage(s)}
+                  className="text-[11px] px-2.5 py-1 rounded-full border whitespace-nowrap text-foreground/80 hover:text-foreground hover:border-primary/60 transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
+                  style={{ borderColor: "oklch(0.50 0.008 285)", background: "oklch(0.38 0.007 285)" }}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* Input */}
           <form onSubmit={handleSubmit} className="px-4 pb-4 shrink-0">
