@@ -64,6 +64,7 @@ export function canAccessPage(role: UserRole, page: string): boolean {
     search:    ["org-owner", "team-manager", "subteam-manager", "member"],
     heatmap:   ["org-owner", "team-manager", "subteam-manager"],
     skills:    ["org-owner", "team-manager", "subteam-manager", "member"],
+    projects:  ["org-owner", "team-manager", "subteam-manager", "member"],
     "meeting-planner": ["org-owner", "team-manager"],
     portfolio: ["org-owner", "team-manager", "subteam-manager", "member"],
     settings:  ["org-owner", "team-manager", "member"],

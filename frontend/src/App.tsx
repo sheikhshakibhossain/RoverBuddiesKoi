@@ -26,13 +26,13 @@ import { UserContext, useUser, useUserCtx, canAccessPage, teamScope, subteamScop
 import type { AppUser, UserRole } from "@/lib/user-context"
 import { AuthPage } from "./Auth"
 import { AIChat } from "@/components/AIChat"
-import { membersApi, heatmapApi, skillsApi, routinesApi, authApi, teamsApi } from "@/lib/api"
+import { membersApi, heatmapApi, skillsApi, routinesApi, authApi, teamsApi, projectsApi } from "@/lib/api"
 import { LandingPage } from "@/LandingPage"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type AvailStatus = "free" | "in-class" | "soon" | "missing"
-type NavPage     = "dashboard" | "members" | "search" | "heatmap" | "skills" | "meeting-planner" | "portfolio" | "settings"
+type NavPage     = "dashboard" | "members" | "search" | "heatmap" | "skills" | "projects" | "meeting-planner" | "portfolio" | "settings"
 type DayOfWeek   = "Sun" | "Mon" | "Tue" | "Wed" | "Thu"
 
 interface ClassSlot {
@@ -57,10 +57,10 @@ const MEMBERS: Member[] = []
 // ─── Permission defaults ──────────────────────────────────────────────────────
 
 const DEFAULT_PAGE_PERMS: Record<string, string[]> = {
-  "org-owner":       ["dashboard","members","search","heatmap","skills","meeting-planner","portfolio","settings"],
-  "team-manager":    ["dashboard","members","search","heatmap","skills","meeting-planner","portfolio","settings"],
-  "subteam-manager": ["dashboard","members","search","heatmap","skills","portfolio"],
-  "member":          ["dashboard","search","skills","portfolio","settings"],
+  "org-owner":       ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
+  "team-manager":    ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
+  "subteam-manager": ["dashboard","members","search","heatmap","skills","projects","portfolio"],
+  "member":          ["dashboard","search","skills","projects","portfolio","settings"],
 }
 
 const DEFAULT_FEATURE_PERMS: Record<string, string[]> = {
@@ -76,6 +76,7 @@ const ALL_PAGE_OPTIONS: { id: string; label: string }[] = [
   { id:"search",          label:"Find Members" },
   { id:"heatmap",         label:"Heatmap" },
   { id:"skills",          label:"Skills" },
+  { id:"projects",        label:"Projects & Kanban" },
   { id:"meeting-planner", label:"AI Scheduler" },
   { id:"portfolio",       label:"Work History" },
   { id:"settings",        label:"Settings" },
@@ -191,6 +192,7 @@ const ALL_NAV: { id: NavPage; label: string; icon: React.ReactNode }[] = [
   { id:"search",          label:"Find Members",     icon:<Search size={15}/> },
   { id:"heatmap",         label:"Heatmap",          icon:<BarChart3 size={15}/> },
   { id:"skills",          label:"Skills Catalog",   icon:<Zap size={15}/> },
+  { id:"projects",        label:"Projects & Kanban",icon:<Layers size={15}/> },
   { id:"meeting-planner", label:"AI Scheduler",     icon:<Calendar size={15}/> },
   { id:"portfolio",       label:"Work History",     icon:<User size={15}/> },
   { id:"settings",        label:"Settings",         icon:<Settings size={15}/> },
@@ -2379,6 +2381,1036 @@ function AccountTab() {
   )
 }
 
+// ─── Projects & Kanban Board Page ──────────────────────────────────────────────
+
+type KanbanStatus = "Backlog" | "To Do" | "In Progress" | "Review" | "Testing" | "Completed"
+type KanbanPriority = "Low" | "Medium" | "High" | "Critical"
+
+interface KanbanProject {
+  id: string
+  name: string
+  color: string
+  description: string
+  createdAt: string
+}
+
+interface KanbanTask {
+  id: string
+  projectId: string
+  title: string
+  description: string
+  status: KanbanStatus
+  priority: KanbanPriority
+  assignee: string
+  due: string
+  tags: string[]
+  createdAt: string
+}
+
+const KANBAN_COLUMNS: { id: KanbanStatus; label: string; color: string; bg: string; border: string }[] = [
+  { id: "Backlog",     label: "Backlog",     color: "text-slate-400",   bg: "bg-slate-500/10",   border: "border-slate-500/20" },
+  { id: "To Do",      label: "To Do",       color: "text-blue-400",    bg: "bg-blue-500/10",    border: "border-blue-500/20" },
+  { id: "In Progress",label: "In Progress", color: "text-amber-400",   bg: "bg-amber-500/10",   border: "border-amber-500/20" },
+  { id: "Review",     label: "Review",      color: "text-violet-400",  bg: "bg-violet-500/10",  border: "border-violet-500/20" },
+  { id: "Testing",    label: "Testing",     color: "text-orange-400",  bg: "bg-orange-500/10",  border: "border-orange-500/20" },
+  { id: "Completed",  label: "Completed",   color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+]
+
+const PRIORITY_STYLES: Record<KanbanPriority, { label: string; dot: string; text: string }> = {
+  Low:      { label: "Low",      dot: "bg-slate-400",   text: "text-slate-400" },
+  Medium:   { label: "Medium",   dot: "bg-blue-400",    text: "text-blue-400" },
+  High:     { label: "High",     dot: "bg-amber-400",   text: "text-amber-400" },
+  Critical: { label: "Critical", dot: "bg-red-500",     text: "text-red-400" },
+}
+
+const PROJECT_PALETTE = ["#6366f1","#22d3ee","#f59e0b","#10b981","#f43f5e","#a78bfa","#fb923c","#34d399"]
+
+const DEFAULT_PROJECTS: KanbanProject[] = [
+  { id: "proj-1", name: "Rover Control System", description: "Core telemetry, obstacle avoidance, and navigation modules", color: "#6366f1", createdAt: new Date().toISOString() },
+  { id: "proj-2", name: "Hardware Integration", description: "PCB design, power distribution, and mechanical assembly", color: "#f59e0b", createdAt: new Date().toISOString() },
+  { id: "proj-3", name: "Autonomous Navigation", description: "Computer vision and path planning pipeline", color: "#10b981", createdAt: new Date().toISOString() },
+]
+
+const DEFAULT_TASKS: KanbanTask[] = [
+  { id: "t-1", projectId: "proj-1", title: "Autonomous Navigation Module", description: "Implement obstacle avoidance using LiDAR sensor and ROS2 pipelines", status: "In Progress", priority: "High", assignee: "Lead Dev", due: "Aug 15", tags: ["ROS2", "Python", "LiDAR"], createdAt: new Date().toISOString() },
+  { id: "t-2", projectId: "proj-2", title: "PCB Power Distribution Rail", description: "Design 12V / 5V dual rail step-down buck converter", status: "To Do", priority: "Critical", assignee: "Electrical Team", due: "Aug 20", tags: ["PCB", "KiCad", "Power"], createdAt: new Date().toISOString() },
+  { id: "t-3", projectId: "proj-2", title: "Chassis Stress Simulation", description: "Run FEA load analysis on rover chassis joints", status: "Completed", priority: "Medium", assignee: "Mechanical Team", due: "Aug 02", tags: ["CAD", "FEA"], createdAt: new Date().toISOString() },
+  { id: "t-4", projectId: "proj-1", title: "Real-Time Telemetry Stream", description: "Stream live IMU and motor velocity over WebSocket to frontend dashboard", status: "To Do", priority: "High", assignee: "Software Lead", due: "Aug 28", tags: ["WebSocket", "Node.js"], createdAt: new Date().toISOString() },
+  { id: "t-5", projectId: "proj-3", title: "Unit Tests for Path Planner", description: "Write comprehensive pytest suite for Dijkstra and A* path algorithms", status: "Backlog", priority: "Low", assignee: "QA Team", due: "Sep 05", tags: ["pytest", "Testing"], createdAt: new Date().toISOString() },
+  { id: "t-6", projectId: "proj-3", title: "Computer Vision Camera Stream", description: "Calibrate stereo camera and stereo disparity map for depth estimation", status: "Review", priority: "High", assignee: "Vision Team", due: "Aug 18", tags: ["OpenCV", "CUDA"], createdAt: new Date().toISOString() },
+  { id: "t-7", projectId: "proj-2", title: "Battery Management System QA", description: "Thermal testing during 10A continuous discharge load cycle", status: "Testing", priority: "Critical", assignee: "Hardware Lead", due: "Aug 12", tags: ["BMS", "Safety"], createdAt: new Date().toISOString() },
+]
+
+function loadStoredKanban(userId: string) {
+  try {
+    const raw = localStorage.getItem(`kanban_data_${userId}`) || localStorage.getItem("kanban_data_global")
+    if (raw) return JSON.parse(raw) as { projects: KanbanProject[]; tasks: KanbanTask[] }
+  } catch {}
+  return null
+}
+
+function saveStoredKanban(userId: string, projects: KanbanProject[], tasks: KanbanTask[]) {
+  try {
+    const payload = JSON.stringify({ projects, tasks })
+    localStorage.setItem(`kanban_data_${userId}`, payload)
+    localStorage.setItem("kanban_data_global", payload)
+  } catch {}
+}
+
+function ProjectsPage() {
+  const user = useUser()
+  const stored = loadStoredKanban(user.id)
+
+  const isManager = user.role === "org-owner" || user.role === "team-manager"
+
+  const [projects,      setProjects]      = useState<KanbanProject[]>(() => stored?.projects || DEFAULT_PROJECTS)
+  const [tasks,         setTasks]         = useState<KanbanTask[]>(() => stored?.tasks || DEFAULT_TASKS)
+  const [loading,       setLoading]       = useState(false)
+  const [error,         setError]         = useState<string | null>(null)
+
+  const [activeProject, setActiveProject] = useState<string>("all")
+  const [memberFilter,  setMemberFilter]  = useState<string>("all")
+  const [dragTaskId,    setDragTaskId]    = useState<string | null>(null)
+  const [dragOver,      setDragOver]      = useState<KanbanStatus | null>(null)
+  const [dragOverPrio,  setDragOverPrio]  = useState<KanbanPriority | null>(null)
+  const [taskModal,     setTaskModal]     = useState<{ open: boolean; task: KanbanTask | null; column?: KanbanStatus }>({ open: false, task: null })
+  const [projectModal,  setProjectModal]  = useState<{ open: boolean; project: KanbanProject | null }>({ open: false, project: null })
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  const [view,          setView]          = useState<"kanban" | "list">("kanban")
+  const [saving,        setSaving]        = useState(false)
+
+  // ── Sync to localStorage on any state update ──
+  useEffect(() => {
+    saveStoredKanban(user.id, projects, tasks)
+  }, [projects, tasks, user.id])
+
+  // ── Load data from API with graceful fallback ──
+  const loadData = async () => {
+    try {
+      setError(null)
+      const [rawProjects, rawTasks] = await Promise.all([
+        projectsApi.getProjects().catch(() => null),
+        projectsApi.getAllTasks().catch(() => null),
+      ])
+      if (Array.isArray(rawProjects) && rawProjects.length > 0) {
+        setProjects(rawProjects.map(apiToProject))
+      }
+      if (Array.isArray(rawTasks) && rawTasks.length > 0) {
+        setTasks(rawTasks.map(apiToTask))
+      }
+    } catch {
+      // Gracefully fall back to local state
+    }
+  }
+
+  useEffect(() => { loadData() }, [])
+
+  // ── Serializers ──
+  function apiToProject(p: any): KanbanProject {
+    return { id: p.id, name: p.name, description: p.description ?? "", color: p.color ?? "#6366f1", createdAt: p.createdAt }
+  }
+  function apiToTask(t: any): KanbanTask {
+    return {
+      id: t.id, projectId: t.projectId, title: t.title, description: t.description ?? "",
+      status: t.status as KanbanStatus, priority: t.priority as KanbanPriority,
+      assignee: t.assigneeLabel || t.createdByName || user.name || "Member",
+      due: t.due ?? "", tags: t.tags ?? [],
+      createdAt: t.createdAt,
+    }
+  }
+
+  // Unique assignees for supervisor filter
+  const uniqueAssignees = Array.from(new Set(tasks.map(t => t.assignee).filter(Boolean)))
+
+  // Filter tasks based on project tab and supervisor member filter
+  const filteredTasks = tasks.filter(t => {
+    const matchesProj = activeProject === "all" || t.projectId === activeProject
+    const matchesMember = memberFilter === "all" || t.assignee === memberFilter
+    return matchesProj && matchesMember
+  })
+
+  // ── Drag & Drop Column Status (Managers only) ──
+  const onDragStart = (e: React.DragEvent, taskId: string) => {
+    if (!isManager) return
+    setDragTaskId(taskId)
+    e.dataTransfer.effectAllowed = "move"
+    e.dataTransfer.setData("text/plain", taskId)
+  }
+
+  const onDragOver = (e: React.DragEvent, col: KanbanStatus) => {
+    if (!isManager) return
+    e.preventDefault()
+    e.dataTransfer.dropEffect = "move"
+    setDragOver(col)
+  }
+
+  const onDrop = async (e: React.DragEvent, col: KanbanStatus) => {
+    if (!isManager) return
+    e.preventDefault()
+    if (!dragTaskId) return
+    const original = tasks.find(t => t.id === dragTaskId)
+    if (!original || original.status === col) {
+      setDragTaskId(null); setDragOver(null); setDragOverPrio(null); return
+    }
+    // Optimistic update
+    const currentId = dragTaskId
+    setTasks(prev => prev.map(t => t.id === currentId ? { ...t, status: col } : t))
+    setDragTaskId(null); setDragOver(null); setDragOverPrio(null)
+    projectsApi.updateTask(currentId, { status: col }).catch(() => {})
+  }
+
+  // ── Drag & Drop Priority Drop Target (Managers only) ──
+  const onDropPriority = async (e: React.DragEvent, prio: KanbanPriority) => {
+    if (!isManager) return
+    e.preventDefault()
+    if (!dragTaskId) return
+    const original = tasks.find(t => t.id === dragTaskId)
+    if (!original || original.priority === prio) {
+      setDragTaskId(null); setDragOver(null); setDragOverPrio(null); return
+    }
+    const currentId = dragTaskId
+    setTasks(prev => prev.map(t => t.id === currentId ? { ...t, priority: prio } : t))
+    setDragTaskId(null); setDragOver(null); setDragOverPrio(null)
+    projectsApi.updateTask(currentId, { priority: prio }).catch(() => {})
+  }
+
+  const onDragEnd = () => { setDragTaskId(null); setDragOver(null); setDragOverPrio(null) }
+
+  // ── 1-Click Priority Cycle (Managers only) ──
+  const cyclePriority = async (e: React.MouseEvent, task: KanbanTask) => {
+    e.stopPropagation()
+    if (!isManager) return
+    const priorities: KanbanPriority[] = ["Low", "Medium", "High", "Critical"]
+    const nextIdx = (priorities.indexOf(task.priority) + 1) % priorities.length
+    const nextPrio = priorities[nextIdx]
+    setTasks(prev => prev.map(t => t.id === task.id ? { ...t, priority: nextPrio } : t))
+    projectsApi.updateTask(task.id, { priority: nextPrio }).catch(() => {})
+  }
+
+  // ── Quick Column Progression (Managers only) ──
+  const moveTaskColumn = async (e: React.MouseEvent, task: KanbanTask, direction: "prev" | "next") => {
+    e.stopPropagation()
+    if (!isManager) return
+    const colIds: KanbanStatus[] = ["Backlog", "To Do", "In Progress", "Review", "Testing", "Completed"]
+    const currentIdx = colIds.indexOf(task.status)
+    const newIdx = direction === "next" ? Math.min(currentIdx + 1, colIds.length - 1) : Math.max(currentIdx - 1, 0)
+    if (newIdx === currentIdx) return
+    const newStatus = colIds[newIdx]
+    setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: newStatus } : t))
+    projectsApi.updateTask(task.id, { status: newStatus }).catch(() => {})
+  }
+
+  // ── Task CRUD ──
+  const saveTask = async (task: KanbanTask) => {
+    if (!isManager) return
+    setSaving(true)
+    try {
+      const isExisting = tasks.find(t => t.id === task.id)
+      if (isExisting) {
+        setTasks(prev => prev.map(t => t.id === task.id ? { ...task } : t))
+        projectsApi.updateTask(task.id, {
+          title: task.title, description: task.description, status: task.status,
+          priority: task.priority, assigneeLabel: task.assignee, due: task.due, tags: task.tags,
+        }).then(updated => {
+          if (updated?.id) setTasks(prev => prev.map(t => t.id === task.id ? apiToTask(updated) : t))
+        }).catch(() => {})
+      } else {
+        const newTask: KanbanTask = {
+          ...task,
+          id: task.id || "t-" + Date.now(),
+          projectId: task.projectId || (activeProject !== "all" ? activeProject : (projects[0]?.id || "proj-1")),
+          assignee: task.assignee || user.name || "Member",
+          createdAt: new Date().toISOString(),
+        }
+        setTasks(prev => [...prev, newTask])
+        projectsApi.createTask(newTask.projectId, {
+          title: newTask.title, description: newTask.description, status: newTask.status,
+          priority: newTask.priority, assigneeLabel: newTask.assignee, due: newTask.due, tags: newTask.tags,
+        }).then(created => {
+          if (created?.id) setTasks(prev => prev.map(t => t.id === newTask.id ? apiToTask(created) : t))
+        }).catch(() => {})
+      }
+      setTaskModal({ open: false, task: null })
+    } finally { setSaving(false) }
+  }
+
+  const deleteTask = async (id: string) => {
+    if (!isManager) return
+    setTasks(prev => prev.filter(t => t.id !== id))
+    setConfirmDelete(null)
+    setTaskModal({ open: false, task: null })
+    projectsApi.deleteTask(id).catch(() => {})
+  }
+
+  // ── Project CRUD ──
+  const saveProject = async (proj: KanbanProject) => {
+    if (!isManager) return
+    setSaving(true)
+    try {
+      const isExisting = projects.find(p => p.id === proj.id)
+      if (isExisting) {
+        setProjects(prev => prev.map(p => p.id === proj.id ? { ...proj } : p))
+        projectsApi.updateProject(proj.id, { name: proj.name, description: proj.description, color: proj.color })
+          .then(updated => { if (updated?.id) setProjects(prev => prev.map(p => p.id === proj.id ? apiToProject(updated) : p)) })
+          .catch(() => {})
+      } else {
+        const newProj: KanbanProject = {
+          ...proj,
+          id: proj.id || "proj-" + Date.now(),
+          color: proj.color || PROJECT_PALETTE[projects.length % PROJECT_PALETTE.length],
+          createdAt: new Date().toISOString(),
+        }
+        setProjects(prev => [...prev, newProj])
+        projectsApi.createProject({ name: newProj.name, description: newProj.description, color: newProj.color })
+          .then(created => { if (created?.id) setProjects(prev => prev.map(p => p.id === newProj.id ? apiToProject(created) : p)) })
+          .catch(() => {})
+      }
+      setProjectModal({ open: false, project: null })
+    } finally { setSaving(false) }
+  }
+
+  const deleteProject = async (id: string) => {
+    if (!isManager) return
+    setProjects(prev => prev.filter(p => p.id !== id))
+    setTasks(prev => prev.filter(t => t.projectId !== id))
+    if (activeProject === id) setActiveProject("all")
+    projectsApi.deleteProject(id).catch(() => {})
+  }
+
+  const totalByStatus = (col: KanbanStatus) => filteredTasks.filter(t => t.status === col).length
+
+  return (
+    <div className="space-y-5">
+      {/* Loading / Error state */}
+      {loading && (
+        <div className="flex items-center justify-center py-20">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-9 h-9 rounded-full border-2 border-primary border-t-transparent animate-spin"/>
+            <p className="text-xs font-medium text-muted-foreground">Syncing Projects & Kanban from database...</p>
+          </div>
+        </div>
+      )}
+      {error && !loading && (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 flex items-center gap-3">
+          <AlertCircle size={16} className="text-destructive shrink-0"/>
+          <p className="text-sm text-destructive">{error}</p>
+          <Button size="sm" variant="outline" className="ml-auto text-xs" onClick={loadData}>Retry</Button>
+        </div>
+      )}
+
+      {!loading && (<>
+      {/* Workspace Banner */}
+      <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5 flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg bg-primary/15 flex items-center justify-center text-primary font-bold text-xs">
+            ⚡
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+              Live Team Kanban Board & Sprint Tracker
+              <Badge variant={isManager ? "default" : "secondary"} className="text-[9px] px-1.5 py-0">
+                {isManager ? "Full Manager Control" : "View-Only Mode • Managed by Team Managers"}
+              </Badge>
+            </p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              {isManager 
+                ? "Drag and drop cards across columns, click priority badges to cycle priority, or click cards to edit full details."
+                : "Live engineering board view. Only Organization Owners and Team Managers can modify tasks and sprint statuses."
+              }
+            </p>
+          </div>
+        </div>
+        {uniqueAssignees.length > 1 && (
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-muted-foreground font-medium">Filter Member:</span>
+            <Select value={memberFilter} onValueChange={setMemberFilter}>
+              <SelectTrigger className="h-7 text-xs w-40 bg-card">
+                <SelectValue placeholder="All Members"/>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Members ({tasks.length})</SelectItem>
+                {uniqueAssignees.map(a => (
+                  <SelectItem key={a} value={a}>{a} ({tasks.filter(t => t.assignee === a).length})</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+      </div>
+
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Projects & Kanban Board</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">
+            Track engineering sprints, task priorities, and subteam milestones
+          </p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
+            <button onClick={() => setView("kanban")} className={cn("px-3 py-1 rounded-md text-xs font-medium transition-all", view === "kanban" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>Board</button>
+            <button onClick={() => setView("list")} className={cn("px-3 py-1 rounded-md text-xs font-medium transition-all", view === "list" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>List</button>
+          </div>
+          {isManager && (
+            <>
+              <Button size="sm" variant="outline" className="gap-1.5 h-8 text-xs" onClick={() => setProjectModal({ open: true, project: null })} disabled={saving}>
+                <Plus size={13}/>New Project
+              </Button>
+              <Button size="sm" className="gap-1.5 h-8 text-xs" onClick={() => setTaskModal({ open: true, task: null, column: "To Do" })} disabled={saving}>
+                <Plus size={13}/>{saving ? "Saving..." : "Add Task"}
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Priority Drop Target Bar (Visible when dragging a task to allow instant priority drop) */}
+      {isManager && dragTaskId && (
+        <div className="rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 p-3 animate-in fade-in zoom-in duration-150">
+          <p className="text-[11px] font-semibold text-primary mb-2 text-center uppercase tracking-wider">
+            🎯 Drop onto a Priority Zone or Column Below:
+          </p>
+          <div className="grid grid-cols-4 gap-2">
+            {(["Low", "Medium", "High", "Critical"] as KanbanPriority[]).map(prio => {
+              const pStyle = PRIORITY_STYLES[prio]
+              const isTarget = dragOverPrio === prio
+              return (
+                <div
+                  key={prio}
+                  onDragOver={(e) => { e.preventDefault(); setDragOverPrio(prio) }}
+                  onDragLeave={() => setDragOverPrio(null)}
+                  onDrop={(e) => onDropPriority(e, prio)}
+                  className={cn(
+                    "rounded-lg border p-2 text-center transition-all cursor-pointer",
+                    isTarget ? "border-primary bg-primary/20 scale-105 shadow-md ring-2 ring-primary/40" : "border-border/60 bg-card hover:bg-muted/40"
+                  )}
+                >
+                  <div className="flex items-center justify-center gap-1.5">
+                    <span className={cn("w-2 h-2 rounded-full", pStyle.dot)}/>
+                    <span className={cn("text-xs font-bold", pStyle.text)}>Set {prio}</span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Project Tabs */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          onClick={() => setActiveProject("all")}
+          className={cn("px-3 py-1.5 rounded-lg text-xs font-medium border transition-all", activeProject === "all" ? "bg-primary text-primary-foreground border-primary shadow-sm" : "border-border bg-muted/30 text-muted-foreground hover:text-foreground hover:bg-muted/60")}
+        >
+          All Projects
+          <span className={cn("ml-1.5 font-mono", activeProject === "all" ? "opacity-70" : "opacity-50")}>{tasks.length}</span>
+        </button>
+        {projects.map(proj => (
+          <div key={proj.id} className="group relative">
+            <button
+              onClick={() => setActiveProject(proj.id)}
+              className={cn("px-3 py-1.5 rounded-lg text-xs font-medium border transition-all flex items-center gap-1.5", activeProject === proj.id ? "text-foreground border-transparent shadow-sm" : "border-border bg-muted/30 text-muted-foreground hover:text-foreground hover:bg-muted/60")}
+              style={activeProject === proj.id ? { backgroundColor: proj.color + "22", borderColor: proj.color + "55" } : {}}
+            >
+              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: proj.color }}/>
+              {proj.name}
+              <span className="font-mono opacity-60 ml-0.5">{tasks.filter(t => t.projectId === proj.id).length}</span>
+            </button>
+            {isManager && (
+              <button
+                onClick={() => setProjectModal({ open: true, project: proj })}
+                className="absolute -top-1.5 -right-1.5 opacity-0 group-hover:opacity-100 transition-opacity w-4 h-4 rounded-full bg-secondary border border-border text-muted-foreground hover:text-foreground flex items-center justify-center shadow-xs"
+                title="Edit project"
+              >
+                <Pencil size={8}/>
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Stats Strip */}
+      <div className="grid grid-cols-6 gap-2">
+        {KANBAN_COLUMNS.map(col => (
+          <div key={col.id} className={cn("rounded-lg border p-2.5 text-center", col.bg, col.border)}>
+            <p className={cn("text-lg font-bold", col.color)}>{totalByStatus(col.id)}</p>
+            <p className="text-[10px] text-muted-foreground font-medium">{col.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {view === "kanban" ? (
+        /* ─── Kanban Board ─── */
+        <div className="flex gap-3 overflow-x-auto pb-4" style={{ minHeight: "480px" }}>
+          {KANBAN_COLUMNS.map(col => {
+            const colTasks = filteredTasks.filter(t => t.status === col.id)
+            const isDragTarget = dragOver === col.id
+            return (
+              <div
+                key={col.id}
+                className={cn(
+                  "rounded-xl border flex flex-col transition-all duration-150",
+                  col.bg,
+                  isDragTarget ? "border-primary scale-[1.02] shadow-xl ring-2 ring-primary/30" : col.border
+                )}
+                style={{ minWidth: "230px", width: "230px", minHeight: "440px" }}
+                onDragOver={e => onDragOver(e, col.id)}
+                onDrop={e => onDrop(e, col.id)}
+                onDragLeave={() => setDragOver(null)}
+              >
+                {/* Column header */}
+                <div className={cn("flex items-center justify-between p-3 border-b", col.border)}>
+                  <div className="flex items-center gap-1.5">
+                    <span className={cn("w-2 h-2 rounded-full", col.color.replace("text-","bg-"))}/>
+                    <span className={cn("text-xs font-bold uppercase tracking-wider", col.color)}>{col.label}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Badge variant="secondary" className="font-mono text-[10px] h-4 px-1">{colTasks.length}</Badge>
+                    {isManager && (
+                      <button
+                        onClick={() => setTaskModal({ open: true, task: null, column: col.id })}
+                        className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                        title={`Add task to ${col.label}`}
+                      >
+                        <Plus size={11}/>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Task cards */}
+                <div className="flex-1 p-2 space-y-2.5 overflow-y-auto">
+                  {colTasks.length === 0 && (
+                    <div
+                      className={cn(
+                        "rounded-lg border-2 border-dashed flex items-center justify-center h-24 transition-colors",
+                        isDragTarget ? "border-primary/60 bg-primary/10" : "border-border/30"
+                      )}
+                    >
+                      <p className="text-[11px] text-muted-foreground/50 font-medium">
+                        {isDragTarget ? "Drop here to move" : "No tasks in " + col.label}
+                      </p>
+                    </div>
+                  )}
+
+                  {colTasks.map(task => {
+                    const proj = projects.find(p => p.id === task.projectId)
+                    const prio = PRIORITY_STYLES[task.priority]
+                    const isBeingDragged = dragTaskId === task.id
+
+                    return (
+                      <div
+                        key={task.id}
+                        draggable={isManager}
+                        onDragStart={e => onDragStart(e, task.id)}
+                        onDragEnd={onDragEnd}
+                        onClick={() => setTaskModal({ open: true, task })}
+                        className={cn(
+                          "group rounded-xl border bg-card p-3 space-y-2 transition-all select-none shadow-xs hover:shadow-md hover:border-primary/50",
+                          isManager ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
+                          isBeingDragged ? "opacity-30 scale-95 border-primary" : "opacity-100 scale-100"
+                        )}
+                      >
+                        {/* Project Badge */}
+                        {proj && (
+                          <div className="flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: proj.color }}/>
+                            <span className="text-[9px] font-semibold truncate max-w-[140px]" style={{ color: proj.color }}>{proj.name}</span>
+                          </div>
+                        )}
+
+                        {/* Title & Priority Pill */}
+                        <div className="flex items-start justify-between gap-1.5">
+                          <p className="text-xs font-semibold text-foreground leading-snug flex-1">{task.title}</p>
+                          
+                          <button
+                            type="button"
+                            onClick={(e) => cyclePriority(e, task)}
+                            title={isManager ? "Click to cycle priority (Low ➔ Medium ➔ High ➔ Critical)" : "Priority level"}
+                            className={cn(
+                              "flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[9px] font-bold shrink-0 transition-all bg-muted/60 hover:bg-muted",
+                              isManager ? "hover:scale-105 active:scale-95 cursor-pointer" : "cursor-default"
+                            )}
+                          >
+                            <span className={cn("w-1.5 h-1.5 rounded-full", prio.dot)}/>
+                            <span className={prio.text}>{prio.label}</span>
+                          </button>
+                        </div>
+
+                        {/* Description */}
+                        {task.description && (
+                          <p className="text-[10px] text-muted-foreground leading-relaxed line-clamp-2">{task.description}</p>
+                        )}
+
+                        {/* Tags */}
+                        {task.tags.length > 0 && (
+                          <div className="flex gap-1 flex-wrap">
+                            {task.tags.slice(0,3).map(tag => (
+                              <span key={tag} className="px-1.5 py-0.5 rounded-md bg-muted text-[9px] text-muted-foreground font-medium">{tag}</span>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Card Footer with Quick Move Arrows & Assignee */}
+                        <div className="flex items-center justify-between pt-1.5 border-t border-border/40 text-[10px]">
+                          <div className="flex items-center gap-1.5">
+                            <Avatar className="w-5 h-5">
+                              <AvatarFallback className="text-[8px] font-bold bg-primary/20 text-primary">
+                                {task.assignee.slice(0,2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="text-[9px] text-muted-foreground truncate max-w-[85px]" title={task.assignee}>
+                              {task.assignee}
+                            </span>
+                          </div>
+
+                          {/* Quick 1-Click Column Move Arrows (Managers only) */}
+                          <div className="flex items-center gap-0.5">
+                            {isManager && (
+                              <button
+                                type="button"
+                                onClick={(e) => moveTaskColumn(e, task, "prev")}
+                                className="w-4 h-4 rounded text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center transition-colors"
+                                title="Move column left (←)"
+                              >
+                                ←
+                              </button>
+                            )}
+                            <span className="text-[8px] font-mono text-muted-foreground">{task.due || "Active"}</span>
+                            {isManager && (
+                              <button
+                                type="button"
+                                onClick={(e) => moveTaskColumn(e, task, "next")}
+                                className="w-4 h-4 rounded text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center transition-colors"
+                                title="Move column right (→)"
+                              >
+                                →
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        /* ─── List View ─── */
+        <div className="rounded-xl border border-border overflow-hidden bg-card">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-border bg-muted/30">
+                <th className="text-left p-3 text-muted-foreground font-medium w-[35%]">Task</th>
+                <th className="text-left p-3 text-muted-foreground font-medium">Project</th>
+                <th className="text-left p-3 text-muted-foreground font-medium">Status</th>
+                <th className="text-left p-3 text-muted-foreground font-medium">Priority</th>
+                <th className="text-left p-3 text-muted-foreground font-medium">Assignee</th>
+                <th className="text-left p-3 text-muted-foreground font-medium">Due Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredTasks.length === 0 && (
+                <tr><td colSpan={6} className="text-center p-8 text-muted-foreground">No tasks found</td></tr>
+              )}
+              {filteredTasks.map((task, i) => {
+                const proj = projects.find(p => p.id === task.projectId)
+                const col = KANBAN_COLUMNS.find(c => c.id === task.status)
+                const prio = PRIORITY_STYLES[task.priority]
+
+                return (
+                  <tr
+                    key={task.id}
+                    onClick={() => setTaskModal({ open: true, task })}
+                    className={cn(
+                      "border-b border-border/50 transition-colors cursor-pointer hover:bg-muted/20",
+                      i % 2 === 0 ? "" : "bg-muted/10"
+                    )}
+                  >
+                    <td className="p-3">
+                      <p className="font-semibold text-foreground">{task.title}</p>
+                      {task.description && <p className="text-muted-foreground mt-0.5 line-clamp-1">{task.description}</p>}
+                    </td>
+                    <td className="p-3">
+                      {proj && (
+                        <span className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: proj.color }}/>
+                          <span style={{ color: proj.color }} className="font-medium">{proj.name}</span>
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-3">
+                      <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-semibold border", col?.bg, col?.border, col?.color)}>{task.status}</span>
+                    </td>
+                    <td className="p-3">
+                      <button
+                        type="button"
+                        onClick={(e) => cyclePriority(e, task)}
+                        className={cn("flex items-center gap-1", isManager ? "cursor-pointer hover:opacity-80" : "cursor-default")}
+                        title={isManager ? "Click to cycle priority" : "Priority"}
+                      >
+                        <span className={cn("w-1.5 h-1.5 rounded-full", prio.dot)}/>
+                        <span className={cn("font-medium", prio.text)}>{prio.label}</span>
+                      </button>
+                    </td>
+                    <td className="p-3 text-muted-foreground font-medium">{task.assignee}</td>
+                    <td className="p-3 font-mono text-muted-foreground">{task.due || "—"}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* ─── Task Modal ─── */}
+      <TaskModal
+        open={taskModal.open}
+        task={taskModal.task}
+        defaultColumn={taskModal.column}
+        projects={projects}
+        defaultProjectId={activeProject !== "all" ? activeProject : projects[0]?.id || ""}
+        currentUser={user.name || "Member"}
+        canEdit={isManager}
+        onSave={saveTask}
+        onDelete={(id) => setConfirmDelete(id)}
+        onClose={() => setTaskModal({ open: false, task: null })}
+      />
+
+      {/* ─── Project Modal ─── */}
+      <ProjectModal
+        open={projectModal.open}
+        project={projectModal.project}
+        canEdit={isManager}
+        onSave={saveProject}
+        onDelete={(id) => { deleteProject(id); setProjectModal({ open: false, project: null }) }}
+        onClose={() => setProjectModal({ open: false, project: null })}
+      />
+
+      {/* ─── Delete Confirm Dialog ─── */}
+      <Dialog open={!!confirmDelete} onOpenChange={() => setConfirmDelete(null)}>
+        <DialogContent className="sm:max-w-[380px]">
+          <DialogHeader>
+            <DialogTitle>Delete Task</DialogTitle>
+            <DialogDescription>This action cannot be undone. The task will be permanently deleted from the database.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setConfirmDelete(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={() => confirmDelete && deleteTask(confirmDelete)}>Delete Task</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      </>)}
+    </div>
+  )
+}
+
+// ─── Task Modal ───────────────────────────────────────────────────────────────
+
+function TaskModal({ open, task, defaultColumn, projects, defaultProjectId, currentUser, canEdit, onSave, onDelete, onClose }: {
+  open: boolean
+  task: KanbanTask | null
+  defaultColumn?: KanbanStatus
+  projects: KanbanProject[]
+  defaultProjectId: string
+  currentUser: string
+  canEdit: boolean
+  onSave: (t: KanbanTask) => void
+  onDelete: (id: string) => void
+  onClose: () => void
+}) {
+  const isNew = !task
+  const [form, setForm] = useState<KanbanTask>({
+    id: "", projectId: defaultProjectId, title: "", description: "",
+    status: defaultColumn || "To Do", priority: "Medium", assignee: currentUser,
+    due: "", tags: [], createdAt: new Date().toISOString(),
+  })
+  const [tagInput, setTagInput] = useState("")
+
+  useEffect(() => {
+    if (open) {
+      if (task) {
+        setForm({ ...task })
+      } else {
+        setForm({
+          id: "t-" + Date.now(),
+          projectId: defaultProjectId || projects[0]?.id || "",
+          title: "", description: "",
+          status: defaultColumn || "To Do", priority: "Medium",
+          assignee: currentUser, due: "", tags: [],
+          createdAt: new Date().toISOString(),
+        })
+      }
+      setTagInput("")
+    }
+  }, [open, task, defaultColumn, defaultProjectId, currentUser, projects])
+
+  const set = (k: keyof KanbanTask, v: any) => {
+    if (!canEdit) return
+    setForm(f => ({ ...f, [k]: v }))
+  }
+
+  const addTag = () => {
+    if (!canEdit) return
+    const t = tagInput.trim()
+    if (t && !form.tags.includes(t)) set("tags", [...form.tags, t])
+    setTagInput("")
+  }
+  const removeTag = (tag: string) => {
+    if (!canEdit) return
+    set("tags", form.tags.filter(t => t !== tag))
+  }
+
+  const handleSave = () => {
+    if (!canEdit || !form.title.trim()) return
+    onSave({ ...form, title: form.title.trim() })
+  }
+
+  const colMeta = KANBAN_COLUMNS.find(c => c.id === form.status)
+  const currentProj = projects.find(p => p.id === form.projectId)
+  const prioMeta = PRIORITY_STYLES[form.priority]
+
+  return (
+    <Dialog open={open} onOpenChange={v => { if (!v) onClose() }}>
+      <DialogContent className="sm:max-w-[520px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            {isNew ? (
+              <><Plus size={16} className="text-primary"/>New Task</>
+            ) : canEdit ? (
+              <><Pencil size={16} className="text-primary"/>Edit Task</>
+            ) : (
+              <><Layers size={16} className="text-primary"/>Task Details</>
+            )}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          {/* Title */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">Task Title {canEdit && <span className="text-destructive">*</span>}</label>
+            {canEdit ? (
+              <Input value={form.title} onChange={e => set("title", e.target.value)} placeholder="What needs to be done?" className="text-sm font-medium" onKeyDown={e => e.key === "Enter" && handleSave()}/>
+            ) : (
+              <p className="text-sm font-semibold text-foreground bg-muted/30 p-2.5 rounded-md">{form.title}</p>
+            )}
+          </div>
+          {/* Description */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">Description</label>
+            {canEdit ? (
+              <textarea
+                value={form.description}
+                onChange={e => set("description", e.target.value)}
+                placeholder="Add more details..."
+                rows={2}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+              />
+            ) : (
+              <p className="text-xs text-muted-foreground bg-muted/20 p-2.5 rounded-md leading-relaxed">{form.description || "No description provided."}</p>
+            )}
+          </div>
+          {/* Row: Project + Status */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Project</label>
+              {canEdit ? (
+                <Select value={form.projectId} onValueChange={v => set("projectId", v)}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select project"/></SelectTrigger>
+                  <SelectContent>
+                    {projects.map(p => (
+                      <SelectItem key={p.id} value={p.id}>
+                        <span className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }}/>
+                          {p.name}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="h-8 flex items-center gap-1.5 px-2 rounded-md bg-muted/30 border border-border text-xs">
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: currentProj?.color || "#6366f1" }}/>
+                  <span className="font-medium">{currentProj?.name || "General"}</span>
+                </div>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Status</label>
+              {canEdit ? (
+                <Select value={form.status} onValueChange={v => set("status", v as KanbanStatus)}>
+                  <SelectTrigger className={cn("h-8 text-xs border", colMeta?.border, colMeta?.bg)} style={{ color: "inherit" }}>
+                    <SelectValue/>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {KANBAN_COLUMNS.map(c => (
+                      <SelectItem key={c.id} value={c.id}><span className={c.color}>{c.label}</span></SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className={cn("h-8 flex items-center px-2.5 rounded-md border text-xs font-semibold", colMeta?.bg, colMeta?.border, colMeta?.color)}>
+                  {form.status}
+                </div>
+              )}
+            </div>
+          </div>
+          {/* Row: Priority + Assignee + Due */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Priority</label>
+              {canEdit ? (
+                <Select value={form.priority} onValueChange={v => set("priority", v as KanbanPriority)}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue/></SelectTrigger>
+                  <SelectContent>
+                    {(["Low","Medium","High","Critical"] as KanbanPriority[]).map(p => (
+                      <SelectItem key={p} value={p}>
+                        <span className="flex items-center gap-1.5">
+                          <span className={cn("w-1.5 h-1.5 rounded-full", PRIORITY_STYLES[p].dot)}/>
+                          <span className={PRIORITY_STYLES[p].text}>{p}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="h-8 flex items-center gap-1.5 px-2 rounded-md bg-muted/30 border border-border text-xs">
+                  <span className={cn("w-2 h-2 rounded-full", prioMeta.dot)}/>
+                  <span className={cn("font-medium", prioMeta.text)}>{prioMeta.label}</span>
+                </div>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Assignee</label>
+              {canEdit ? (
+                <Input value={form.assignee} onChange={e => set("assignee", e.target.value)} placeholder="Name or team" className="h-8 text-xs"/>
+              ) : (
+                <div className="h-8 flex items-center px-2 rounded-md bg-muted/30 border border-border text-xs text-muted-foreground font-medium">
+                  {form.assignee || "Unassigned"}
+                </div>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Due Date</label>
+              {canEdit ? (
+                <Input value={form.due} onChange={e => set("due", e.target.value)} placeholder="e.g. Aug 30" className="h-8 text-xs"/>
+              ) : (
+                <div className="h-8 flex items-center px-2 rounded-md bg-muted/30 border border-border text-xs font-mono text-muted-foreground">
+                  {form.due || "—"}
+                </div>
+              )}
+            </div>
+          </div>
+          {/* Tags */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">Tags</label>
+            {canEdit && (
+              <div className="flex gap-1.5">
+                <Input value={tagInput} onChange={e => setTagInput(e.target.value)} placeholder="Add tag..." className="h-8 text-xs flex-1" onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addTag())}/>
+                <Button size="sm" variant="outline" className="h-8 text-xs px-2" onClick={addTag}>Add</Button>
+              </div>
+            )}
+            {form.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1 pt-1">
+                {form.tags.map(tag => (
+                  <span key={tag} className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted text-[10px] text-muted-foreground font-medium">
+                    {tag}
+                    {canEdit && (
+                      <button onClick={() => removeTag(tag)} className="text-muted-foreground hover:text-destructive transition-colors"><X size={9}/></button>
+                    )}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+        <DialogFooter className="gap-2 flex-row">
+          {canEdit && !isNew && (
+            <Button variant="destructive" size="sm" className="mr-auto text-xs" onClick={() => onDelete(form.id)}>Delete</Button>
+          )}
+          <Button variant="ghost" size="sm" className="text-xs ml-auto" onClick={onClose}>Close</Button>
+          {canEdit && (
+            <Button size="sm" className="text-xs gap-1.5" onClick={handleSave} disabled={!form.title.trim()}>
+              <Save size={12}/>{isNew ? "Create Task" : "Save Changes"}
+            </Button>
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// ─── Project Modal ────────────────────────────────────────────────────────────
+
+function ProjectModal({ open, project, canEdit, onSave, onDelete, onClose }: {
+  open: boolean
+  project: KanbanProject | null
+  canEdit: boolean
+  onSave: (p: KanbanProject) => void
+  onDelete: (id: string) => void
+  onClose: () => void
+}) {
+  const isNew = !project
+  const [form, setForm] = useState<KanbanProject>({
+    id: "", name: "", color: PROJECT_PALETTE[0], description: "", createdAt: new Date().toISOString(),
+  })
+
+  useEffect(() => {
+    if (open) {
+      if (project) {
+        setForm({ ...project })
+      } else {
+        setForm({ id: "proj-" + Date.now(), name: "", color: PROJECT_PALETTE[0], description: "", createdAt: new Date().toISOString() })
+      }
+    }
+  }, [open, project])
+
+  return (
+    <Dialog open={open} onOpenChange={v => { if (!v) onClose() }}>
+      <DialogContent className="sm:max-w-[420px]">
+        <DialogHeader>
+          <DialogTitle>{isNew ? "Create New Project" : "Edit Project"}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">Project Name <span className="text-destructive">*</span></label>
+            <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Rover Navigation System" className="text-sm"/>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">Description</label>
+            <Input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Brief description..."/>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">Color</label>
+            <div className="flex gap-2 flex-wrap">
+              {PROJECT_PALETTE.map(c => (
+                <button
+                  key={c}
+                  onClick={() => setForm(f => ({ ...f, color: c }))}
+                  className={cn("w-7 h-7 rounded-full border-2 transition-all", form.color === c ? "border-foreground scale-110 shadow-md" : "border-transparent hover:scale-105")}
+                  style={{ backgroundColor: c }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+        <DialogFooter className="gap-2 flex-row">
+          {!isNew && canEdit && (
+            <Button variant="destructive" size="sm" className="mr-auto text-xs" onClick={() => onDelete(form.id)}>Delete</Button>
+          )}
+          <Button variant="ghost" size="sm" className="text-xs" onClick={onClose}>Cancel</Button>
+          {canEdit && (
+            <Button size="sm" className="text-xs" onClick={() => { if (form.name.trim()) onSave({ ...form, name: form.name.trim() }) }} disabled={!form.name.trim()}>
+              {isNew ? "Create Project" : "Save Changes"}
+            </Button>
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 // ─── AI Meeting Planner Page ──────────────────────────────────────────────────
 
 function MeetingPlannerPage() {
@@ -2776,6 +3808,7 @@ export default function App() {
       case "search":          return <SearchPage/>
       case "heatmap":         return <HeatmapPage/>
       case "skills":          return <SkillsPage/>
+      case "projects":        return <ProjectsPage/>
       case "meeting-planner": return <MeetingPlannerPage/>
       case "portfolio":       return <PortfolioPage/>
       case "settings":        return <SettingsPage onUploadRoutine={() => setRoutineOpen(true)}/>
