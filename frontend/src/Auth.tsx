@@ -564,95 +564,7 @@ function PasswordInput({ id, value, onChange }: { id: string; value: string; onC
   )
 }
 
-// ─── Onboarding modal (members only) ──────────────────────────────────────────
-
-function OnboardingModal({ onComplete }: { onComplete: () => void }) {
-  const [drag,      setDrag]      = useState(false)
-  const [uploading, setUploading] = useState(false)
-  const [progress,  setProgress]  = useState(0)
-  const [done,      setDone]      = useState(false)
-
-  const startUpload = () => {
-    setUploading(true)
-    let p = 0
-    const iv = setInterval(() => {
-      p += 15
-      if (p >= 100) { clearInterval(iv); setProgress(100); setTimeout(() => setDone(true), 400) }
-      else setProgress(p)
-    }, 200)
-  }
-
-  return (
-    <Dialog open onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Upload Your Class Routine</DialogTitle>
-          <DialogDescription>We need your UCAM schedule to sync your availability with the team.</DialogDescription>
-        </DialogHeader>
-
-        {!done ? (
-          <div className="py-4">
-            <div
-              onDragOver={e => { e.preventDefault(); setDrag(true) }}
-              onDragLeave={() => setDrag(false)}
-              onDrop={e => { e.preventDefault(); setDrag(false); startUpload() }}
-              onClick={!uploading ? startUpload : undefined}
-              className={[
-                "border-2 border-dashed rounded-xl p-10 text-center transition-all duration-200",
-                drag ? "border-primary bg-primary/5 scale-[1.02]" : "border-border bg-muted/30 hover:bg-muted/50",
-                uploading ? "pointer-events-none opacity-80" : "cursor-pointer",
-              ].join(" ")}
-            >
-              {!uploading ? (
-                <>
-                  <div className="w-12 h-12 rounded-full bg-secondary mx-auto flex items-center justify-center mb-4">
-                    <UploadCloud size={24} className="text-muted-foreground" />
-                  </div>
-                  <p className="text-sm font-medium text-foreground mb-1">Click or drag your UCAM XLSX here</p>
-                  <p className="text-xs text-muted-foreground">Courses, days, and times are parsed automatically</p>
-                </>
-              ) : (
-                <div className="space-y-4 py-2">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 mx-auto flex items-center justify-center">
-                    <Loader2 size={24} className="text-primary animate-spin" />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span className="font-medium">Parsing schedule data...</span>
-                      <span className="font-mono text-muted-foreground">{progress}%</span>
-                    </div>
-                    <Progress value={progress} className="h-1.5" />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="py-8 flex flex-col items-center text-center space-y-4">
-            <div className="w-16 h-16 rounded-full bg-success/20 flex items-center justify-center">
-              <CheckCircle2 size={32} className="text-success" />
-            </div>
-            <div>
-              <p className="text-base font-semibold">Routine Synced Successfully</p>
-              <p className="text-sm text-muted-foreground mt-1">18 classes and 4 labs detected.</p>
-            </div>
-          </div>
-        )}
-
-        <DialogFooter>
-          {done
-            ? <Button className="w-full" onClick={onComplete}>Go to Dashboard</Button>
-            : <Button variant="ghost" className="w-full" onClick={onComplete} disabled={uploading}>Skip for now</Button>
-          }
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
 // ─── Root AuthPage ─────────────────────────────────────────────────────────────
-
-type AuthStep = "auth-forms" | "onboarding"
 
 export function AuthPage({ 
   onLogin, 
@@ -661,30 +573,11 @@ export function AuthPage({
   onLogin: (user: AppUser) => void;
   initialTab?: "login" | "register";
 }) {
-  const [step, setStep] = useState<AuthStep>("auth-forms")
-  const [pendingUser, setPendingUser] = useState<AppUser | null>(null)
-
-  const handleAuthComplete = (user: AppUser) => {
-    if (user.role === "member") {
-      setPendingUser(user)
-      setStep("onboarding")
-    } else {
-      onLogin(user)
-    }
-  }
-
-  if (step === "auth-forms") {
-    return (
-      <AuthForms
-        initialTab={initialTab}
-        onLogin={handleAuthComplete}
-      />
-    )
-  }
-
-  if (step === "onboarding" && pendingUser) {
-    return <OnboardingModal onComplete={() => onLogin(pendingUser)} />
-  }
-
-  return null
+  return (
+    <AuthForms
+      initialTab={initialTab}
+      onLogin={onLogin}
+    />
+  )
 }
+
