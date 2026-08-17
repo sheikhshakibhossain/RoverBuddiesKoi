@@ -129,7 +129,22 @@ function getTodayDayOfWeek(): DayOfWeek {
   return getDhakaTimeParts().day
 }
 
-function formatDhakaTime(date: Date = new Date()): string {
+function formatDhakaTime24(date: Date = new Date()): string {
+  try {
+    return date.toLocaleTimeString("en-US", {
+      timeZone: "Asia/Dhaka",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hourCycle: "h23",
+    })
+  } catch {
+    const parts = getDhakaTimeParts(date)
+    return `${parts.timeStr24}:00`
+  }
+}
+
+function formatDhakaTime12(date: Date = new Date()): string {
   try {
     return date.toLocaleTimeString("en-US", {
       timeZone: "Asia/Dhaka",
@@ -141,6 +156,10 @@ function formatDhakaTime(date: Date = new Date()): string {
   } catch {
     return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true })
   }
+}
+
+function formatDhakaTime(date: Date = new Date()): string {
+  return `${formatDhakaTime24(date)} (${formatDhakaTime12(date)})`
 }
 
 function formatDhakaDate(date: Date = new Date()): string {
@@ -1012,15 +1031,18 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
               <Clock size={20} className="animate-pulse" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-lg sm:text-xl font-bold text-foreground tracking-tight font-mono">
-                  {formatDhakaTime(dhakaNow)}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xl sm:text-2xl font-black text-foreground tracking-tight font-mono">
+                  {formatDhakaTime24(dhakaNow)}
+                </span>
+                <span className="text-xs font-semibold text-muted-foreground">
+                  ({formatDhakaTime12(dhakaNow)})
                 </span>
                 <Badge variant="default" className="text-[10px] px-1.5 py-0 h-4 font-semibold">
-                  BST
+                  BST (UTC+6)
                 </Badge>
               </div>
-              <p className="text-xs text-muted-foreground font-sans">
+              <p className="text-xs text-muted-foreground font-sans mt-0.5">
                 {formatDhakaDate(dhakaNow)}
               </p>
             </div>

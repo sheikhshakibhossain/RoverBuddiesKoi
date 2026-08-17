@@ -3,7 +3,21 @@ import { Building2, LayoutDashboard, Search, Zap, CheckCircle2, ArrowRight, Cloc
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
-function formatDhakaTime(date: Date = new Date()): string {
+function formatDhakaTime24(date: Date = new Date()): string {
+  try {
+    return date.toLocaleTimeString("en-US", {
+      timeZone: "Asia/Dhaka",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hourCycle: "h23",
+    })
+  } catch {
+    return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+  }
+}
+
+function formatDhakaTime12(date: Date = new Date()): string {
   try {
     return date.toLocaleTimeString("en-US", {
       timeZone: "Asia/Dhaka",
@@ -15,6 +29,10 @@ function formatDhakaTime(date: Date = new Date()): string {
   } catch {
     return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true })
   }
+}
+
+function formatDhakaTime(date: Date = new Date()): string {
+  return `${formatDhakaTime24(date)} (${formatDhakaTime12(date)})`
 }
 
 function formatDhakaDate(date: Date = new Date()): string {
