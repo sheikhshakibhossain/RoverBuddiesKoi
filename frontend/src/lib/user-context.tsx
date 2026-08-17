@@ -16,6 +16,8 @@ export interface AppUser {
 
 export interface UserCtx {
   user: AppUser
+  setUser: (u: AppUser) => void
+  updateUser: (u: Partial<AppUser>) => void
   pagePerms: Record<string, string[]>
   setPagePerms: (p: Record<string, string[]>) => void
   featurePerms: Record<string, string[]>

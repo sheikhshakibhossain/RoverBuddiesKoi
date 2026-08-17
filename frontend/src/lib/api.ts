@@ -158,6 +158,23 @@ export const authApi = {
     return fetchApi<any>("/api/auth/me")
   },
 
+  updateProfile: async (data: {
+    name?: string
+    email?: string
+    whatsapp?: string
+    batch?: string
+    team?: string
+    teamName?: string
+    subteam?: string
+    subteamNames?: string[]
+  }) => {
+    const res = await fetchApi<{ message: string; user: any }>("/api/auth/me", {
+      method: "PUT",
+      body: JSON.stringify(data),
+    })
+    return res.user
+  },
+
   logout: async () => {
     const refreshToken = getRefreshToken()
     if (refreshToken) {

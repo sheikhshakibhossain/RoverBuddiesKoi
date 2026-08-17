@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken"
 import { z } from "zod"
 import { prisma } from "../db.js"
 import { config } from "../config/index.js"
-import { AppError, UnauthorizedError, ValidationError } from "../utils/errors.js"
+import { AppError, UnauthorizedError, ValidationError, NotFoundError } from "../utils/errors.js"
 import { Role } from "@prisma/client"
 import { parseRoutineExcel } from "../services/routineParser.js"
 
@@ -291,6 +291,127 @@ export async function forgotPassword(req: Request, res: Response, next: NextFunc
       // Password reset token or email notification
     }
     res.json({ message: "If account exists, password reset instructions have been dispatched." })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function updateProfile(req: Request, res: Response, next: NextFunction) {
+  try {
+    if (!req.user) throw new UnauthorizedError()
+    const userId = req.user.id
+    const { name, email, whatsapp, batch, team, teamName, subteam, subteamNames } = req.body
+
+    const updateData: any = {}
+
+    // Name & Initials
+    if (name && typeof name === "string" && name.trim()) {
+      const trimmedName = name.trim()
+      updateData.name = trimmedName
+      const parts = trimmedName.split(" ").filter(Boolean)
+      updateData.initials = parts.length > 1
+        ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+        : trimmedName.slice(0, 2).toUpperCase()
+    }
+
+    // Email (ensure unique)
+    if (email && typeof email === "string" && email.trim()) {
+      const trimmedEmail = email.trim().toLowerCase()
+      if (trimmedEmail !== req.user.email) {
+        const existing = await prisma.user.findUnique({ where: { email: trimmedEmail } })
+        if (existing && existing.id !== userId) {
+          throw new ValidationError("Email address is already in use by another account.")
+        }
+        updateData.email = trimmedEmail
+      }
+    }
+
+    // WhatsApp
+    if (whatsapp !== undefined && typeof whatsapp === "string") {
+      updateData.whatsapp = whatsapp.trim()
+    }
+
+    // Batch
+    if (batch !== undefined && typeof batch === "string") {
+      updateData.batch = batch.trim()
+    }
+
+    // Team
+    const targetTeamName = (teamName || team || "").trim()
+    let teamId = req.user.teamId
+    if (targetTeamName) {
+      const foundTeam = await prisma.team.findFirst({
+        where: { name: targetTeamName, organizationId: req.user.organizationId },
+      })
+      if (foundTeam) {
+        updateData.teamId = foundTeam.id
+        teamId = foundTeam.id
+      }
+    }
+
+    // Apply User table updates (Role is purposely NOT included, preserving existing role)
+    if (Object.keys(updateData).length > 0) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: updateData,
+      })
+    }
+
+    // Subteam updates
+    const targetSubteams: string[] = []
+    if (Array.isArray(subteamNames) && subteamNames.length > 0) {
+      targetSubteams.push(...subteamNames.filter(Boolean))
+    } else if (subteam && typeof subteam === "string" && subteam.trim()) {
+      targetSubteams.push(subteam.trim())
+    }
+
+    if (targetSubteams.length > 0 && teamId) {
+      // Remove previous user subteam relations
+      await prisma.userSubteam.deleteMany({
+        where: { userId },
+      })
+
+      // Link to new subteams
+      for (const stName of targetSubteams) {
+        let st = await prisma.subteam.findFirst({
+          where: { name: stName, teamId },
+        })
+        if (!st) {
+          st = await prisma.subteam.create({
+            data: { name: stName, teamId },
+          })
+        }
+        await prisma.userSubteam.create({
+          data: { userId, subteamId: st.id },
+        })
+      }
+    }
+
+    // Fetch refreshed user record
+    const updatedUser = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        team: true,
+        subteams: { include: { subteam: true } },
+      },
+    })
+
+    if (!updatedUser) throw new NotFoundError("User not found")
+
+    res.json({
+      message: "Profile updated successfully",
+      user: {
+        id: updatedUser.id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        initials: updatedUser.initials,
+        batch: updatedUser.batch,
+        whatsapp: updatedUser.whatsapp,
+        team: updatedUser.team?.name || "UMRT",
+        subteam: updatedUser.subteams[0]?.subteam?.name || "Software",
+      },
+    })
   } catch (error) {
     next(error)
   }

@@ -1,6 +1,6 @@
 import { Router } from "express"
 import multer from "multer"
-import { register, login, refreshToken, logout, getMe, forgotPassword, deleteAccount } from "../controllers/auth.js"
+import { register, login, refreshToken, logout, getMe, updateProfile, forgotPassword, deleteAccount } from "../controllers/auth.js"
 import { authenticate } from "../middlewares/auth.js"
 
 const upload = multer({ limits: { fileSize: 10 * 1024 * 1024 } })
@@ -11,6 +11,8 @@ router.post("/login", login)
 router.post("/refresh", refreshToken)
 router.post("/logout", logout)
 router.get("/me", authenticate, getMe)
+router.put("/me", authenticate, updateProfile)
+router.patch("/me", authenticate, updateProfile)
 router.delete("/me", authenticate, deleteAccount)
 router.post("/forgot-password", forgotPassword)
 

@@ -5,7 +5,7 @@ import {
   Shield, Calendar, LogOut, User, HelpCircle, RefreshCw,
   CheckCircle2, XCircle, AlertCircle, Minus, ArrowUpRight,
   Upload, Building2, ChevronDown, Lock, Layers, Plus, Pencil,
-  Clock, AlertTriangle, Save, ArrowLeft, Menu, X, Eye
+  Clock, AlertTriangle, Save, ArrowLeft, Menu, X, Eye, Loader2
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button }           from "@/components/ui/button"
@@ -358,64 +358,212 @@ function TopBar({ page, onSignOut, onOpenProfile, onToggleMobileMenu }: {
 
 // ─── Profile Edit Dialog ──────────────────────────────────────────────────────
 
+// ─── Profile Edit Dialog ──────────────────────────────────────────────────────
+
 function ProfileEditDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
-  const user = useUser()
+  const { user, updateUser } = useUserCtx()
   const [name,     setName]     = useState(user.name)
+  const [email,    setEmail]    = useState(user.email)
   const [whatsapp, setWhatsapp] = useState(user.whatsapp)
+  const [team,     setTeam]     = useState(user.team || "UMRT")
+  const [subteam,  setSubteam]  = useState(user.subteam || "Software")
+  const [batch,    setBatch]    = useState(user.batch || "2024")
+  const [loading,  setLoading]  = useState(false)
+  const [error,    setError]    = useState<string | null>(null)
   const [saved,    setSaved]    = useState(false)
 
-  const handleSave = () => { setSaved(true); setTimeout(() => { setSaved(false); onOpenChange(false) }, 900) }
+  // Synchronize fields when modal opens or user updates
+  useEffect(() => {
+    if (open) {
+      setName(user.name)
+      setEmail(user.email)
+      setWhatsapp(user.whatsapp)
+      setTeam(user.team || "UMRT")
+      setSubteam(user.subteam || "Software")
+      setBatch(user.batch || "2024")
+      setError(null)
+      setSaved(false)
+    }
+  }, [open, user])
+
+  const handleSave = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    if (!name.trim() || !email.trim()) {
+      setError("Name and email are required.")
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+
+    try {
+      const updated = await authApi.updateProfile({
+        name: name.trim(),
+        email: email.trim(),
+        whatsapp: whatsapp.trim(),
+        batch,
+        team,
+        subteam,
+      })
+
+      updateUser({
+        name: updated.name,
+        email: updated.email,
+        whatsapp: updated.whatsapp,
+        batch: updated.batch,
+        team: updated.team,
+        subteam: updated.subteam,
+        initials: updated.initials,
+      })
+
+      setSaved(true)
+      setTimeout(() => {
+        setSaved(false)
+        onOpenChange(false)
+      }, 1000)
+    } catch (err: any) {
+      setError(err.message || "Failed to update profile in database.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const TEAMS_LIST = ["UMRT", "URRT", "Team XYZ"]
+  const SUBTEAMS_LIST = ["Software", "Electrical", "Mechanical", "Communication", "Science", "Media", "UI/UX"]
+  const BATCHES_LIST = ["2020", "2021", "2022", "2023", "2024", "2025", "2026"]
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>My Profile</DialogTitle>
-          <DialogDescription>Update your personal information</DialogDescription>
+          <DialogTitle>Edit Profile</DialogTitle>
+          <DialogDescription>Update your personal details. Changes are saved directly to the database.</DialogDescription>
         </DialogHeader>
-        <div className="space-y-4">
-          <div className="flex items-center gap-4 p-3 rounded-lg bg-muted">
+
+        <form onSubmit={handleSave} className="space-y-4">
+          {/* User summary header */}
+          <div className="flex items-center gap-3.5 p-3.5 rounded-xl bg-secondary/50 border border-border">
             <Avatar className="w-12 h-12">
-              <AvatarFallback className="text-lg bg-primary text-primary-foreground font-semibold">{user.initials}</AvatarFallback>
+              <AvatarFallback className="text-base bg-primary text-primary-foreground font-semibold">
+                {user.initials}
+              </AvatarFallback>
             </Avatar>
-            <div>
-              <p className="text-sm font-semibold text-foreground">{user.name}</p>
-              <p className="text-xs text-muted-foreground">{user.email}</p>
-              <Badge variant="outline" className="text-[10px] mt-1">{roleLabel(user.role)}</Badge>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            {[
-              { label:"Organization", value:user.team === "UMRT" || user.team === "URRT" ? "CAIR Lab" : "CAIR Lab" },
-              { label:"Team",         value:user.team },
-              { label:"Subteam",      value:user.subteam },
-              { label:"Batch",        value:user.batch },
-            ].map(f => (
-              <div key={f.label} className="p-3 rounded-lg bg-muted">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">{f.label}</p>
-                <p className="text-sm font-medium text-foreground">{f.value}</p>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-semibold text-foreground truncate">{user.name}</p>
+                <Badge variant="outline" className="text-[10px] shrink-0 font-medium">
+                  {roleLabel(user.role)}
+                </Badge>
               </div>
-            ))}
+              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+              <p className="text-[10px] text-muted-foreground/70 mt-0.5 flex items-center gap-1">
+                <Lock size={10} /> Role is fixed ({roleLabel(user.role)}) and cannot be modified self-service.
+              </p>
+            </div>
           </div>
 
-          <div className="space-y-3">
+          {/* Editable fields grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Display Name</label>
-              <Input value={name} onChange={e => setName(e.target.value)} />
+              <label className="text-xs font-medium text-foreground">Full Name</label>
+              <Input
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder="Full name"
+                required
+              />
             </div>
+
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">WhatsApp Number</label>
-              <Input value={whatsapp} onChange={e => setWhatsapp(e.target.value)} placeholder="880..." />
+              <label className="text-xs font-medium text-foreground">Work Email</label>
+              <Input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="name@cairlab.org"
+                required
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">WhatsApp Number</label>
+              <Input
+                value={whatsapp}
+                onChange={e => setWhatsapp(e.target.value)}
+                placeholder="8801..."
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">Batch</label>
+              <Select value={batch} onValueChange={setBatch}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue placeholder="Select batch" />
+                </SelectTrigger>
+                <SelectContent>
+                  {BATCHES_LIST.map(b => (
+                    <SelectItem key={b} value={b} className="text-xs">Batch {b}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">Team</label>
+              <Select value={team} onValueChange={setTeam}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue placeholder="Select team" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TEAMS_LIST.map(t => (
+                    <SelectItem key={t} value={t} className="text-xs">{t}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">Subteam</label>
+              <Select value={subteam} onValueChange={setSubteam}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue placeholder="Select subteam" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SUBTEAMS_LIST.map(st => (
+                    <SelectItem key={st} value={st} className="text-xs">{st}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleSave} className="gap-1.5" disabled={saved}>
-            {saved ? <><CheckCircle2 size={14}/> Saved</> : <><Save size={14}/> Save Changes</>}
-          </Button>
-        </DialogFooter>
+
+          {error && (
+            <div className="p-2.5 rounded-lg border border-destructive/30 bg-destructive/10 text-destructive text-xs font-medium">
+              {error}
+            </div>
+          )}
+
+          {saved && (
+            <div className="p-2.5 rounded-lg border border-success/30 bg-success/10 text-success text-xs font-medium flex items-center gap-1.5">
+              <CheckCircle2 size={14} /> Profile updated in database successfully!
+            </div>
+          )}
+
+          <DialogFooter className="pt-2">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={loading || saved} className="gap-1.5">
+              {loading ? (
+                <><Loader2 size={14} className="animate-spin" /> Saving...</>
+              ) : saved ? (
+                <><CheckCircle2 size={14} /> Saved</>
+              ) : (
+                <><Save size={14} /> Save Changes</>
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   )
@@ -2220,25 +2368,29 @@ function TeamsTab({ user }: { user: AppUser }) {
 
 function SettingsPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
   const { user, pagePerms, setPagePerms, featurePerms, setFeaturePerms } = useUserCtx()
-  const defaultTab = user.role === "member" ? "routine" : "semester"
+  const defaultTab = "profile"
 
   return (
     <div className="space-y-5 max-w-2xl">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Settings</h1>
         <p className="text-muted-foreground text-sm mt-0.5">
-          {user.role === "member" ? "Upload and manage your class schedule" : "Manage semester configuration and access control"}
+          Manage your personal profile, class routine, and team settings
         </p>
       </div>
 
       <Tabs defaultValue={defaultTab}>
-        <TabsList>
+        <TabsList className="flex flex-wrap h-auto gap-1">
+          <TabsTrigger value="profile">Profile</TabsTrigger>
           {user.role === "org-owner" && <TabsTrigger value="semester">Semester</TabsTrigger>}
           {user.role === "org-owner" && <TabsTrigger value="access">Access Control</TabsTrigger>}
           {(user.role === "org-owner" || user.role === "team-manager") && <TabsTrigger value="teams">Teams</TabsTrigger>}
           <TabsTrigger value="routine">{user.role === "member" ? "My Schedule" : "Routine Upload"}</TabsTrigger>
           <TabsTrigger value="account">Account</TabsTrigger>
         </TabsList>
+
+        {/* Profile Tab — Available to all users */}
+        <ProfileTab />
 
         {/* Semester — Org Owner only */}
         {user.role === "org-owner" && (
@@ -2471,6 +2623,208 @@ function SettingsPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
         <AccountTab />
       </Tabs>
     </div>
+  )
+}
+
+function ProfileTab() {
+  const { user, updateUser } = useUserCtx()
+  const [name, setName] = useState(user.name)
+  const [email, setEmail] = useState(user.email)
+  const [whatsapp, setWhatsapp] = useState(user.whatsapp)
+  const [team, setTeam] = useState(user.team || "UMRT")
+  const [subteam, setSubteam] = useState(user.subteam || "Software")
+  const [batch, setBatch] = useState(user.batch || "2024")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [saved, setSaved] = useState(false)
+
+  // Keep state in sync with user
+  useEffect(() => {
+    setName(user.name)
+    setEmail(user.email)
+    setWhatsapp(user.whatsapp)
+    setTeam(user.team || "UMRT")
+    setSubteam(user.subteam || "Software")
+    setBatch(user.batch || "2024")
+  }, [user])
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!name.trim() || !email.trim()) {
+      setError("Name and email are required.")
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+
+    try {
+      const updated = await authApi.updateProfile({
+        name: name.trim(),
+        email: email.trim(),
+        whatsapp: whatsapp.trim(),
+        batch,
+        team,
+        subteam,
+      })
+
+      updateUser({
+        name: updated.name,
+        email: updated.email,
+        whatsapp: updated.whatsapp,
+        batch: updated.batch,
+        team: updated.team,
+        subteam: updated.subteam,
+        initials: updated.initials,
+      })
+
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch (err: any) {
+      setError(err.message || "Failed to update profile in database.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const TEAMS_LIST = ["UMRT", "URRT", "Team XYZ"]
+  const SUBTEAMS_LIST = ["Software", "Electrical", "Mechanical", "Communication", "Science", "Media", "UI/UX"]
+  const BATCHES_LIST = ["2020", "2021", "2022", "2023", "2024", "2025", "2026"]
+
+  return (
+    <TabsContent value="profile" className="mt-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">My Profile</CardTitle>
+          <CardDescription>View and edit your personal information. Changes persist immediately in the database.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSave} className="space-y-5">
+            {/* Header info */}
+            <div className="flex items-center gap-4 p-4 rounded-xl bg-secondary/50 border border-border">
+              <Avatar className="w-14 h-14">
+                <AvatarFallback className="text-lg bg-primary text-primary-foreground font-semibold">
+                  {user.initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-semibold text-foreground truncate">{user.name}</h3>
+                  <Badge variant="outline" className="text-xs font-medium">
+                    {roleLabel(user.role)}
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">{user.email}</p>
+                <p className="text-[11px] text-muted-foreground/70 mt-1 flex items-center gap-1">
+                  <Lock size={11} /> Role is fixed to <span className="font-medium text-foreground">{roleLabel(user.role)}</span> (cannot be changed directly).
+                </p>
+              </div>
+            </div>
+
+            {/* Editable Fields */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-foreground">Full Name</label>
+                <Input
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  placeholder="Full name"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-foreground">Work Email</label>
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="name@cairlab.org"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-foreground">WhatsApp Number</label>
+                <Input
+                  value={whatsapp}
+                  onChange={e => setWhatsapp(e.target.value)}
+                  placeholder="8801..."
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-foreground">Batch</label>
+                <Select value={batch} onValueChange={setBatch}>
+                  <SelectTrigger className="h-9 text-xs">
+                    <SelectValue placeholder="Select batch" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {BATCHES_LIST.map(b => (
+                      <SelectItem key={b} value={b} className="text-xs">Batch {b}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-foreground">Assigned Team</label>
+                <Select value={team} onValueChange={setTeam}>
+                  <SelectTrigger className="h-9 text-xs">
+                    <SelectValue placeholder="Select team" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TEAMS_LIST.map(t => (
+                      <SelectItem key={t} value={t} className="text-xs">{t}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-foreground">Assigned Subteam</label>
+                <Select value={subteam} onValueChange={setSubteam}>
+                  <SelectTrigger className="h-9 text-xs">
+                    <SelectValue placeholder="Select subteam" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SUBTEAMS_LIST.map(st => (
+                      <SelectItem key={st} value={st} className="text-xs">{st}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {error && (
+              <div className="p-3 rounded-lg border border-destructive/30 bg-destructive/10 text-destructive text-xs font-medium">
+                {error}
+              </div>
+            )}
+
+            {saved && (
+              <div className="p-3 rounded-lg border border-success/30 bg-success/10 text-success text-xs font-medium flex items-center gap-1.5">
+                <CheckCircle2 size={16} /> Profile changes saved to database successfully!
+              </div>
+            )}
+
+            <Separator />
+
+            <div className="flex justify-end gap-2">
+              <Button type="submit" disabled={loading} className="gap-2">
+                {loading ? (
+                  <><Loader2 size={14} className="animate-spin" /> Saving changes...</>
+                ) : saved ? (
+                  <><CheckCircle2 size={14} /> Saved</>
+                ) : (
+                  <><Save size={14} /> Save Profile Changes</>
+                )}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </TabsContent>
   )
 }
 
@@ -3907,6 +4261,15 @@ export default function App() {
     }
   }
 
+  const updateUser = (updatedFields: Partial<AppUser>) => {
+    setUser(prev => {
+      if (!prev) return prev
+      const next = { ...prev, ...updatedFields }
+      localStorage.setItem("userSession", JSON.stringify(next))
+      return next
+    })
+  }
+
   const handleSignOut = () => { 
     authApi.logout().catch(()=>{})
     localStorage.removeItem("accessToken")
@@ -3961,7 +4324,7 @@ export default function App() {
   }
 
   return (
-    <UserContext.Provider value={{ user, pagePerms, setPagePerms, featurePerms, setFeaturePerms }}>
+    <UserContext.Provider value={{ user, setUser, updateUser, pagePerms, setPagePerms, featurePerms, setFeaturePerms }}>
       <TooltipProvider>
         <div className="min-h-screen flex bg-background">
           <Sidebar page={page} setPage={setPage} mobileOpen={mobileMenuOpen} setMobileOpen={setMobileMenuOpen} />
