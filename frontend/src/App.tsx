@@ -100,29 +100,61 @@ function getDhakaTimeParts(date: Date = new Date()): {
   timeStr24: string
   totalMinutes: number
 } {
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    timeZone: "Asia/Dhaka",
-    weekday: "short",
-    hour: "numeric",
-    minute: "numeric",
-    hourCycle: "h23",
-  })
-  const parts = formatter.formatToParts(date)
-  let day: DayOfWeek = "Mon"
-  let hours = 0
-  let minutes = 0
-  for (const p of parts) {
-    if (p.type === "weekday") {
-      day = p.value as DayOfWeek
-    } else if (p.type === "hour") {
-      hours = parseInt(p.value, 10)
-    } else if (p.type === "minute") {
-      minutes = parseInt(p.value, 10)
+  const d = date instanceof Date && !isNaN(date.getTime()) ? date : new Date()
+
+  try {
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Dhaka",
+      weekday: "short",
+      hour: "numeric",
+      minute: "numeric",
+      hourCycle: "h23",
+    })
+    const parts = formatter.formatToParts(d)
+    let day: DayOfWeek = "Mon"
+    let hours = 0
+    let minutes = 0
+    let isPM = false
+    let isAM = false
+
+    for (const p of parts) {
+      if (p.type === "weekday") {
+        day = p.value as DayOfWeek
+      } else if (p.type === "hour") {
+        hours = parseInt(p.value, 10)
+      } else if (p.type === "minute") {
+        minutes = parseInt(p.value, 10)
+      } else if (p.type === "dayPeriod") {
+        const val = p.value.toUpperCase()
+        if (val === "PM") isPM = true
+        if (val === "AM") isAM = true
+      }
     }
+
+    if (isPM && hours < 12) {
+      hours += 12
+    } else if (isAM && hours === 12) {
+      hours = 0
+    }
+    if (hours === 24) {
+      hours = 0
+    }
+
+    const timeStr24 = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`
+    const totalMinutes = hours * 60 + minutes
+    return { day, hours, minutes, timeStr24, totalMinutes }
+  } catch {
+    // Robust UTC + 6 hours fallback
+    const days: DayOfWeek[] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+    const utcTime = d.getTime() + (d.getTimezoneOffset() * 60000)
+    const dhakaTime = new Date(utcTime + (6 * 3600000))
+    const day = days[dhakaTime.getDay()]
+    const hours = dhakaTime.getHours()
+    const minutes = dhakaTime.getMinutes()
+    const timeStr24 = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`
+    const totalMinutes = hours * 60 + minutes
+    return { day, hours, minutes, timeStr24, totalMinutes }
   }
-  const timeStr24 = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`
-  const totalMinutes = hours * 60 + minutes
-  return { day, hours, minutes, timeStr24, totalMinutes }
 }
 
 function getTodayDayOfWeek(): DayOfWeek {
@@ -199,7 +231,20 @@ function formatDhakaDateTime(dateStrOrObj: string | Date): string {
 function timeToMinutes(timeStr: string): number {
   if (!timeStr) return 0
   const clean = timeStr.trim()
-  const match12 = clean.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i)
+
+  // Format 1: "02:00:PM" or "02:00:AM" (UIU format with colon before AM/PM)
+  const matchColonAmPm = clean.match(/^(\d{1,2}):(\d{2}):(AM|PM)$/i)
+  if (matchColonAmPm) {
+    let h = parseInt(matchColonAmPm[1], 10)
+    const m = parseInt(matchColonAmPm[2], 10)
+    const isPM = matchColonAmPm[3].toUpperCase() === "PM"
+    if (isPM && h !== 12) h += 12
+    if (!isPM && h === 12) h = 0
+    return h * 60 + m
+  }
+
+  // Format 2: "02:00 PM" or "2:00PM" or "02:00:00 PM" (Standard 12-hour AM/PM)
+  const match12 = clean.match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)$/i)
   if (match12) {
     let h = parseInt(match12[1], 10)
     const m = parseInt(match12[2], 10)
@@ -208,8 +253,18 @@ function timeToMinutes(timeStr: string): number {
     if (!isPM && h === 12) h = 0
     return h * 60 + m
   }
-  const [h, m] = clean.split(":").map(Number)
-  return (h || 0) * 60 + (m || 0)
+
+  // Format 3: Range string e.g. "14:00 - 16:30" (extract first time if passed)
+  if (clean.includes("-") || clean.includes("–")) {
+    const firstPart = clean.split(/[-–]/)[0].trim()
+    return timeToMinutes(firstPart)
+  }
+
+  // Format 4: 24-hour "HH:mm" or "HH:mm:ss"
+  const parts = clean.split(":").map(Number)
+  const h = parts[0] || 0
+  const m = parts[1] || 0
+  return h * 60 + m
 }
 
 function format12Hour(timeStr: string): string {
@@ -309,7 +364,7 @@ function enrichMemberWithLiveStatus(m: Member): Member {
 }
 
 function isFreeAt(member: Member, day: DayOfWeek, time: string): boolean {
-  if (member.status === "missing" || !member.schedule || member.schedule.length === 0) return false
+  if (!member.schedule || member.schedule.length === 0) return false
   const tMin = timeToMinutes(time)
   return !member.schedule.some(slot => {
     if (slot.day !== day) return false
@@ -1730,21 +1785,44 @@ function SearchPage() {
     if (skill  !== "all") filters.skill  = skill
     if (batch  !== "all") filters.batch  = batch
     if (day    !== "all") filters.day    = day
-    if (time   !== "all") filters.time   = time
-    if (query.trim())     filters.search = query.trim()
+    const enrichMemberStatus = (m: Member): Member => {
+      const d = day !== "all" ? (day as DayOfWeek) : undefined
+      const t = time !== "all" ? time : undefined
+      const live = computeLiveAvailability(m.schedule, d, t)
+      return {
+        ...m,
+        status: live.status,
+        nextChange: live.nextChange,
+        currentClass: live.currentClass,
+        remainingMin: live.remainingMin,
+      }
+    }
+
     membersApi.getMembers(filters)
-      .then(res => setResults((res || []).map(enrichMemberWithLiveStatus)))
+      .then(res => setResults((res || []).map(enrichMemberStatus)))
       .catch(() => setResults([]))
       .finally(() => setLoading(false))
   }, [query, team, sub, status, skill, batch, day, time])
 
   // Live timer to continuously recompute status every 15s
   useEffect(() => {
+    const enrichMemberStatus = (m: Member): Member => {
+      const d = day !== "all" ? (day as DayOfWeek) : undefined
+      const t = time !== "all" ? time : undefined
+      const live = computeLiveAvailability(m.schedule, d, t)
+      return {
+        ...m,
+        status: live.status,
+        nextChange: live.nextChange,
+        currentClass: live.currentClass,
+        remainingMin: live.remainingMin,
+      }
+    }
     const timer = setInterval(() => {
-      setResults(prev => prev.map(enrichMemberWithLiveStatus))
+      setResults(prev => prev.map(enrichMemberStatus))
     }, 15000)
     return () => clearInterval(timer)
-  }, [])
+  }, [day, time])
 
   // Client-side day/time filter for members WITH routines
   const filteredResults = (day !== "all" && time !== "all")

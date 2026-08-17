@@ -10,7 +10,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { AppUser } from "@/lib/user-context"
-import { aiApi } from "@/lib/api"
+import { aiApi, membersApi } from "@/lib/api"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -43,11 +43,21 @@ const DAYS: DayOfWeek[] = ["Sat","Sun","Mon","Tue","Wed","Thu","Fri"]
 const DAY_ALIASES: Record<string, DayOfWeek> = {
   saturday:"Sat", sat:"Sat", "6":"Sat",
   sunday:"Sun", sun:"Sun", "0":"Sun",
-  monday:"Mon", mon:"Mon", today:"Mon",
+  monday:"Mon", mon:"Mon",
   tuesday:"Tue", tue:"Tue",
-  wednesday:"Wed", wed:"Wed", tomorrow:"Wed",
+  wednesday:"Wed", wed:"Wed",
   thursday:"Thu", thu:"Thu",
   friday:"Fri", fri:"Fri", "5":"Fri",
+}
+
+function getTodayAndTomorrow(): { today: DayOfWeek; tomorrow: DayOfWeek } {
+  const days: DayOfWeek[] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+  const now = new Date()
+  const dhakaUtc = now.getTime() + (now.getTimezoneOffset() * 60000)
+  const dhakaTime = new Date(dhakaUtc + 6 * 3600000)
+  const todayIdx = dhakaTime.getDay()
+  const tomIdx = (todayIdx + 1) % 7
+  return { today: days[todayIdx], tomorrow: days[tomIdx] }
 }
 
 // Extract team name from query
@@ -79,6 +89,9 @@ function extractSkill(q: string): string | null {
 
 // Extract day
 function extractDay(q: string): DayOfWeek | null {
+  const { today, tomorrow } = getTodayAndTomorrow()
+  if (q.includes("today")) return today
+  if (q.includes("tomorrow")) return tomorrow
   for (const [alias, day] of Object.entries(DAY_ALIASES)) {
     if (q.includes(alias)) return day
   }
@@ -93,18 +106,20 @@ function extractTime(q: string): string | null {
     const h = m24[1].padStart(2,"0")
     return `${h}:${m24[2]}`
   }
-  // 12-hour with am/pm
-  const m12 = q.match(/\b(\d{1,2})\s*(am|pm)\b/)
+  // 12-hour with am/pm (colon or space)
+  const m12 = q.match(/\b(\d{1,2})(?::(\d{2}))?\s*[:\s]?(am|pm)\b/i)
   if (m12) {
-    let h = parseInt(m12[1])
-    if (m12[2] === "pm" && h !== 12) h += 12
-    if (m12[2] === "am" && h === 12) h = 0
-    return `${String(h).padStart(2,"0")}:00`
+    let h = parseInt(m12[1], 10)
+    const m = m12[2] ? m12[2].padStart(2, "0") : "00"
+    const meridiem = m12[3].toLowerCase()
+    if (meridiem === "pm" && h !== 12) h += 12
+    if (meridiem === "am" && h === 12) h = 0
+    return `${String(h).padStart(2,"0")}:${m}`
   }
   // "at 3", "after 3" — assume PM if 1–8
   const mat = q.match(/\b(?:at|after|around|by)\s+(\d{1,2})\b/)
   if (mat) {
-    let h = parseInt(mat[1])
+    let h = parseInt(mat[1], 10)
     if (h < 9) h += 12
     return `${String(h).padStart(2,"0")}:00`
   }
@@ -120,7 +135,20 @@ function extractBatch(q: string): string | null {
 function timeToMinutes(timeStr: string): number {
   if (!timeStr) return 0
   const clean = timeStr.trim()
-  const match12 = clean.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i)
+
+  // Format 1: "02:00:PM" or "02:00:AM" (UIU format with colon before AM/PM)
+  const matchColonAmPm = clean.match(/^(\d{1,2}):(\d{2}):(AM|PM)$/i)
+  if (matchColonAmPm) {
+    let h = parseInt(matchColonAmPm[1], 10)
+    const m = parseInt(matchColonAmPm[2], 10)
+    const isPM = matchColonAmPm[3].toUpperCase() === "PM"
+    if (isPM && h !== 12) h += 12
+    if (!isPM && h === 12) h = 0
+    return h * 60 + m
+  }
+
+  // Format 2: "02:00 PM" or "2:00PM" or "02:00:00 PM" (Standard 12-hour AM/PM)
+  const match12 = clean.match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)$/i)
   if (match12) {
     let h = parseInt(match12[1], 10)
     const m = parseInt(match12[2], 10)
@@ -129,13 +157,23 @@ function timeToMinutes(timeStr: string): number {
     if (!isPM && h === 12) h = 0
     return h * 60 + m
   }
-  const [h, m] = clean.split(":").map(Number)
-  return (h || 0) * 60 + (m || 0)
+
+  // Format 3: Range string e.g. "14:00 - 16:30" (extract first time if passed)
+  if (clean.includes("-") || clean.includes("–")) {
+    const firstPart = clean.split(/[-–]/)[0].trim()
+    return timeToMinutes(firstPart)
+  }
+
+  // Format 4: 24-hour "HH:mm" or "HH:mm:ss"
+  const parts = clean.split(":").map(Number)
+  const h = parts[0] || 0
+  const m = parts[1] || 0
+  return h * 60 + m
 }
 
 // Check if a member is free at a given day/time
 function isFreeAt(member: Member, day: DayOfWeek, time: string): boolean {
-  if (member.status === "missing" || !member.schedule || member.schedule.length === 0) return false
+  if (!member.schedule || member.schedule.length === 0) return false
   const tMin = timeToMinutes(time)
   return !member.schedule.some(slot => {
     if (slot.day !== day) return false
@@ -552,8 +590,21 @@ export function AIChat({ members, user, onMemberClick }: AIChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MSG])
   const [input,    setInput]    = useState("")
   const [thinking, setThinking] = useState(false)
+  const [internalMembers, setInternalMembers] = useState<Member[]>([])
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef  = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (members && members.length > 0) {
+      setInternalMembers(members)
+    } else if (open) {
+      membersApi.getMembers()
+        .then(res => setInternalMembers(res || []))
+        .catch(() => {})
+    }
+  }, [members, open])
+
+  const activeMembers = members && members.length > 0 ? members : internalMembers
 
   useEffect(() => {
     if (open) {
@@ -589,7 +640,7 @@ export function AIChat({ members, user, onMemberClick }: AIChatProps) {
       }
       setMessages(prev => [...prev, botMsg])
     } catch {
-      const result = resolveQuery(text, members, user.role)
+      const result = resolveQuery(text, activeMembers, user.role)
       const botMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: "bot",

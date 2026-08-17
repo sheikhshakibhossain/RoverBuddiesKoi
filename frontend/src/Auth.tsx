@@ -333,6 +333,7 @@ export function AuthForms({
 }) {
   const [tab,       setTab]       = useState<"login" | "register">(initialTab)
   const [loading,   setLoading]   = useState(false)
+  const [errorMsg,  setErrorMsg]  = useState<string | null>(null)
 
   // Login fields
   const [lEmail,    setLEmail]    = useState("")
