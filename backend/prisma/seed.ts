@@ -39,13 +39,16 @@ async function main() {
   await prisma.subteam.create({ data: { name: "Software", teamId: umrt.id } })
   await prisma.subteam.create({ data: { name: "Electrical", teamId: umrt.id } })
   await prisma.subteam.create({ data: { name: "Mechanical", teamId: umrt.id } })
+  await prisma.subteam.create({ data: { name: "Communication", teamId: umrt.id } })
 
   await prisma.subteam.create({ data: { name: "Software", teamId: urrt.id } })
   await prisma.subteam.create({ data: { name: "Electrical", teamId: urrt.id } })
   await prisma.subteam.create({ data: { name: "Mechanical", teamId: urrt.id } })
+  await prisma.subteam.create({ data: { name: "Communication", teamId: urrt.id } })
 
   await prisma.subteam.create({ data: { name: "UI/UX", teamId: xyz.id } })
   await prisma.subteam.create({ data: { name: "Software", teamId: xyz.id } })
+  await prisma.subteam.create({ data: { name: "Communication", teamId: xyz.id } })
 
   // 3. Active Semester Configuration
   await prisma.semester.create({

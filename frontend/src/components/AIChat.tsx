@@ -36,7 +36,7 @@ interface ChatMessage {
 // ─── NLP Engine ───────────────────────────────────────────────────────────────
 
 const TEAMS    = ["UMRT","URRT","Team XYZ"]
-const SUBTEAMS = ["Software","Mechanical","Electrical","UI/UX"]
+const SUBTEAMS = ["Software","Mechanical","Electrical","Communication","Science","Media","UI/UX"]
 const ALL_SKILLS = ["React","TypeScript","Python","ROS","Embedded Systems","PCB Design","CAD","Machine Learning","UI/UX","DevOps"]
 const DAYS: DayOfWeek[] = ["Sun","Mon","Tue","Wed","Thu"]
 
@@ -58,6 +58,9 @@ function extractTeam(q: string): string | null {
 
 // Extract subteam name
 function extractSubteam(q: string): string | null {
+  if (q.includes("comunication") || q.includes("communication") || q.includes("comm") || q.includes("comms")) {
+    return "Communication"
+  }
   for (const s of SUBTEAMS) {
     if (q.includes(s.toLowerCase())) return s
   }

@@ -403,12 +403,15 @@ export function AuthForms({
     { value: "Team XYZ", label: "Team XYZ" },
   ]
   const SUBTEAMS = [
-    { value: "Software",   label: "Software" },
-    { value: "Electrical", label: "Electrical" },
-    { value: "Mechanical", label: "Mechanical" },
-    { value: "UI/UX",      label: "UI/UX" },
+    { value: "Software",      label: "Software" },
+    { value: "Electrical",    label: "Electrical" },
+    { value: "Mechanical",    label: "Mechanical" },
+    { value: "Communication", label: "Communication" },
+    { value: "Science",       label: "Science" },
+    { value: "Media",         label: "Media" },
+    { value: "UI/UX",         label: "UI/UX" },
   ]
-  const BATCHES  = ["2020","2021","2022","2023","2024","2025"].map(b => ({ value: b, label: `Batch ${b}` }))
+  const BATCHES  = ["2020","2021","2022","2023","2024","2025","2026"].map(b => ({ value: b, label: `Batch ${b}` }))
 
   return (
     <div

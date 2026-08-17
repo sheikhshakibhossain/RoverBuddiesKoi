@@ -1,4 +1,31 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000"
+function resolveApiBaseUrl(): string {
+  // In the browser, check if running on a remote host (e.g. *.vercel.app, mobile client, WAN domain)
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname
+    const isLocalhost = host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0"
+
+    // When deployed or accessed remotely (mobile network, cellular data, Vercel),
+    // always use relative path "" so Vercel rewrites forward /api calls securely over HTTPS.
+    if (!isLocalhost) {
+      const explicit = import.meta.env.VITE_API_BASE_URL
+      if (explicit && explicit.startsWith("https://") && !explicit.includes("localhost")) {
+        return explicit.replace(/\/$/, "")
+      }
+      return ""
+    }
+  }
+
+  // Local development fallback
+  const envUrl = import.meta.env.VITE_API_BASE_URL
+  if (envUrl && typeof envUrl === "string" && envUrl.trim() !== "") {
+    return envUrl.trim().replace(/\/$/, "")
+  }
+
+  // In dev, empty string lets Vite proxy forward /api to port 5000
+  return ""
+}
+
+export const API_BASE_URL = resolveApiBaseUrl()
 
 export function getAccessToken(): string | null {
   return localStorage.getItem("accessToken")
@@ -34,7 +61,19 @@ export async function fetchApi<T = any>(
     headers.set("Content-Type", "application/json")
   }
 
-  let res = await fetch(url, { ...options, headers })
+  let res: Response
+  try {
+    res = await fetch(url, { ...options, headers })
+  } catch (fetchErr: any) {
+    // Graceful handling of network connection failure
+    const msg = fetchErr?.message || ""
+    if (msg.includes("fetch") || fetchErr.name === "TypeError") {
+      throw new Error(
+        `Unable to reach backend server at ${API_BASE_URL || window.location.origin}. Please ensure the backend is running.`
+      )
+    }
+    throw fetchErr
+  }
 
   // Token expired - attempt refresh once
   if (res.status === 401 && getRefreshToken()) {
@@ -43,7 +82,11 @@ export async function fetchApi<T = any>(
       const newToken = getAccessToken()
       if (newToken) {
         headers.set("Authorization", `Bearer ${newToken}`)
-        res = await fetch(url, { ...options, headers })
+        try {
+          res = await fetch(url, { ...options, headers })
+        } catch (fetchErr: any) {
+          throw new Error("Unable to connect to the backend server. Please ensure the backend is running.")
+        }
       }
     } else {
       clearTokens()

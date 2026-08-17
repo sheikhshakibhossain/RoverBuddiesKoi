@@ -17,20 +17,36 @@ import projectRoutes from "./routes/projects.js"
 
 const app = express()
 
+// Enable trust proxy for Vercel / serverless reverse proxies / Cloudflare
+app.set("trust proxy", 1)
+
 // 1. Security Middlewares
-app.use(helmet())
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+  })
+)
+
 app.use(
   cors({
     origin: true,
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
   })
 )
 
-// 2. Rate Limiter
+// Handle preflight requests
+app.options("*", cors())
+
+// 2. Rate Limiter (Optimized for mobile CGNAT and serverless proxying)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 300,
-  message: { error: "Too many requests from this IP, please try again later." },
+  max: 3000, // Generous limit to accommodate cellular carrier CGNAT shared IPs
+  message: { error: "Too many requests from this network, please try again later." },
+  validate: { xForwardedForHeader: false, default: false },
+  skip: (req) => req.method === "OPTIONS" || req.path === "/health",
 })
 app.use("/api", limiter)
 

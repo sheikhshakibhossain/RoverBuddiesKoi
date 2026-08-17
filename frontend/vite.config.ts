@@ -33,12 +33,26 @@ export default defineConfig(({ mode }) => {
     server: {
       host: '0.0.0.0',
       port: parseInt(process.env.PORT || '8443'),
-      strictPort: true,
+      strictPort: false,
       watch: { ignored: ['**/.figma/**'] },
+      proxy: {
+        '/api': {
+          target: process.env.VITE_API_BASE_URL || 'http://localhost:5000',
+          changeOrigin: true,
+          secure: false,
+        },
+      },
     },
     preview: {
       host: '0.0.0.0',
       port: parseInt(process.env.PORT || '8443'),
+      proxy: {
+        '/api': {
+          target: process.env.VITE_API_BASE_URL || 'http://localhost:5000',
+          changeOrigin: true,
+          secure: false,
+        },
+      },
     },
   }
 })
