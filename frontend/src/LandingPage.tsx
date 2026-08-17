@@ -1,5 +1,35 @@
-import { Building2, LayoutDashboard, Search, Zap, CheckCircle2, ArrowRight } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Building2, LayoutDashboard, Search, Zap, CheckCircle2, ArrowRight, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+
+function formatDhakaTime(date: Date = new Date()): string {
+  try {
+    return date.toLocaleTimeString("en-US", {
+      timeZone: "Asia/Dhaka",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    })
+  } catch {
+    return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true })
+  }
+}
+
+function formatDhakaDate(date: Date = new Date()): string {
+  try {
+    return date.toLocaleDateString("en-US", {
+      timeZone: "Asia/Dhaka",
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
+  } catch {
+    return date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })
+  }
+}
 
 export function LandingPage({
   onGetStarted,
@@ -8,6 +38,15 @@ export function LandingPage({
   onGetStarted: () => void;
   onLogin: () => void;
 }) {
+  const [now, setNow] = useState<Date>(new Date())
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(new Date())
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden">
       {/* Background Ambience */}
@@ -25,7 +64,7 @@ export function LandingPage({
       />
 
       {/* Navbar */}
-      <nav className="relative z-10 w-full max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
+      <nav className="relative z-10 w-full max-w-6xl mx-auto px-6 py-6 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div
             className="w-10 h-10 rounded-[12px] flex items-center justify-center"
@@ -35,21 +74,33 @@ export function LandingPage({
           </div>
           <span className="text-xl font-bold tracking-tight text-foreground">RoverBuddiesKoi</span>
         </div>
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" className="text-muted-foreground hover:text-foreground" onClick={onLogin}>
+
+        {/* Live Dhaka Clock in Navbar */}
+        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-card/90 border border-primary/20 text-xs font-mono shadow-xs">
+          <Clock size={15} className="text-primary animate-pulse shrink-0" />
+          <span className="font-bold text-foreground text-xs sm:text-sm">{formatDhakaTime(now)}</span>
+          <Badge variant="default" className="text-[10px] px-1 py-0 h-4 font-semibold hidden sm:inline-flex">
+            BST
+          </Badge>
+          <span className="text-muted-foreground/60 hidden md:inline">· {formatDhakaDate(now)}</span>
+        </div>
+
+        <div className="flex items-center gap-2 sm:gap-4">
+          <Button variant="ghost" className="text-muted-foreground hover:text-foreground text-xs sm:text-sm" onClick={onLogin}>
             Sign In
           </Button>
-          <Button className="gap-2" onClick={onGetStarted}>
+          <Button className="gap-2 text-xs sm:text-sm" onClick={onGetStarted}>
             Get Started <ArrowRight size={14} />
           </Button>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 text-center mt-12 pb-24">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-secondary/50 backdrop-blur-sm mb-8">
-          <span className="flex h-2 w-2 rounded-full bg-success"></span>
-          <span className="text-xs font-medium text-muted-foreground">CAIR Lab · Fall 2026</span>
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 text-center mt-8 pb-24">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-card/80 backdrop-blur-sm mb-8 shadow-xs font-mono">
+          <span className="flex h-2 w-2 rounded-full bg-success animate-pulse"></span>
+          <span className="text-xs font-semibold text-foreground">Live Time: {formatDhakaTime(now)} (BST)</span>
+          <span className="text-xs text-muted-foreground">· CAIR Lab</span>
         </div>
 
         <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-foreground max-w-4xl leading-[1.1]">

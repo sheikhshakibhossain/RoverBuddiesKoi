@@ -1,17 +1,32 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
   Building2, Loader2, UploadCloud, CheckCircle2, ArrowLeft,
-  Shield, Users, Layers, User, Eye, EyeOff,
+  Shield, Users, Layers, User, Eye, EyeOff, Clock,
 } from "lucide-react"
 import type { AppUser, UserRole } from "@/lib/user-context"
 import { roleLabel, normalizeRole } from "@/lib/user-context"
 import { authApi } from "@/lib/api"
+
+function formatDhakaTime(date: Date = new Date()): string {
+  try {
+    return date.toLocaleTimeString("en-US", {
+      timeZone: "Asia/Dhaka",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    })
+  } catch {
+    return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true })
+  }
+}
 
 // ─── Demo profiles (one per role) ─────────────────────────────────────────────
 
@@ -318,7 +333,12 @@ export function AuthForms({
   const [rSubteam,  setRSubteam]  = useState("Software")          // subteam-manager, member
   const [rBatch,    setRBatch]    = useState("2024")              // member
   const [rWhatsapp, setRWhatsapp] = useState("")                  // member
-  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [now, setNow] = useState<Date>(new Date())
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(timer)
+  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -435,6 +455,11 @@ export function AuthForms({
             <div>
               <h1 className="text-xl font-bold tracking-tight text-foreground">RoverBuddies</h1>
               <p className="text-xs text-muted-foreground mt-0.5">Team Availability Management · CAIR Lab</p>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted/60 border border-border text-[11px] font-mono mt-2 text-foreground">
+                <Clock size={11} className="text-primary animate-pulse shrink-0" />
+                <span className="font-semibold">{formatDhakaTime(now)}</span>
+                <span className="text-muted-foreground">BST</span>
+              </div>
             </div>
           </div>
 
