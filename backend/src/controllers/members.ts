@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express"
 import { prisma } from "../db.js"
-import { calculateAvailability } from "../services/availability.js"
+import { calculateAvailability, getDhakaTimeParts } from "../services/availability.js"
 import { DayOfWeek } from "@prisma/client"
 import { NotFoundError } from "../utils/errors.js"
 
@@ -9,9 +9,10 @@ export async function getMembers(req: Request, res: Response, next: NextFunction
     const currentUser = req.user!
     const { team, subteam, status, day, time, skill, batch, search } = req.query
 
-    // Target day & time calculation
-    const targetDayStr = (day as string) || getCurrentDayOfWeek()
-    const targetTimeStr = (time as string) || getCurrentTimeStr()
+    // Target day & time calculation in Dhaka Timezone
+    const dhakaNow = getDhakaTimeParts()
+    const targetDayStr = (day as string) || dhakaNow.day
+    const targetTimeStr = (time as string) || dhakaNow.timeStr24
 
     // Build RBAC & Query filter
     const whereClause: any = {
@@ -148,7 +149,8 @@ export async function getMemberById(req: Request, res: Response, next: NextFunct
       room: r.room,
     }))
 
-    const avail = calculateAvailability(schedule, getCurrentDayOfWeek(), getCurrentTimeStr())
+    const dhakaNow = getDhakaTimeParts()
+    const avail = calculateAvailability(schedule, dhakaNow.day, dhakaNow.timeStr24)
 
     res.json({
       id: u.id,
@@ -251,18 +253,6 @@ export async function updateRole(req: Request, res: Response, next: NextFunction
   } catch (error) {
     next(error)
   }
-}
-
-function getCurrentDayOfWeek(): DayOfWeek {
-  const days: DayOfWeek[] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-  return days[new Date().getDay()]
-}
-
-function getCurrentTimeStr(): string {
-  const now = new Date()
-  const h = now.getHours().toString().padStart(2, "0")
-  const m = now.getMinutes().toString().padStart(2, "0")
-  return `${h}:${m}`
 }
 
 function roleLabel(role: string): string {

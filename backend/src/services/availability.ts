@@ -15,20 +15,64 @@ export interface AvailabilityResult {
   remainingMin?: number
 }
 
-function timeToMinutes(timeStr: string): number {
-  const [h, m] = timeStr.split(":").map(Number)
-  return h * 60 + m
+export function timeToMinutes(timeStr: string): number {
+  if (!timeStr) return 0
+  const clean = timeStr.trim()
+  const match12 = clean.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i)
+  if (match12) {
+    let h = parseInt(match12[1], 10)
+    const m = parseInt(match12[2], 10)
+    const isPM = match12[3].toUpperCase() === "PM"
+    if (isPM && h !== 12) h += 12
+    if (!isPM && h === 12) h = 0
+    return h * 60 + m
+  }
+  const [h, m] = clean.split(":").map(Number)
+  return (h || 0) * 60 + (m || 0)
 }
 
-function format12Hour(timeStr: string): string {
-  const [hStr, mStr] = timeStr.split(":")
-  let h = parseInt(hStr, 10)
-  const m = parseInt(mStr, 10)
+export function format12Hour(timeStr: string): string {
+  if (!timeStr) return ""
+  const mins = timeToMinutes(timeStr)
+  let h = Math.floor(mins / 60)
+  const m = mins % 60
   const ampm = h >= 12 ? "PM" : "AM"
   h = h % 12
   h = h ? h : 12 // hour 0 is 12
   const minuteDisplay = m < 10 ? `0${m}` : m
   return `${h}:${minuteDisplay} ${ampm}`
+}
+
+export function getDhakaTimeParts(date: Date = new Date()): {
+  day: DayOfWeek
+  hours: number
+  minutes: number
+  timeStr24: string
+  totalMinutes: number
+} {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Dhaka",
+    weekday: "short",
+    hour: "numeric",
+    minute: "numeric",
+    hourCycle: "h23",
+  })
+  const parts = formatter.formatToParts(date)
+  let day: DayOfWeek = "Mon"
+  let hours = 0
+  let minutes = 0
+  for (const p of parts) {
+    if (p.type === "weekday") {
+      day = p.value as DayOfWeek
+    } else if (p.type === "hour") {
+      hours = parseInt(p.value, 10)
+    } else if (p.type === "minute") {
+      minutes = parseInt(p.value, 10)
+    }
+  }
+  const timeStr24 = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`
+  const totalMinutes = hours * 60 + minutes
+  return { day, hours, minutes, timeStr24, totalMinutes }
 }
 
 export function calculateAvailability(

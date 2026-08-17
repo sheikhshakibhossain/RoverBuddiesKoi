@@ -15,7 +15,7 @@ import { aiApi } from "@/lib/api"
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type AvailStatus = "free" | "in-class" | "soon" | "missing"
-type DayOfWeek   = "Sun" | "Mon" | "Tue" | "Wed" | "Thu"
+type DayOfWeek   = "Sat" | "Sun" | "Mon" | "Tue" | "Wed" | "Thu" | "Fri"
 
 interface ClassSlot { day: DayOfWeek; startTime: string; endTime: string; course: string; room?: string }
 interface Member {
@@ -38,14 +38,16 @@ interface ChatMessage {
 const TEAMS    = ["UMRT","URRT","Team XYZ"]
 const SUBTEAMS = ["Software","Mechanical","Electrical","Communication","Science","Media","UI/UX"]
 const ALL_SKILLS = ["React","TypeScript","Python","ROS","Embedded Systems","PCB Design","CAD","Machine Learning","UI/UX","DevOps"]
-const DAYS: DayOfWeek[] = ["Sun","Mon","Tue","Wed","Thu"]
+const DAYS: DayOfWeek[] = ["Sat","Sun","Mon","Tue","Wed","Thu","Fri"]
 
 const DAY_ALIASES: Record<string, DayOfWeek> = {
+  saturday:"Sat", sat:"Sat", "6":"Sat",
   sunday:"Sun", sun:"Sun", "0":"Sun",
   monday:"Mon", mon:"Mon", today:"Mon",
   tuesday:"Tue", tue:"Tue",
   wednesday:"Wed", wed:"Wed", tomorrow:"Wed",
   thursday:"Thu", thu:"Thu",
+  friday:"Fri", fri:"Fri", "5":"Fri",
 }
 
 // Extract team name from query
@@ -115,26 +117,40 @@ function extractBatch(q: string): string | null {
   return m ? m[1] : null
 }
 
+function timeToMinutes(timeStr: string): number {
+  if (!timeStr) return 0
+  const clean = timeStr.trim()
+  const match12 = clean.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i)
+  if (match12) {
+    let h = parseInt(match12[1], 10)
+    const m = parseInt(match12[2], 10)
+    const isPM = match12[3].toUpperCase() === "PM"
+    if (isPM && h !== 12) h += 12
+    if (!isPM && h === 12) h = 0
+    return h * 60 + m
+  }
+  const [h, m] = clean.split(":").map(Number)
+  return (h || 0) * 60 + (m || 0)
+}
+
 // Check if a member is free at a given day/time
 function isFreeAt(member: Member, day: DayOfWeek, time: string): boolean {
-  if (member.status === "missing") return false
-  const [h, m] = time.split(":").map(Number)
-  const tMin = h * 60 + m
+  if (member.status === "missing" || !member.schedule || member.schedule.length === 0) return false
+  const tMin = timeToMinutes(time)
   return !member.schedule.some(slot => {
     if (slot.day !== day) return false
-    const [sh, sm] = slot.startTime.split(":").map(Number)
-    const [eh, em] = slot.endTime.split(":").map(Number)
-    return tMin >= sh * 60 + sm && tMin < eh * 60 + em
+    const startMins = timeToMinutes(slot.startTime)
+    const endMins = timeToMinutes(slot.endTime)
+    return tMin >= startMins && tMin < endMins
   })
 }
 
 // Find best common meeting slot for two groups
 function bestCommonSlot(groupA: Member[], groupB: Member[]): string | null {
   const hours = ["09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00"]
-  const days: DayOfWeek[] = ["Sun","Mon","Tue","Wed","Thu"]
   let bestScore = -1
   let bestSlot: string | null = null
-  for (const day of days) {
+  for (const day of DAYS) {
     for (const h of hours) {
       const freeA = groupA.filter(m => isFreeAt(m, day, h)).length
       const freeB = groupB.filter(m => isFreeAt(m, day, h)).length
@@ -253,9 +269,8 @@ export function resolveQuery(input: string, members: Member[], userRole: string)
     // Single team best time
     if (pool.length > 0) {
       const hours = ["09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00"]
-      const days: DayOfWeek[] = ["Sun","Mon","Tue","Wed","Thu"]
-      let best = { day:"Mon" as DayOfWeek, hour:"09:00", count:0 }
-      for (const d of days) {
+      let best = { day:"Sat" as DayOfWeek, hour:"09:00", count:0 }
+      for (const d of DAYS) {
         for (const h of hours) {
           const count = pool.filter(m => isFreeAt(m, d, h)).length
           if (count > best.count) best = { day:d, hour:h, count }
@@ -414,6 +429,19 @@ function StatusDot({ status }: { status: AvailStatus }) {
   )
 }
 
+function formatDhakaMsgTime(date: Date = new Date()): string {
+  try {
+    return date.toLocaleTimeString("en-US", {
+      timeZone: "Asia/Dhaka",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    })
+  } catch {
+    return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })
+  }
+}
+
 // ─── Message renderer ─────────────────────────────────────────────────────────
 
 function BotMessage({ msg, onMemberClick }: { msg: ChatMessage; onMemberClick: (m: Member) => void }) {
@@ -476,9 +504,14 @@ function BotMessage({ msg, onMemberClick }: { msg: ChatMessage; onMemberClick: (
           </div>
         )}
 
-        {msg.meta && (
-          <p className="text-[10px] text-muted-foreground/60 font-mono px-0.5">{msg.meta}</p>
-        )}
+        <div className="flex items-center justify-between px-1">
+          {msg.meta ? (
+            <p className="text-[10px] text-muted-foreground/60 font-mono">{msg.meta}</p>
+          ) : <span />}
+          <span className="text-[9px] text-muted-foreground/50 font-mono ml-auto">
+            {formatDhakaMsgTime(msg.timestamp)} BST
+          </span>
+        </div>
       </div>
     </div>
   )
@@ -486,11 +519,14 @@ function BotMessage({ msg, onMemberClick }: { msg: ChatMessage; onMemberClick: (
 
 function UserMessage({ msg }: { msg: ChatMessage }) {
   return (
-    <div className="flex justify-end">
+    <div className="flex flex-col items-end gap-1">
       <div className="max-w-[78%] rounded-2xl rounded-tr-sm px-3.5 py-2.5 text-sm"
         style={{ background:"oklch(0.96 0 0)", color:"oklch(0.12 0.005 285)" }}>
         {msg.text}
       </div>
+      <span className="text-[9px] text-muted-foreground/50 font-mono pr-1">
+        {formatDhakaMsgTime(msg.timestamp)} BST
+      </span>
     </div>
   )
 }

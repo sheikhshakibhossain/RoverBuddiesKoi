@@ -97,18 +97,18 @@ async function main() {
 
   console.log(`📋 ${slots.length} slots parsed\n`)
 
-  // Get users
-  const whereClause = targetEmail ? { email: targetEmail } : {}
-  const users = await prisma.user.findMany({ where: whereClause })
-  console.log(`👥 Found ${users.length} user(s):\n`)
-  users.forEach((u, i) => console.log(`  [${i}] ${u.name} <${u.email}> (${u.role})`))
-  console.log("")
-
-  for (const user of users) {
-    await insertForUser(user.id, user.organizationId, `${user.name} <${user.email}>`, slots)
+  // Get user to update
+  const targetEmail = process.env.TARGET_EMAIL || "mahinhasanupol@gmail.com"
+  const user = await prisma.user.findUnique({ where: { email: targetEmail } })
+  if (!user) {
+    console.error(`❌ User with email "${targetEmail}" not found. Pass TARGET_EMAIL=...`)
+    process.exit(1)
   }
 
-  console.log("\n🎉 All done!")
+  console.log(`👤 Target user: ${user.name} <${user.email}> (${user.role})\n`)
+  await insertForUser(user.id, user.organizationId, `${user.name} <${user.email}>`, slots)
+
+  console.log("\n🎉 Routine successfully inserted for target user!")
   await prisma.$disconnect()
 }
 

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express"
 import { prisma } from "../db.js"
-import { calculateAvailability } from "../services/availability.js"
+import { calculateAvailability, getDhakaTimeParts } from "../services/availability.js"
 import { DayOfWeek } from "@prisma/client"
 
 export async function processAIChat(req: Request, res: Response, next: NextFunction) {
@@ -23,10 +23,9 @@ export async function processAIChat(req: Request, res: Response, next: NextFunct
       },
     })
 
-    const days: DayOfWeek[] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-    const currentDay = days[new Date().getDay()]
-    const now = new Date()
-    const currentTime = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`
+    const dhakaNow = getDhakaTimeParts()
+    const currentDay = dhakaNow.day
+    const currentTime = dhakaNow.timeStr24
 
     let replyText = ""
 

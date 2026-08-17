@@ -127,7 +127,7 @@ export async function getPendingSkills(req: Request, res: Response, next: NextFu
       skillName: p.skill.name,
       skill: p.skill.name,
       requestedAt: p.createdAt,
-      requested: new Date(p.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      requested: new Date(p.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "Asia/Dhaka" }),
     }))
 
     res.json(result)

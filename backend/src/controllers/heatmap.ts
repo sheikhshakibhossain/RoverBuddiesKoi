@@ -3,7 +3,7 @@ import { prisma } from "../db.js"
 import { calculateAvailability } from "../services/availability.js"
 import { DayOfWeek } from "@prisma/client"
 
-const DAYS: DayOfWeek[] = ["Sun", "Mon", "Tue", "Wed", "Thu"]
+const DAYS: DayOfWeek[] = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"]
 const HOURS = [
   "08:00", "09:00", "10:00", "11:00", "12:00",
   "13:00", "14:00", "15:00", "16:00", "17:00",

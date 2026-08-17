@@ -33,7 +33,7 @@ import { LandingPage } from "@/LandingPage"
 
 type AvailStatus = "free" | "in-class" | "soon" | "missing"
 type NavPage     = "dashboard" | "members" | "search" | "heatmap" | "skills" | "projects" | "meeting-planner" | "portfolio" | "settings"
-type DayOfWeek   = "Sun" | "Mon" | "Tue" | "Wed" | "Thu"
+type DayOfWeek   = "Sat" | "Sun" | "Mon" | "Tue" | "Wed" | "Thu" | "Fri"
 
 interface ClassSlot {
   day: DayOfWeek
@@ -89,20 +89,214 @@ const ALL_FEATURE_OPTIONS: Record<string, string[]> = {
 }
 
 const PENDING_APPROVALS: any[] = []
-const DAYS: DayOfWeek[] = ["Sun","Mon","Tue","Wed","Thu"]
+const DAYS: DayOfWeek[] = ["Sat","Sun","Mon","Tue","Wed","Thu","Fri"]
+const DAY_INDEX_MAP: DayOfWeek[] = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"] // JS getDay(): 0=Sun..6=Sat
 const HOURS = ["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00"]
+
+function getDhakaTimeParts(date: Date = new Date()): {
+  day: DayOfWeek
+  hours: number
+  minutes: number
+  timeStr24: string
+  totalMinutes: number
+} {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Dhaka",
+    weekday: "short",
+    hour: "numeric",
+    minute: "numeric",
+    hourCycle: "h23",
+  })
+  const parts = formatter.formatToParts(date)
+  let day: DayOfWeek = "Mon"
+  let hours = 0
+  let minutes = 0
+  for (const p of parts) {
+    if (p.type === "weekday") {
+      day = p.value as DayOfWeek
+    } else if (p.type === "hour") {
+      hours = parseInt(p.value, 10)
+    } else if (p.type === "minute") {
+      minutes = parseInt(p.value, 10)
+    }
+  }
+  const timeStr24 = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`
+  const totalMinutes = hours * 60 + minutes
+  return { day, hours, minutes, timeStr24, totalMinutes }
+}
+
+function getTodayDayOfWeek(): DayOfWeek {
+  return getDhakaTimeParts().day
+}
+
+function formatDhakaTime(date: Date = new Date()): string {
+  try {
+    return date.toLocaleTimeString("en-US", {
+      timeZone: "Asia/Dhaka",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    })
+  } catch {
+    return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true })
+  }
+}
+
+function formatDhakaDate(date: Date = new Date()): string {
+  try {
+    return date.toLocaleDateString("en-US", {
+      timeZone: "Asia/Dhaka",
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
+  } catch {
+    return date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })
+  }
+}
+
+function formatDhakaDateTime(dateStrOrObj: string | Date): string {
+  if (!dateStrOrObj) return ""
+  try {
+    const d = typeof dateStrOrObj === "string" ? new Date(dateStrOrObj) : dateStrOrObj
+    return d.toLocaleString("en-US", {
+      timeZone: "Asia/Dhaka",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    })
+  } catch {
+    return String(dateStrOrObj)
+  }
+}
 
 // ─── Availability helper ───────────────────────────────────────────────────────
 
+function timeToMinutes(timeStr: string): number {
+  if (!timeStr) return 0
+  const clean = timeStr.trim()
+  const match12 = clean.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i)
+  if (match12) {
+    let h = parseInt(match12[1], 10)
+    const m = parseInt(match12[2], 10)
+    const isPM = match12[3].toUpperCase() === "PM"
+    if (isPM && h !== 12) h += 12
+    if (!isPM && h === 12) h = 0
+    return h * 60 + m
+  }
+  const [h, m] = clean.split(":").map(Number)
+  return (h || 0) * 60 + (m || 0)
+}
+
+function format12Hour(timeStr: string): string {
+  if (!timeStr) return ""
+  const mins = timeToMinutes(timeStr)
+  let h = Math.floor(mins / 60)
+  const m = mins % 60
+  const ampm = h >= 12 ? "PM" : "AM"
+  h = h % 12
+  h = h ? h : 12
+  const minuteDisplay = m < 10 ? `0${m}` : m
+  return `${h}:${minuteDisplay} ${ampm}`
+}
+
+function computeLiveAvailability(
+  schedule: ClassSlot[],
+  overrideDay?: DayOfWeek,
+  overrideTimeStr?: string
+): {
+  status: AvailStatus
+  nextChange: string
+  currentClass?: string
+  remainingMin?: number
+} {
+  if (!schedule || schedule.length === 0) {
+    return {
+      status: "missing",
+      nextChange: "Routine not uploaded",
+    }
+  }
+
+  const dhakaNow = getDhakaTimeParts()
+  const targetDay = overrideDay || dhakaNow.day
+  const currentMins = overrideTimeStr ? timeToMinutes(overrideTimeStr) : dhakaNow.totalMinutes
+
+  const todayClasses = schedule.filter(s => s.day === targetDay)
+  if (todayClasses.length === 0) {
+    return {
+      status: "free",
+      nextChange: "Free all day",
+    }
+  }
+
+  // 1. Check if currently in class
+  for (const slot of todayClasses) {
+    const startMins = timeToMinutes(slot.startTime)
+    const endMins = timeToMinutes(slot.endTime)
+
+    if (currentMins >= startMins && currentMins < endMins) {
+      const remainingMin = endMins - currentMins
+      return {
+        status: "in-class",
+        nextChange: `Free at ${format12Hour(slot.endTime)}`,
+        currentClass: slot.course,
+        remainingMin,
+      }
+    }
+  }
+
+  // 2. Check if class starting soon (within 30 mins)
+  const upcoming = todayClasses
+    .map(slot => ({ slot, startMins: timeToMinutes(slot.startTime) }))
+    .filter(x => x.startMins > currentMins)
+    .sort((a, b) => a.startMins - b.startMins)
+
+  if (upcoming.length > 0) {
+    const next = upcoming[0]
+    const diff = next.startMins - currentMins
+    if (diff <= 30) {
+      return {
+        status: "soon",
+        nextChange: `Class in ${diff} min`,
+        currentClass: next.slot.course,
+      }
+    }
+    return {
+      status: "free",
+      nextChange: `Free until ${format12Hour(next.slot.startTime)}`,
+    }
+  }
+
+  return {
+    status: "free",
+    nextChange: "Free rest of the day",
+  }
+}
+
+function enrichMemberWithLiveStatus(m: Member): Member {
+  const live = computeLiveAvailability(m.schedule)
+  return {
+    ...m,
+    status: live.status,
+    nextChange: live.nextChange,
+    currentClass: live.currentClass,
+    remainingMin: live.remainingMin,
+  }
+}
+
 function isFreeAt(member: Member, day: DayOfWeek, time: string): boolean {
-  if (member.status === "missing") return false
-  const [h, m] = time.split(":").map(Number)
-  const tMin = h * 60 + m
+  if (member.status === "missing" || !member.schedule || member.schedule.length === 0) return false
+  const tMin = timeToMinutes(time)
   return !member.schedule.some(slot => {
     if (slot.day !== day) return false
-    const [sh, sm] = slot.startTime.split(":").map(Number)
-    const [eh, em] = slot.endTime.split(":").map(Number)
-    return tMin >= sh * 60 + sm && tMin < eh * 60 + em
+    const startMins = timeToMinutes(slot.startTime)
+    const endMins = timeToMinutes(slot.endTime)
+    return tMin >= startMins && tMin < endMins
   })
 }
 
@@ -297,6 +491,33 @@ function Sidebar({ page, setPage, mobileOpen, setMobileOpen }: {
   )
 }
 
+// ─── Dhaka Clock Widget ───────────────────────────────────────────────────────
+
+function DhakaClockWidget() {
+  const [now, setNow] = useState<Date>(new Date())
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(new Date())
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  return (
+    <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 py-1 rounded-lg bg-muted/60 border border-border text-xs font-mono select-none">
+      <div className="flex items-center gap-1 sm:gap-1.5 text-primary">
+        <Clock size={12} className="text-primary animate-pulse shrink-0" />
+        <span className="font-semibold text-foreground tracking-tight text-[11px] sm:text-xs">{formatDhakaTime(now)}</span>
+      </div>
+      <span className="text-muted-foreground/40 hidden md:inline">|</span>
+      <span className="text-muted-foreground text-[11px] hidden md:inline">{formatDhakaDate(now)}</span>
+      <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-primary/30 text-primary font-semibold hidden lg:inline-flex">
+        BST (UTC+6)
+      </Badge>
+    </div>
+  )
+}
+
 // ─── Top Bar ──────────────────────────────────────────────────────────────────
 
 function TopBar({ page, onSignOut, onOpenProfile, onToggleMobileMenu }: {
@@ -312,12 +533,13 @@ function TopBar({ page, onSignOut, onOpenProfile, onToggleMobileMenu }: {
       </Button>
       <span className="text-xs text-muted-foreground hidden sm:inline">CAIR Lab</span>
       <ChevronRight size={12} className="text-muted-foreground hidden sm:inline" />
-      <span className="text-sm font-medium text-foreground truncate max-w-[150px] sm:max-w-none">{label}</span>
+      <span className="text-sm font-medium text-foreground truncate max-w-[120px] sm:max-w-none">{label}</span>
 
       <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-        <Badge variant="success" className="gap-1.5 text-[11px] px-2">
+        <DhakaClockWidget />
+        <Badge variant="success" className="gap-1.5 text-[11px] px-2 hidden sm:inline-flex">
           <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse inline-block" />
-          <span className="hidden sm:inline">Live</span>
+          <span>Live</span>
         </Badge>
         <Separator orientation="vertical" className="h-5 mx-0.5 sm:mx-1" />
         <Tooltip>
@@ -709,20 +931,39 @@ function PendingApprovals() {
   )
 }
 
+function getGreeting(date: Date = new Date()): string {
+  const h = getDhakaTimeParts(date).hours
+  if (h < 12) return "Good morning"
+  if (h < 17) return "Good afternoon"
+  if (h < 21) return "Good evening"
+  return "Good night"
+}
+
 function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
   const user    = useUser()
   const tScope  = teamScope(user)
   const stScope = subteamScope(user)
   const [membersList, setMembersList] = useState<Member[]>([])
+  const [dhakaNow,    setDhakaNow]    = useState<Date>(new Date())
 
   const loadData = () => {
     membersApi.getMembers()
-      .then(res => setMembersList(res || []))
+      .then(res => setMembersList((res || []).map(enrichMemberWithLiveStatus)))
       .catch(() => setMembersList([]))
   }
 
   useEffect(() => {
     loadData()
+    const timer = setInterval(() => {
+      setMembersList(prev => prev.map(enrichMemberWithLiveStatus))
+    }, 15000)
+    const clockTimer = setInterval(() => {
+      setDhakaNow(new Date())
+    }, 1000)
+    return () => {
+      clearInterval(timer)
+      clearInterval(clockTimer)
+    }
   }, [])
 
   const pool = membersList.filter(m => {
@@ -750,14 +991,42 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
     <div className="space-y-5">
       {isMemberMissing && <RoutineRestrictionBanner onUpload={onUploadRoutine} />}
 
-      <div className="flex items-end justify-between">
+      {/* Dashboard Live Header with Time & Date */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-card border border-border/80 shadow-xs">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Good afternoon, {user.name.split(" ")[0]}</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            {getGreeting(dhakaNow)}, {user.name.split(" ")[0]}
+          </h1>
           <p className="text-muted-foreground text-sm mt-0.5">
-            {tScope ?? "CAIR Lab"}{stScope ? ` · ${stScope}` : ""} · Real-Time Availability
+            {tScope ?? "CAIR Lab"}{stScope ? ` · ${stScope}` : ""} · Real-Time Availability Hub
           </p>
         </div>
-        <Button variant="outline" size="sm" className="gap-1.5" onClick={loadData}><RefreshCw size={13}/> Refresh</Button>
+
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Live Dhaka Time & Date Card */}
+          <div className="flex items-center gap-3 px-3.5 py-2 rounded-xl bg-muted/60 border border-border font-mono shadow-xs">
+            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+              <Clock size={18} className="animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-base font-bold text-foreground tracking-tight">
+                  {formatDhakaTime(dhakaNow)}
+                </span>
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-primary/30 text-primary font-semibold">
+                  BST
+                </Badge>
+              </div>
+              <p className="text-[11px] text-muted-foreground font-sans">
+                {formatDhakaDate(dhakaNow)}
+              </p>
+            </div>
+          </div>
+
+          <Button variant="outline" size="sm" className="gap-1.5 h-10 px-3" onClick={loadData}>
+            <RefreshCw size={13}/> Refresh
+          </Button>
+        </div>
       </div>
 
       <PendingApprovals />
@@ -776,7 +1045,7 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-base">Live Availability</CardTitle>
-                <CardDescription className="text-xs mt-0.5">{pool.length} members · updated just now</CardDescription>
+                <CardDescription className="text-xs mt-0.5">{pool.length} members · Live at {formatDhakaTime(dhakaNow)} BST</CardDescription>
               </div>
               <Tabs value={tab} onValueChange={v => setTab(v as typeof tab)}>
                 <TabsList className="h-8">
@@ -875,8 +1144,8 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
           {/* Bar chart — computed from live members data */}
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Today&#39;s Availability</CardTitle>
-              <CardDescription className="text-xs">Members free per hour (today)</CardDescription>
+              <CardTitle className="text-sm">Today&#39;s Availability ({getTodayDayOfWeek()})</CardTitle>
+              <CardDescription className="text-xs">Members free per hour · Dhaka Time (BST)</CardDescription>
             </CardHeader>
             <CardContent className="pt-0">
               {pool.length === 0 ? (
@@ -884,13 +1153,13 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
                   <p className="text-xs text-muted-foreground">No members yet</p>
                 </div>
               ) : (() => {
-                const today = DAYS[new Date().getDay()] as DayOfWeek
+                const today = getTodayDayOfWeek()
                 const chartSlots = HOURS.map(h => {
                   const freeCount = pool.filter(m => isFreeAt(m, today, h)).length
                   return { t: h, v: freeCount }
                 })
                 const maxV = Math.max(...chartSlots.map(s => s.v), 1)
-                const nowH = `${new Date().getHours().toString().padStart(2,"0")}:00`
+                const nowH = `${getDhakaTimeParts().hours.toString().padStart(2,"0")}:00`
                 return (
                   <div className="flex items-end gap-1 h-20">
                     {chartSlots.map(s => {
@@ -955,18 +1224,20 @@ function MemberDialog({ member, open, onOpenChange, canManage }: {
   member: Member | null; open: boolean; onOpenChange: (o: boolean) => void; canManage: boolean
 }) {
   if (!member) return null
-  const todaySlots = member.schedule.filter(s => s.day === "Mon") // Mon = today in demo
+  const liveMember = enrichMemberWithLiveStatus(member)
+  const todayDay = getTodayDayOfWeek()
+  const todaySlots = liveMember.schedule.filter(s => s.day === todayDay)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
-            <MemberAvatar member={member} size="lg"/>
+            <MemberAvatar member={liveMember} size="lg"/>
             <div>
-              <p>{member.name}</p>
+              <p>{liveMember.name}</p>
               <p className="text-xs font-normal text-muted-foreground mt-0.5">
-                {member.role} · {member.org} · {member.team}
+                {liveMember.role} · {liveMember.org} · {liveMember.team}
               </p>
             </div>
           </DialogTitle>
@@ -976,14 +1247,14 @@ function MemberDialog({ member, open, onOpenChange, canManage }: {
           {/* Key info grid */}
           <div className="grid grid-cols-3 gap-2">
             {([
-              { label:"Status",   node:<StatusBadge status={member.status}/> },
-              { label:"Batch",    node:<span className="text-sm font-mono text-foreground">{member.batch}</span> },
-              { label:"Next",     node:<span className="text-sm font-mono text-foreground">{member.nextChange}</span> },
-              { label:"Org",      node:<span className="text-sm text-foreground">{member.org}</span> },
-              { label:"Team",     node:<span className="text-sm text-foreground">{member.team}</span> },
+              { label:"Status",   node:<StatusBadge status={liveMember.status}/> },
+              { label:"Batch",    node:<span className="text-sm font-mono text-foreground">{liveMember.batch}</span> },
+              { label:"Next",     node:<span className="text-sm font-mono text-foreground">{liveMember.nextChange}</span> },
+              { label:"Org",      node:<span className="text-sm text-foreground">{liveMember.org}</span> },
+              { label:"Team",     node:<span className="text-sm text-foreground">{liveMember.team}</span> },
               { label:"Subteam(s)", node:
                 <div className="flex flex-wrap gap-1">
-                  {member.subteams.map(s => <Badge key={s} variant="secondary" className="text-[10px]">{s}</Badge>)}
+                  {liveMember.subteams.map(s => <Badge key={s} variant="secondary" className="text-[10px]">{s}</Badge>)}
                 </div>
               },
             ] as { label: string; node: React.ReactNode }[]).map(r => (
@@ -995,23 +1266,26 @@ function MemberDialog({ member, open, onOpenChange, canManage }: {
           </div>
 
           {/* Remaining duration for in-class */}
-          {member.status === "in-class" && member.remainingMin !== undefined && (
+          {liveMember.status === "in-class" && liveMember.remainingMin !== undefined && (
             <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-destructive/10 border border-destructive/20">
               <Clock size={14} className="text-destructive shrink-0"/>
               <div className="flex-1">
-                <p className="text-xs font-medium text-foreground">In {member.currentClass}</p>
-                <Progress value={((90-member.remainingMin)/90)*100} className="h-1 mt-1.5 bg-destructive/20" indicatorClassName="bg-destructive"/>
+                <p className="text-xs font-medium text-foreground">In {liveMember.currentClass}</p>
+                <Progress value={((90-liveMember.remainingMin)/90)*100} className="h-1 mt-1.5 bg-destructive/20" indicatorClassName="bg-destructive"/>
               </div>
-              <span className="text-xs font-mono text-destructive">{member.remainingMin}m left</span>
+              <span className="text-xs font-mono text-destructive">{liveMember.remainingMin}m left</span>
             </div>
           )}
 
           {/* Today's schedule */}
           <div>
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Today&#39;s Schedule (Mon)</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Today&#39;s Schedule ({todayDay})</p>
             {todaySlots.length === 0
-              ? <p className="text-xs text-muted-foreground">No classes today</p>
-              : (
+              ? (
+                <div className="p-2.5 rounded-lg bg-muted/60 text-xs text-muted-foreground">
+                  {member.schedule.length === 0 ? "No routine uploaded for this semester" : `No classes scheduled on ${todayDay}`}
+                </div>
+              ) : (
                 <div className="space-y-1.5">
                   {todaySlots.map((s, i) => (
                     <div key={i} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-muted">
@@ -1027,22 +1301,32 @@ function MemberDialog({ member, open, onOpenChange, canManage }: {
 
           {/* Weekly schedule */}
           <div>
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Weekly Schedule</p>
-            <div className="grid grid-cols-5 gap-1 text-[10px]">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Weekly Schedule ({DAYS.length} Days)</p>
+              <span className="text-[10px] font-mono text-muted-foreground">{member.schedule.length} class slots</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-1.5 text-[10px]">
               {DAYS.map(day => {
                 const slots = member.schedule.filter(s => s.day === day)
+                const isToday = day === todayDay
                 return (
-                  <div key={day} className="rounded-lg bg-muted p-2 min-h-16">
-                    <p className="font-semibold text-muted-foreground mb-1.5">{day}</p>
-                    {slots.length === 0
-                      ? <p className="text-muted-foreground/40 italic">Free</p>
-                      : slots.map((s,i) => (
-                        <div key={i} className="mb-1 last:mb-0">
-                          <p className="font-medium text-foreground leading-tight">{s.course}</p>
-                          <p className="text-muted-foreground">{s.startTime}</p>
-                        </div>
-                      ))
-                    }
+                  <div key={day} className={cn("rounded-lg bg-muted p-2 min-h-16 flex flex-col justify-between", isToday && "border border-primary/40 bg-primary/5")}>
+                    <div>
+                      <p className={cn("font-semibold text-muted-foreground mb-1 flex items-center justify-between", isToday && "text-primary font-bold")}>
+                        <span>{day}</span>
+                        {isToday && <span className="text-[8px] uppercase tracking-wider bg-primary/20 text-primary px-1 rounded">Today</span>}
+                      </p>
+                      {slots.length === 0
+                        ? <p className="text-muted-foreground/40 italic">Free</p>
+                        : slots.map((s,i) => (
+                          <div key={i} className="mb-1.5 last:mb-0 border-b border-border/40 pb-1 last:border-0 last:pb-0">
+                            <p className="font-medium text-foreground leading-tight">{s.course}</p>
+                            <p className="text-muted-foreground font-mono text-[9px] mt-0.5">{s.startTime}–{s.endTime}</p>
+                            {s.room && <p className="text-[8px] text-muted-foreground/70">{s.room}</p>}
+                          </div>
+                        ))
+                      }
+                    </div>
                   </div>
                 )
               })}
@@ -1105,14 +1389,20 @@ function MembersPage() {
       teamsApi.getTeams(),
     ])
       .then(([m, t]) => {
-        setMembers(m || [])
+        setMembers((m || []).map(enrichMemberWithLiveStatus))
         setTeamsList((t || []).map((x: any) => x.name))
       })
       .catch(() => {})
       .finally(() => setLoading(false))
   }
 
-  useEffect(() => { loadData() }, [teamFilter])
+  useEffect(() => {
+    loadData()
+    const timer = setInterval(() => {
+      setMembers(prev => prev.map(enrichMemberWithLiveStatus))
+    }, 15000)
+    return () => clearInterval(timer)
+  }, [teamFilter])
 
   // Filter based on scope, subteam toggle, and search
   const filtered = members.filter(m => {
@@ -1418,7 +1708,7 @@ function SearchPage() {
     if (time   !== "all") filters.time   = time
     if (query.trim())     filters.search = query.trim()
     membersApi.getMembers(filters)
-      .then(res => setResults(res || []))
+      .then(res => setResults((res || []).map(enrichMemberWithLiveStatus)))
       .catch(() => setResults([]))
       .finally(() => setLoading(false))
   }, [query, team, sub, status, skill, batch, day, time])
@@ -1637,6 +1927,7 @@ function HeatmapPage() {
 
   const [fromHour,    setFromHour]    = useState("08:00")
   const [toHour,      setToHour]      = useState("17:00")
+  const [selectedDay, setSelectedDay] = useState<DayOfWeek>(() => getTodayDayOfWeek())
   const [heatData,    setHeatData]    = useState<any>(null)
   const [snapshots,   setSnapshots]   = useState<any[]>([])
   const [loading,     setLoading]     = useState(true)
@@ -1672,30 +1963,32 @@ function HeatmapPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Availability Heatmap</h1>
-          <p className="text-muted-foreground text-sm mt-0.5">Identify peak collaboration windows. Updated every 12 hours.</p>
+          <p className="text-muted-foreground text-sm mt-0.5">Identify peak collaboration windows across all 7 days. Updated every 12 hours.</p>
           {heatData?.computedAt && (
             <p className="text-xs text-muted-foreground/60 mt-0.5">
-              Last computed: {new Date(heatData.computedAt).toLocaleString()}
+              Last computed: {formatDhakaDateTime(heatData.computedAt)} (BST)
             </p>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={loadHeatmap}>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs" onClick={loadHeatmap}>
             <RefreshCw size={13} className={loading ? "animate-spin" : ""}/> Refresh
           </Button>
           {/* Time range */}
-          <Select value={fromHour} onValueChange={setFromHour}>
-            <SelectTrigger className="w-24 h-8 text-xs"><SelectValue/></SelectTrigger>
-            <SelectContent>{HOURS.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
-          </Select>
-          <span className="text-muted-foreground text-xs">to</span>
-          <Select value={toHour} onValueChange={setToHour}>
-            <SelectTrigger className="w-24 h-8 text-xs"><SelectValue/></SelectTrigger>
-            <SelectContent>{HOURS.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
-          </Select>
+          <div className="flex items-center gap-1 bg-card p-1 rounded-lg border border-border">
+            <Select value={fromHour} onValueChange={setFromHour}>
+              <SelectTrigger className="w-20 h-7 text-xs border-0 bg-transparent shadow-none"><SelectValue/></SelectTrigger>
+              <SelectContent>{HOURS.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
+            </Select>
+            <span className="text-muted-foreground text-xs">to</span>
+            <Select value={toHour} onValueChange={setToHour}>
+              <SelectTrigger className="w-20 h-7 text-xs border-0 bg-transparent shadow-none"><SelectValue/></SelectTrigger>
+              <SelectContent>{HOURS.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
@@ -1714,15 +2007,34 @@ function HeatmapPage() {
         </CardContent></Card>
       ) : (
         <Tabs defaultValue={defaultTab}>
-          <div className="flex items-center gap-3">
-            <TabsList>
-              {!tScope && <TabsTrigger value="org">Organization</TabsTrigger>}
-              <TabsTrigger value="team">By Team</TabsTrigger>
-              <TabsTrigger value="subteam">By Subteam</TabsTrigger>
-            </TabsList>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <TabsList>
+                {!tScope && <TabsTrigger value="org">Organization</TabsTrigger>}
+                <TabsTrigger value="team">By Team</TabsTrigger>
+                <TabsTrigger value="subteam">By Subteam</TabsTrigger>
+              </TabsList>
+
+              {/* Interactive Day Selection */}
+              <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-lg border border-border">
+                <span className="text-[11px] font-medium text-muted-foreground px-1.5">Day:</span>
+                {DAYS.map(d => (
+                  <Button
+                    key={d}
+                    size="sm"
+                    variant={selectedDay === d ? "default" : "ghost"}
+                    className={cn("h-6 text-xs px-2 rounded-md font-medium", selectedDay === d && "shadow-xs")}
+                    onClick={() => setSelectedDay(d)}
+                  >
+                    {d}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
             {/* Snapshot history toggle */}
             {snapshots.length > 0 && (
-              <div className="ml-auto flex items-center gap-2">
+              <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground">Source:</span>
                 <Select value={activeTab} onValueChange={v => { setActiveTab(v); setSelectedSnap(snapshots[0]) }}>
                   <SelectTrigger className="w-32 h-8 text-xs"><SelectValue/></SelectTrigger>
@@ -1731,7 +2043,7 @@ function HeatmapPage() {
                     {snapshots.map((s, i) => (
                       <SelectItem key={s.id} value={s.id}
                         onClick={() => setSelectedSnap(s)}>
-                        Snap {i+1} · {new Date(s.computedAt).toLocaleDateString()}
+                        Snap {i+1} · {formatDhakaDate(new Date(s.computedAt))}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1748,7 +2060,7 @@ function HeatmapPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="pl-5 w-24">Time</TableHead>
+                        <TableHead className="pl-5 w-28">Time ({selectedDay})</TableHead>
                         {teams.map((t: string) => (
                           <TableHead key={t} className="text-center">
                             <div className="text-foreground">{t}</div>
@@ -1760,9 +2072,8 @@ function HeatmapPage() {
                     </TableHeader>
                     <TableBody>
                       {hours.map((h: string) => {
-                        // Use Mon as default day for org view
                         const ratios = teams.map((t: string) => {
-                          const cell = displayData?.teamMatrix?.[t]?.["Mon"]?.[h]
+                          const cell = displayData?.teamMatrix?.[t]?.[selectedDay]?.[h]
                           return cell ? cell.free / Math.max(cell.total, 1) : 0
                         })
                         const best = Math.max(...ratios)
@@ -1770,7 +2081,7 @@ function HeatmapPage() {
                           <TableRow key={h}>
                             <TableCell className="pl-5 font-mono text-xs text-muted-foreground">{h}</TableCell>
                             {teams.map((t: string, i: number) => {
-                              const cell  = displayData?.teamMatrix?.[t]?.["Mon"]?.[h]
+                              const cell  = displayData?.teamMatrix?.[t]?.[selectedDay]?.[h]
                               const free  = cell?.free ?? 0
                               const total = cell?.total ?? 0
                               const ratio = ratios[i]
@@ -1783,7 +2094,7 @@ function HeatmapPage() {
                                       </Badge>
                                     </TableCell>
                                   </TooltipTrigger>
-                                  <TooltipContent>{Math.round(ratio*100)}% of {t} free at {h}</TooltipContent>
+                                  <TooltipContent>{Math.round(ratio*100)}% of {t} free on {selectedDay} at {h}</TooltipContent>
                                 </Tooltip>
                               )
                             })}
@@ -1801,7 +2112,7 @@ function HeatmapPage() {
                 </CardContent>
               </Card>
               <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                <span className="font-medium text-foreground">Legend</span>
+                <span className="font-medium text-foreground">Legend ({selectedDay})</span>
                 <Badge variant="success">≥ 75% free</Badge>
                 <Badge variant="warning">50–75% free</Badge>
                 <Badge variant="destructive">{"< 50% free"}</Badge>
@@ -1833,8 +2144,8 @@ function HeatmapPage() {
                       const ratio = total > 0 ? bestFree / total : 0
                       const ind   = ratio >= 0.7 ? "bg-success" : ratio >= 0.5 ? "bg-warning" : "bg-destructive"
                       return (
-                        <div key={day} className="flex items-center gap-2">
-                          <span className="text-[10px] font-mono text-muted-foreground w-7 shrink-0">{day}</span>
+                        <div key={day} className={cn("flex items-center gap-2 p-1 rounded-md", day === selectedDay && "bg-muted")}>
+                          <span className={cn("text-[10px] font-mono w-7 shrink-0", day === selectedDay ? "text-primary font-bold" : "text-muted-foreground")}>{day}</span>
                           <Progress value={ratio*100} className="flex-1 h-1.5 bg-secondary" indicatorClassName={ind}/>
                           <span className="text-[10px] font-mono text-muted-foreground w-14 text-right">Best {bestH}</span>
                         </div>
@@ -1871,7 +2182,7 @@ function HeatmapPage() {
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead className="pl-5 w-24">Time (Mon)</TableHead>
+                            <TableHead className="pl-5 w-28">Time ({selectedDay})</TableHead>
                             {subNames.map((sub: string) => (
                               <TableHead key={sub} className="text-center">
                                 <div className="text-foreground">{sub}</div>
@@ -1886,7 +2197,7 @@ function HeatmapPage() {
                         <TableBody>
                           {hours.map((h: string) => {
                             const ratios = subNames.map((sub: string) => {
-                              const cell = displayData.subteamMatrix[subteamTeam]?.[sub]?.["Mon"]?.[h]
+                              const cell = displayData.subteamMatrix[subteamTeam]?.[sub]?.[selectedDay]?.[h]
                               return cell ? cell.free / Math.max(cell.total, 1) : 0
                             })
                             const best = Math.max(...ratios)
@@ -1894,7 +2205,7 @@ function HeatmapPage() {
                               <TableRow key={h}>
                                 <TableCell className="pl-5 font-mono text-xs text-muted-foreground">{h}</TableCell>
                                 {subNames.map((sub: string, i: number) => {
-                                  const cell  = displayData.subteamMatrix[subteamTeam]?.[sub]?.["Mon"]?.[h]
+                                  const cell  = displayData.subteamMatrix[subteamTeam]?.[sub]?.[selectedDay]?.[h]
                                   const free  = cell?.free ?? 0
                                   const total = cell?.total ?? 0
                                   return (
@@ -2576,53 +2887,162 @@ function SettingsPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
 
         {/* Routine Upload — all roles */}
         <TabsContent value="routine" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">
-                {user.role === "member" ? "My Class Schedule" : "Routine Upload"}
-              </CardTitle>
-              <CardDescription>
-                {user.role === "member"
-                  ? "Upload your UCAM XLSX schedule. Members without a valid routine are restricted after the deadline."
-                  : "Members must upload their class schedule each semester before the deadline."
-                }
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {user.role === "member" && (
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-success/10 border border-success/20">
-                  <CheckCircle2 size={16} className="text-success shrink-0"/>
-                  <div>
-                    <p className="text-xs font-medium text-foreground">Routine synced · Fall 2026</p>
-                    <p className="text-xs text-muted-foreground">18 classes · 4 labs · uploaded Aug 4, 2026</p>
-                  </div>
-                  <Button variant="outline" size="sm" className="ml-auto text-xs h-7" onClick={onUploadRoutine}>Update</Button>
-                </div>
-              )}
-              <div
-                className="rounded-lg border-2 border-dashed border-border bg-muted/30 p-8 text-center cursor-pointer hover:bg-muted/50 transition-colors"
-                onClick={onUploadRoutine}
-              >
-                <Upload size={28} className="mx-auto mb-3 text-muted-foreground"/>
-                <p className="text-sm font-medium text-foreground">Upload UCAM XLSX</p>
-                <p className="text-xs text-muted-foreground mt-1">Drag and drop or click to browse</p>
-                <Button variant="outline" size="sm" className="mt-4" onClick={e => { e.stopPropagation(); onUploadRoutine() }}>
-                  Browse File
-                </Button>
-              </div>
-              <div className="p-3 rounded-lg bg-muted">
-                <p className="text-xs font-medium text-foreground mb-1">Supported formats</p>
-                <p className="text-xs text-muted-foreground">UCAM XLSX — courses, days, and times parsed automatically</p>
-                <p className="text-xs text-muted-foreground/60 mt-0.5">PDF support coming in a future release</p>
-              </div>
-            </CardContent>
-          </Card>
+          <RoutineTab onUploadRoutine={onUploadRoutine} />
         </TabsContent>
 
         {/* Account Tab */}
         <AccountTab />
       </Tabs>
     </div>
+  )
+}
+
+function RoutineTab({ onUploadRoutine }: { onUploadRoutine: () => void }) {
+  const { user } = useUserCtx()
+  const [schedule, setSchedule] = useState<ClassSlot[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchSchedule = () => {
+    setLoading(true)
+    routinesApi.getMyRoutine()
+      .then(res => {
+        if (Array.isArray(res)) setSchedule(res)
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    fetchSchedule()
+  }, [])
+
+  const labCount = schedule.filter(s => s.course.toLowerCase().includes("lab") || s.course.toLowerCase().includes("laboratory")).length
+  const theoryCount = schedule.length - labCount
+
+  // Group by day according to DAYS order
+  const groupedByDay = DAYS.map(day => ({
+    day,
+    slots: schedule.filter(s => s.day === day),
+  })).filter(g => g.slots.length > 0)
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        <div>
+          <CardTitle className="text-base">
+            {user.role === "member" ? "My Class Schedule" : "Routine Management"}
+          </CardTitle>
+          <CardDescription className="text-xs mt-1">
+            {user.role === "member"
+              ? "Your current semester class schedule loaded from the database. Upload a new UCAM XLSX to update anytime."
+              : "Members must upload their class schedule each semester before the deadline."
+            }
+          </CardDescription>
+        </div>
+        <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs" onClick={fetchSchedule} disabled={loading}>
+          <RefreshCw size={12} className={loading ? "animate-spin" : ""}/> Refresh
+        </Button>
+      </CardHeader>
+
+      <CardContent className="space-y-5">
+        {loading ? (
+          <div className="py-12 text-center">
+            <RefreshCw size={24} className="mx-auto mb-2 text-muted-foreground animate-spin"/>
+            <p className="text-xs text-muted-foreground">Loading your class schedule from database...</p>
+          </div>
+        ) : schedule.length > 0 ? (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3.5 rounded-xl bg-success/10 border border-success/20">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-success/20 text-success">
+                  <CheckCircle2 size={18}/>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Routine Synced Active</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {schedule.length} total class slots · {theoryCount} theory · {labCount} lab{labCount !== 1 ? "s" : ""}
+                  </p>
+                </div>
+              </div>
+              <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" onClick={onUploadRoutine}>
+                <Upload size={12}/> Update Routine
+              </Button>
+            </div>
+
+            {/* Daily schedule breakdown */}
+            <div className="space-y-3">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                Class Schedule by Day ({groupedByDay.length} Active Days)
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {groupedByDay.map(({ day, slots }) => (
+                  <div key={day} className="p-3 rounded-xl border border-border bg-card/60 space-y-2.5">
+                    <div className="flex items-center justify-between pb-1.5 border-b border-border/50">
+                      <Badge variant="outline" className="font-semibold text-xs px-2.5 py-0.5">
+                        {day}
+                      </Badge>
+                      <span className="text-[11px] font-mono text-muted-foreground">
+                        {slots.length} class{slots.length !== 1 ? "es" : ""}
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {slots.map((slot, i) => (
+                        <div key={i} className="flex items-start justify-between gap-2 p-2 rounded-lg bg-muted/60 text-xs">
+                          <div className="space-y-0.5 min-w-0 flex-1">
+                            <p className="font-medium text-foreground truncate">{slot.course}</p>
+                            {slot.room && (
+                              <p className="text-[11px] text-muted-foreground/80 flex items-center gap-1">
+                                <span>Room:</span> {slot.room}
+                              </p>
+                            )}
+                          </div>
+                          <Badge variant="secondary" className="font-mono text-[10px] shrink-0">
+                            {slot.startTime}–{slot.endTime}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 space-y-2">
+            <div className="flex items-center gap-2 text-destructive">
+              <AlertCircle size={16}/>
+              <p className="text-sm font-semibold">No Routine Uploaded Yet</p>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              You have not uploaded a class routine for this semester. Upload your UIU UCAM XLSX routine below to calculate your real-time availability.
+            </p>
+          </div>
+        )}
+
+        {/* Upload box */}
+        <div
+          className="rounded-xl border-2 border-dashed border-border bg-muted/30 p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors"
+          onClick={onUploadRoutine}
+        >
+          <Upload size={24} className="mx-auto mb-2 text-muted-foreground"/>
+          <p className="text-sm font-medium text-foreground">Upload or Update UCAM XLSX</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Drag and drop your spreadsheet or click to browse</p>
+          <Button variant="outline" size="sm" className="mt-3 text-xs" onClick={e => { e.stopPropagation(); onUploadRoutine() }}>
+            Browse File
+          </Button>
+        </div>
+
+        <div className="p-3 rounded-lg bg-muted flex items-start gap-2.5">
+          <Clock size={14} className="text-muted-foreground shrink-0 mt-0.5"/>
+          <div className="text-xs">
+            <p className="font-medium text-foreground">Automatic Routine Parser</p>
+            <p className="text-muted-foreground mt-0.5">
+              Supports UIU UCAM RptStudentClassRoutine.xlsx spreadsheets with Saturday, Sunday, Monday, Tuesday, Wednesday, and Thursday class schedules.
+            </p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 

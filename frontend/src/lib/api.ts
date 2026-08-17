@@ -236,6 +236,9 @@ export const routinesApi = {
       body: formData,
     })
   },
+  getMyRoutine: async () => {
+    return fetchApi<any[]>("/api/routines/me")
+  },
 }
 
 export const skillsApi = {

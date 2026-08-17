@@ -22,8 +22,25 @@ async function check() {
   })
 
   if (userCount > 0) {
-    const users = await prisma.user.findMany({ select: { id: true, email: true, name: true, role: true } })
-    console.log("Users:", users)
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        routines: true,
+      },
+    })
+    console.log("\n=== REAL-TIME AVAILABILITY FOR ALL MEMBERS AT CURRENT DHAKA TIME ===")
+    const { calculateAvailability, getDhakaTimeParts } = await import("../src/services/availability.js")
+    const dhakaNow = getDhakaTimeParts()
+    console.log(`Current Dhaka Time: ${dhakaNow.day} ${dhakaNow.timeStr24} (${dhakaNow.hours}:${dhakaNow.minutes.toString().padStart(2, "0")})`)
+    for (const u of users) {
+      const sched = u.routines.map(r => ({ day: r.day, startTime: r.startTime, endTime: r.endTime, course: r.course }))
+      const avail = calculateAvailability(sched, dhakaNow.day, dhakaNow.timeStr24)
+      const daySlots = u.routines.filter(r => r.day === dhakaNow.day)
+      console.log(`- ${u.name.padEnd(28)} | ${dhakaNow.day} classes: ${daySlots.length} | Status: ${avail.status.padEnd(8)} | Next: ${avail.nextChange}`)
+    }
   }
 }
 
