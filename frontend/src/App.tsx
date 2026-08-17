@@ -1047,6 +1047,8 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
   })
 
   const [tab, setTab] = useState<AvailStatus | "all">("all")
+  const [selected, setSelected] = useState<Member | null>(null)
+  const canManage = user.role === "org-owner" || user.role === "team-manager" || user.role === "subteam-manager"
   const free    = pool.filter(m => m.status === "free").length
   const inClass = pool.filter(m => m.status === "in-class").length
   const soon    = pool.filter(m => m.status === "soon").length
@@ -1159,11 +1161,15 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
                     </TableRow>
                   ) : (
                     shown.map(m => (
-                      <TableRow key={m.id}>
+                      <TableRow
+                        key={m.id}
+                        className="cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => setSelected(m)}
+                      >
                         <TableCell className="pl-3">
                           <div className="flex items-center gap-2.5">
                             <MemberAvatar member={m} size="sm"/>
-                            <span className="text-sm font-medium">{m.name}</span>
+                            <span className="text-sm font-medium hover:underline">{m.name}</span>
                           </div>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">{m.subteams[0]}</TableCell>
@@ -1175,7 +1181,7 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
                             : <span className="text-xs text-muted-foreground/40">—</span>
                           }
                         </TableCell>
-                        <TableCell>
+                        <TableCell onClick={e => e.stopPropagation()}>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button variant="ghost" size="icon" className="w-7 h-7" asChild>
@@ -1208,10 +1214,14 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
               </CardHeader>
               <CardContent className="pt-0 space-y-2">
                 {becomingFree.slice(0,3).map(m => (
-                  <div key={m.id} className="flex items-center gap-2.5">
+                  <div
+                    key={m.id}
+                    className="flex items-center gap-2.5 p-1.5 -mx-1.5 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => setSelected(m)}
+                  >
                     <MemberAvatar member={m} size="sm"/>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-foreground truncate">{m.name}</p>
+                      <p className="text-xs font-medium text-foreground truncate hover:underline">{m.name}</p>
                       <p className="text-[10px] text-muted-foreground">{m.nextChange}</p>
                     </div>
                     <span className="text-[10px] font-mono text-warning shrink-0">{m.remainingMin}m</span>
@@ -1294,6 +1304,13 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
           </Card>
         </div>
       </div>
+
+      <MemberDialog
+        member={selected}
+        open={!!selected}
+        onOpenChange={o => !o && setSelected(null)}
+        canManage={canManage}
+      />
     </div>
   )
 }
