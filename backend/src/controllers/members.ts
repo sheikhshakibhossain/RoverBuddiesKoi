@@ -9,10 +9,10 @@ export async function getMembers(req: Request, res: Response, next: NextFunction
     const currentUser = req.user!
     const { team, subteam, status, day, time, skill, batch, search } = req.query
 
-    // Target day & time calculation in Dhaka Timezone
+    // Target day & time calculation in Dhaka Timezone (ignore "all")
     const dhakaNow = getDhakaTimeParts()
-    const targetDayStr = (day as string) || dhakaNow.day
-    const targetTimeStr = (time as string) || dhakaNow.timeStr24
+    const targetDayStr = (day && typeof day === "string" && day !== "all") ? day : dhakaNow.day
+    const targetTimeStr = (time && typeof time === "string" && time !== "all") ? time : dhakaNow.timeStr24
 
     // Build RBAC & Query filter
     const whereClause: any = {

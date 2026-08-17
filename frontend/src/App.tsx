@@ -1713,6 +1713,14 @@ function SearchPage() {
       .finally(() => setLoading(false))
   }, [query, team, sub, status, skill, batch, day, time])
 
+  // Live timer to continuously recompute status every 15s
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setResults(prev => prev.map(enrichMemberWithLiveStatus))
+    }, 15000)
+    return () => clearInterval(timer)
+  }, [])
+
   // Client-side day/time filter for members WITH routines
   const filteredResults = (day !== "all" && time !== "all")
     ? results.filter(m => isFreeAt(m, day as DayOfWeek, time))

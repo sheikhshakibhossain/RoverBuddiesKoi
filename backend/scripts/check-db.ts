@@ -31,15 +31,9 @@ async function check() {
         routines: true,
       },
     })
-    console.log("\n=== REAL-TIME AVAILABILITY FOR ALL MEMBERS AT CURRENT DHAKA TIME ===")
-    const { calculateAvailability, getDhakaTimeParts } = await import("../src/services/availability.js")
-    const dhakaNow = getDhakaTimeParts()
-    console.log(`Current Dhaka Time: ${dhakaNow.day} ${dhakaNow.timeStr24} (${dhakaNow.hours}:${dhakaNow.minutes.toString().padStart(2, "0")})`)
+    console.log("\n=== ALL USERS IN DB ===")
     for (const u of users) {
-      const sched = u.routines.map(r => ({ day: r.day, startTime: r.startTime, endTime: r.endTime, course: r.course }))
-      const avail = calculateAvailability(sched, dhakaNow.day, dhakaNow.timeStr24)
-      const daySlots = u.routines.filter(r => r.day === dhakaNow.day)
-      console.log(`- ${u.name.padEnd(28)} | ${dhakaNow.day} classes: ${daySlots.length} | Status: ${avail.status.padEnd(8)} | Next: ${avail.nextChange}`)
+      console.log(`- ${u.name} <${u.email}> (${u.role})`)
     }
   }
 }
