@@ -991,40 +991,43 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
     <div className="space-y-5">
       {isMemberMissing && <RoutineRestrictionBanner onUpload={onUploadRoutine} />}
 
-      {/* Dashboard Live Header with Time & Date */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-card border border-border/80 shadow-xs">
+      {/* Dashboard Live Hero Clock Banner */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-card via-card/90 to-primary/5 border border-border shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            {getGreeting(dhakaNow)}, {user.name.split(" ")[0]}
-          </h1>
-          <p className="text-muted-foreground text-sm mt-0.5">
-            {tScope ?? "CAIR Lab"}{stScope ? ` · ${stScope}` : ""} · Real-Time Availability Hub
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+              {getGreeting(dhakaNow)}, {user.name.split(" ")[0]}
+            </h1>
+            <span className="w-2.5 h-2.5 rounded-full bg-success animate-pulse shrink-0" title="Real-time Live Sync" />
+          </div>
+          <p className="text-muted-foreground text-sm mt-1">
+            {tScope ?? "CAIR Lab"}{stScope ? ` · ${stScope}` : ""} · University Real-Time Class Availability
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          {/* Live Dhaka Time & Date Card */}
-          <div className="flex items-center gap-3 px-3.5 py-2 rounded-xl bg-muted/60 border border-border font-mono shadow-xs">
+          {/* Prominent Live Dhaka Clock Card */}
+          <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-background/80 backdrop-blur-md border border-primary/20 font-mono shadow-sm">
             <div className="p-2 rounded-lg bg-primary/10 text-primary">
-              <Clock size={18} className="animate-pulse" />
+              <Clock size={20} className="animate-pulse" />
             </div>
             <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-base font-bold text-foreground tracking-tight">
+              <div className="flex items-center gap-2">
+                <span className="text-lg sm:text-xl font-bold text-foreground tracking-tight font-mono">
                   {formatDhakaTime(dhakaNow)}
                 </span>
-                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-primary/30 text-primary font-semibold">
+                <Badge variant="default" className="text-[10px] px-1.5 py-0 h-4 font-semibold">
                   BST
                 </Badge>
               </div>
-              <p className="text-[11px] text-muted-foreground font-sans">
+              <p className="text-xs text-muted-foreground font-sans">
                 {formatDhakaDate(dhakaNow)}
               </p>
             </div>
           </div>
 
-          <Button variant="outline" size="sm" className="gap-1.5 h-10 px-3" onClick={loadData}>
-            <RefreshCw size={13}/> Refresh
+          <Button variant="outline" size="sm" className="gap-1.5 h-11 px-3.5" onClick={loadData}>
+            <RefreshCw size={14}/> Refresh
           </Button>
         </div>
       </div>
@@ -1744,17 +1747,49 @@ function SearchPage() {
     return true
   }
 
+  const [dhakaNow, setDhakaNow] = useState<Date>(new Date())
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setDhakaNow(new Date())
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Find Members</h1>
-        <p className="text-muted-foreground text-sm mt-0.5">
-          {stScope ? `Search within ${stScope} subteam`
-            : tScope ? `Search within ${tScope} team`
-            : "Search by name, team, subteam, day/time, skill, or availability"
-          }
-        </p>
-        <p className="text-xs text-muted-foreground/60 mt-0.5">{filteredResults.length} result{filteredResults.length !== 1 ? "s" : ""}{loading ? " · loading…" : ""}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-card border border-border shadow-xs">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Find Members</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">
+            {stScope ? `Search within ${stScope} subteam`
+              : tScope ? `Search within ${tScope} team`
+              : "Search by name, team, subteam, day/time, skill, or availability"
+            }
+          </p>
+          <p className="text-xs text-muted-foreground/60 mt-0.5">{filteredResults.length} result{filteredResults.length !== 1 ? "s" : ""}{loading ? " · loading…" : ""}</p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 px-3.5 py-2 rounded-xl bg-muted/60 border border-border font-mono shadow-xs">
+            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+              <Clock size={18} className="animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-base font-bold text-foreground tracking-tight">
+                  {formatDhakaTime(dhakaNow)}
+                </span>
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-primary/30 text-primary font-semibold">
+                  BST
+                </Badge>
+              </div>
+              <p className="text-[11px] text-muted-foreground font-sans">
+                {formatDhakaDate(dhakaNow)}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <Card>
@@ -4685,7 +4720,7 @@ export default function App() {
     if (savedPage) {
       setPage(savedPage)
     } else {
-      setPage(u.role === "member" ? "search" : "dashboard")
+      setPage("dashboard")
     }
   }
 
