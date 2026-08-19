@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "esbuild src/server.ts --bundle --platform=node --format=esm --target=node20 --outfile=dist/server.js && node -e \"fs.writeFileSync('dist/package.json', JSON.stringify({ type: 'module' }))\" && node -e \"const fs=require('fs'); if(fs.existsSync('node_modules/.prisma')) fs.cpSync('node_modules/.prisma', 'dist/.prisma', {recursive:true});\"",
+    "build": "esbuild src/server.ts --bundle --platform=node --format=cjs --target=node20 --outfile=dist/server.js && node -e \"fs.writeFileSync('dist/package.json', JSON.stringify({ type: 'commonjs' }))\" && node -e \"const fs=require('fs'); if(fs.existsSync('node_modules/.prisma')) fs.cpSync('node_modules/.prisma', 'dist/.prisma', {recursive:true});\"",
     "postinstall": "prisma generate",
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",
