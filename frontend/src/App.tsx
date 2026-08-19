@@ -8,17 +8,17 @@ import {
   Clock, AlertTriangle, Save, ArrowLeft, Menu, X, Eye, Loader2
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Button }           from "@/components/ui/button"
-import { Badge }            from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Input }            from "@/components/ui/input"
-import { Separator }        from "@/components/ui/separator"
-import { ScrollArea }       from "@/components/ui/scroll-area"
+import { Input } from "@/components/ui/input"
+import { Separator } from "@/components/ui/separator"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import { Progress }         from "@/components/ui/progress"
+import { Progress } from "@/components/ui/progress"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -32,8 +32,8 @@ import { LandingPage } from "@/LandingPage"
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type AvailStatus = "free" | "in-class" | "soon" | "missing"
-type NavPage     = "dashboard" | "members" | "search" | "heatmap" | "skills" | "projects" | "meeting-planner" | "portfolio" | "settings"
-type DayOfWeek   = "Sat" | "Sun" | "Mon" | "Tue" | "Wed" | "Thu" | "Fri"
+type NavPage = "dashboard" | "members" | "search" | "heatmap" | "skills" | "projects" | "meeting-planner" | "portfolio" | "settings"
+type DayOfWeek = "Sat" | "Sun" | "Mon" | "Tue" | "Wed" | "Thu" | "Fri"
 
 interface ClassSlot {
   day: DayOfWeek
@@ -57,45 +57,41 @@ const MEMBERS: Member[] = []
 // ─── Permission defaults ──────────────────────────────────────────────────────
 
 const DEFAULT_PAGE_PERMS: Record<string, string[]> = {
-  "org-owner":       ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
-  "team-manager":    ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
-  "subteam-manager": ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
-  "member":          ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
-  "ORG_OWNER":       ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
-  "TEAM_MANAGER":    ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
-  "SUBTEAM_MANAGER": ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
-  "MEMBER":          ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
+  "org-owner": ["dashboard", "members", "search", "heatmap", "skills", "projects", "meeting-planner", "portfolio", "settings"],
+  "team-manager": ["dashboard", "members", "search", "heatmap", "skills", "projects", "meeting-planner", "portfolio", "settings"],
+  "subteam-manager": ["dashboard", "members", "search", "heatmap", "skills", "projects", "meeting-planner", "portfolio", "settings"],
+  "member": ["dashboard", "members", "search", "heatmap", "skills", "projects", "meeting-planner", "portfolio", "settings"],
 }
 
 const DEFAULT_FEATURE_PERMS: Record<string, string[]> = {
-  "org-owner":       ["Manage all teams","Configure semesters","View org analytics","Assign/revoke roles","Approve skills globally"],
-  "team-manager":    ["Manage team","Create & manage subteams","Assign Subteam Managers","Approve member skills","View team analytics"],
-  "subteam-manager": ["Manage subteam","Add/remove members","Approve member skills","View subteam schedules","View subteam analytics"],
-  "member":          ["Upload class routine","Update profile","Request new skills","View availability","Search subteam members","Contact teammates"],
+  "org-owner": ["Manage all teams", "Configure semesters", "View org analytics", "Assign/revoke roles", "Approve skills globally"],
+  "team-manager": ["Manage team", "Create & manage subteams", "Assign Subteam Managers", "Approve member skills", "View team analytics"],
+  "subteam-manager": ["Manage subteam", "Add/remove members", "Approve member skills", "View subteam schedules", "View subteam analytics"],
+  "member": ["Upload class routine", "Update profile", "Request new skills", "View availability", "Search subteam members", "Contact teammates"],
 }
 
 const ALL_PAGE_OPTIONS: { id: string; label: string }[] = [
-  { id:"dashboard",       label:"Dashboard" },
-  { id:"members",         label:"Members" },
-  { id:"search",          label:"Find Members" },
-  { id:"heatmap",         label:"Heatmap" },
-  { id:"skills",          label:"Skills" },
-  { id:"projects",        label:"Projects & Kanban" },
-  { id:"meeting-planner", label:"AI Scheduler" },
-  { id:"portfolio",       label:"Work History" },
-  { id:"settings",        label:"Settings" },
+  { id: "dashboard", label: "Dashboard" },
+  { id: "members", label: "Members" },
+  { id: "search", label: "Find Members" },
+  { id: "heatmap", label: "Heatmap" },
+  { id: "skills", label: "Skills" },
+  { id: "projects", label: "Projects & Kanban" },
+  { id: "meeting-planner", label: "AI Scheduler" },
+  { id: "portfolio", label: "Work History" },
+  { id: "settings", label: "Settings" },
 ]
 
 const ALL_FEATURE_OPTIONS: Record<string, string[]> = {
-  "team-manager":    ["Manage team","Create & manage subteams","Assign Subteam Managers","Approve member skills","View team analytics"],
-  "subteam-manager": ["Manage subteam","Add/remove members","Approve member skills","View subteam schedules","View subteam analytics"],
-  "member":          ["Upload class routine","Update profile","Request new skills","View availability","Search subteam members","Contact teammates"],
+  "team-manager": ["Manage team", "Create & manage subteams", "Assign Subteam Managers", "Approve member skills", "View team analytics"],
+  "subteam-manager": ["Manage subteam", "Add/remove members", "Approve member skills", "View subteam schedules", "View subteam analytics"],
+  "member": ["Upload class routine", "Update profile", "Request new skills", "View availability", "Search subteam members", "Contact teammates"],
 }
 
 const PENDING_APPROVALS: any[] = []
-const DAYS: DayOfWeek[] = ["Sat","Sun","Mon","Tue","Wed","Thu","Fri"]
-const DAY_INDEX_MAP: DayOfWeek[] = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"] // JS getDay(): 0=Sun..6=Sat
-const HOURS = ["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00"]
+const DAYS: DayOfWeek[] = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"]
+const DAY_INDEX_MAP: DayOfWeek[] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] // JS getDay(): 0=Sun..6=Sat
+const HOURS = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"]
 
 function getDhakaTimeParts(date: Date = new Date()): {
   day: DayOfWeek
@@ -406,10 +402,10 @@ type BadgeVariant = "success" | "destructive" | "warning" | "muted"
 
 function statusMeta(s: AvailStatus): { dotClass: string; label: string; variant: BadgeVariant; icon: React.ReactNode } {
   const map = {
-    free:       { dotClass:"bg-success",          label:"Free",       variant:"success"     as BadgeVariant, icon:<CheckCircle2 size={11}/> },
-    "in-class": { dotClass:"bg-destructive",      label:"In Class",   variant:"destructive" as BadgeVariant, icon:<XCircle size={11}/> },
-    soon:       { dotClass:"bg-warning",          label:"Class Soon", variant:"warning"     as BadgeVariant, icon:<AlertCircle size={11}/> },
-    missing:    { dotClass:"bg-muted-foreground", label:"No Routine", variant:"muted"       as BadgeVariant, icon:<Minus size={11}/> },
+    free: { dotClass: "bg-success", label: "Free", variant: "success" as BadgeVariant, icon: <CheckCircle2 size={11} /> },
+    "in-class": { dotClass: "bg-destructive", label: "In Class", variant: "destructive" as BadgeVariant, icon: <XCircle size={11} /> },
+    soon: { dotClass: "bg-warning", label: "Class Soon", variant: "warning" as BadgeVariant, icon: <AlertCircle size={11} /> },
+    missing: { dotClass: "bg-muted-foreground", label: "No Routine", variant: "muted" as BadgeVariant, icon: <Minus size={11} /> },
   }
   return map[s]
 }
@@ -422,7 +418,7 @@ function StatusBadge({ status }: { status: AvailStatus }) {
 function MemberAvatar({ member, size = "md" }: { member: Member; size?: "sm" | "md" | "lg" }) {
   const { dotClass } = statusMeta(member.status)
   const dim = size === "sm" ? "w-7 h-7" : size === "lg" ? "w-10 h-10" : "w-8 h-8"
-  const dot = size === "sm" ? "w-2 h-2"  : "w-2.5 h-2.5"
+  const dot = size === "sm" ? "w-2 h-2" : "w-2.5 h-2.5"
   return (
     <div className="relative shrink-0">
       <Avatar className={dim}>
@@ -435,7 +431,7 @@ function MemberAvatar({ member, size = "md" }: { member: Member; size?: "sm" | "
 
 function heatBadgeVariant(ratio: number): BadgeVariant {
   if (ratio >= 0.75) return "success"
-  if (ratio >= 0.5)  return "warning"
+  if (ratio >= 0.5) return "warning"
   return "destructive"
 }
 
@@ -615,15 +611,15 @@ function WhatsAppPromptDialog({
 // ─── Nav ──────────────────────────────────────────────────────────────────────
 
 const ALL_NAV: { id: NavPage; label: string; icon: React.ReactNode }[] = [
-  { id:"dashboard",       label:"Dashboard",        icon:<LayoutDashboard size={15}/> },
-  { id:"members",         label:"Members",          icon:<Users size={15}/> },
-  { id:"search",          label:"Find Members",     icon:<Search size={15}/> },
-  { id:"heatmap",         label:"Heatmap",          icon:<BarChart3 size={15}/> },
-  { id:"skills",          label:"Skills Catalog",   icon:<Zap size={15}/> },
-  { id:"projects",        label:"Projects & Kanban",icon:<Layers size={15}/> },
-  { id:"meeting-planner", label:"AI Scheduler",     icon:<Calendar size={15}/> },
-  { id:"portfolio",       label:"Work History",     icon:<User size={15}/> },
-  { id:"settings",        label:"Settings",         icon:<Settings size={15}/> },
+  { id: "dashboard", label: "Dashboard", icon: <LayoutDashboard size={15} /> },
+  { id: "members", label: "Members", icon: <Users size={15} /> },
+  { id: "search", label: "Find Members", icon: <Search size={15} /> },
+  { id: "heatmap", label: "Heatmap", icon: <BarChart3 size={15} /> },
+  { id: "skills", label: "Skills Catalog", icon: <Zap size={15} /> },
+  { id: "projects", label: "Projects & Kanban", icon: <Layers size={15} /> },
+  { id: "meeting-planner", label: "AI Scheduler", icon: <Calendar size={15} /> },
+  { id: "portfolio", label: "Work History", icon: <User size={15} /> },
+  { id: "settings", label: "Settings", icon: <Settings size={15} /> },
 ]
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
@@ -637,9 +633,7 @@ function Sidebar({ page, setPage, mobileOpen, setMobileOpen }: {
   setMobileOpen: (o: boolean) => void;
 }) {
   const { user, pagePerms } = useUserCtx()
-  const normRole = normalizeRole(user.role)
-  const allowed = pagePerms[user.role] || pagePerms[normRole] || ALL_NAV.map(n => n.id)
-  const nav  = ALL_NAV.filter(n => allowed.includes(n.id))
+  const nav = ALL_NAV.filter(n => (pagePerms[user.role] ?? []).includes(n.id))
 
   return (
     <>
@@ -697,11 +691,11 @@ function Sidebar({ page, setPage, mobileOpen, setMobileOpen }: {
             <p className="px-2 mb-2 text-[10px] font-semibold uppercase tracking-widest text-sidebar-muted-foreground">Your Scope</p>
             <div className="px-2 space-y-1 text-xs text-sidebar-muted-foreground">
               {user.role === "org-owner"
-                ? <div className="flex items-center gap-1.5"><Shield size={10}/>All teams</div>
-                : <div className="flex items-center gap-1.5"><Shield size={10}/>{user.team}</div>
+                ? <div className="flex items-center gap-1.5"><Shield size={10} />All teams</div>
+                : <div className="flex items-center gap-1.5"><Shield size={10} />{user.team}</div>
               }
               {(user.role === "subteam-manager" || user.role === "member") && (
-                <div className="flex items-center gap-1.5"><Layers size={10}/>{user.subteam}</div>
+                <div className="flex items-center gap-1.5"><Layers size={10} />{user.subteam}</div>
               )}
             </div>
           </div>
@@ -759,7 +753,7 @@ function DhakaClockWidget() {
 function TopBar({ page, onSignOut, onOpenProfile, onToggleMobileMenu }: {
   page: NavPage; onSignOut: () => void; onOpenProfile: () => void; onToggleMobileMenu: () => void
 }) {
-  const user  = useUser()
+  const user = useUser()
   const label = ALL_NAV.find(n => n.id === page)?.label
 
   return (
@@ -820,15 +814,15 @@ function TopBar({ page, onSignOut, onOpenProfile, onToggleMobileMenu }: {
 
 function ProfileEditDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const { user, updateUser } = useUserCtx()
-  const [name,     setName]     = useState(user.name)
-  const [email,    setEmail]    = useState(user.email)
+  const [name, setName] = useState(user.name)
+  const [email, setEmail] = useState(user.email)
   const [whatsapp, setWhatsapp] = useState(user.whatsapp)
-  const [team,     setTeam]     = useState(user.team || "UMRT")
-  const [subteam,  setSubteam]  = useState(user.subteam || "Software")
-  const [batch,    setBatch]    = useState(user.batch || "2024")
-  const [loading,  setLoading]  = useState(false)
-  const [error,    setError]    = useState<string | null>(null)
-  const [saved,    setSaved]    = useState(false)
+  const [team, setTeam] = useState(user.team || "UMRT")
+  const [subteam, setSubteam] = useState(user.subteam || "Software")
+  const [batch, setBatch] = useState(user.batch || "2024")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [saved, setSaved] = useState(false)
 
   // Synchronize fields when modal opens or user updates
   useEffect(() => {
@@ -1034,10 +1028,10 @@ function StatCard({ label, value, sub, icon, variant }: {
   variant: "success" | "destructive" | "warning" | "muted"
 }) {
   const colorMap = {
-    success:     { text:"text-success",         indicator:"bg-success" },
-    destructive: { text:"text-destructive",      indicator:"bg-destructive" },
-    warning:     { text:"text-warning",          indicator:"bg-warning" },
-    muted:       { text:"text-muted-foreground", indicator:"bg-muted-foreground" },
+    success: { text: "text-success", indicator: "bg-success" },
+    destructive: { text: "text-destructive", indicator: "bg-destructive" },
+    warning: { text: "text-warning", indicator: "bg-warning" },
+    muted: { text: "text-muted-foreground", indicator: "bg-muted-foreground" },
   }
   const { text, indicator } = colorMap[variant]
   return (
@@ -1051,7 +1045,7 @@ function StatCard({ label, value, sub, icon, variant }: {
         </div>
         <p className={cn("text-3xl font-bold font-mono", text)}>{value}</p>
         <p className="text-xs text-muted-foreground mt-1">{sub}</p>
-        <Progress value={(value / Math.max(MEMBERS.length,1)) * 100} className="h-1 mt-3 bg-secondary" indicatorClassName={indicator} />
+        <Progress value={(value / Math.max(MEMBERS.length, 1)) * 100} className="h-1 mt-3 bg-secondary" indicatorClassName={indicator} />
       </CardContent>
     </Card>
   )
@@ -1111,7 +1105,7 @@ function PendingApprovals() {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-base flex items-center gap-2">
-              <AlertCircle size={16} className="text-warning"/>
+              <AlertCircle size={16} className="text-warning" />
               Pending Approvals
             </CardTitle>
             <CardDescription className="text-xs mt-0.5">
@@ -1139,8 +1133,8 @@ function PendingApprovals() {
                   <TableCell className="py-2 text-xs">Requested <span className="font-semibold text-primary">{roleLabel(r.requestedRole)}</span></TableCell>
                   <TableCell className="py-2 text-right pr-4">
                     <div className="flex items-center justify-end gap-1">
-                      <Button variant="ghost" size="icon" className="h-6 w-6 text-success hover:text-success hover:bg-success/10" onClick={() => handleRoleAction(r.id, "approve")}><CheckCircle2 size={13}/></Button>
-                      <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleRoleAction(r.id, "reject")}><XCircle size={13}/></Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 text-success hover:text-success hover:bg-success/10" onClick={() => handleRoleAction(r.id, "approve")}><CheckCircle2 size={13} /></Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleRoleAction(r.id, "reject")}><XCircle size={13} /></Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -1152,8 +1146,8 @@ function PendingApprovals() {
                   <TableCell className="py-2 text-xs">Requested <span className="font-semibold text-primary">{s.skillName}</span></TableCell>
                   <TableCell className="py-2 text-right pr-4">
                     <div className="flex items-center justify-end gap-1">
-                      <Button variant="ghost" size="icon" className="h-6 w-6 text-success hover:text-success hover:bg-success/10" onClick={() => handleSkillAction(s.id, "approve")}><CheckCircle2 size={13}/></Button>
-                      <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleSkillAction(s.id, "reject")}><XCircle size={13}/></Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 text-success hover:text-success hover:bg-success/10" onClick={() => handleSkillAction(s.id, "approve")}><CheckCircle2 size={13} /></Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleSkillAction(s.id, "reject")}><XCircle size={13} /></Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -1176,11 +1170,11 @@ function getGreeting(date: Date = new Date()): string {
 }
 
 function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
-  const user    = useUser()
-  const tScope  = teamScope(user)
+  const user = useUser()
+  const tScope = teamScope(user)
   const stScope = subteamScope(user)
   const [membersList, setMembersList] = useState<Member[]>([])
-  const [dhakaNow,    setDhakaNow]    = useState<Date>(new Date())
+  const [dhakaNow, setDhakaNow] = useState<Date>(new Date())
 
   const loadData = () => {
     membersApi.getMembers()
@@ -1203,7 +1197,7 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
   }, [])
 
   const pool = membersList.filter(m => {
-    if (tScope  && m.team        !== tScope)  return false
+    if (tScope && m.team !== tScope) return false
     if (stScope && !m.subteams.includes(stScope)) return false
     return true
   })
@@ -1211,17 +1205,17 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
   const [tab, setTab] = useState<AvailStatus | "all">("all")
   const [selected, setSelected] = useState<Member | null>(null)
   const canManage = user.role === "org-owner" || user.role === "team-manager" || user.role === "subteam-manager"
-  const free    = pool.filter(m => m.status === "free").length
+  const free = pool.filter(m => m.status === "free").length
   const inClass = pool.filter(m => m.status === "in-class").length
-  const soon    = pool.filter(m => m.status === "soon").length
+  const soon = pool.filter(m => m.status === "soon").length
   const missing = pool.filter(m => m.status === "missing").length
-  const shown   = tab === "all" ? pool : pool.filter(m => m.status === tab)
+  const shown = tab === "all" ? pool : pool.filter(m => m.status === tab)
 
   const subteams = [...new Set(pool.flatMap(m => m.subteams))]
 
   // For "becoming free next" — in-class members sorted by least remaining time
   const becomingFree = pool.filter(m => m.status === "in-class" && m.remainingMin !== undefined)
-    .sort((a,b) => (a.remainingMin ?? 99) - (b.remainingMin ?? 99))
+    .sort((a, b) => (a.remainingMin ?? 99) - (b.remainingMin ?? 99))
 
   const isMemberMissing = user.role === "member" && pool.find(m => m.name === user.name)?.status === "missing"
   const isWhatsAppMissing = !user.whatsapp || !user.whatsapp.trim() || user.whatsapp === "880123456789" || user.whatsapp === "0123456789" || user.whatsapp.length < 9
@@ -1289,7 +1283,7 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
           </div>
 
           <Button variant="outline" size="sm" className="gap-1.5 h-11 px-3.5" onClick={loadData}>
-            <RefreshCw size={14}/> Refresh
+            <RefreshCw size={14} /> Refresh
           </Button>
         </div>
       </div>
@@ -1297,10 +1291,10 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
       <PendingApprovals />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Free Now"   value={free}    sub={`${Math.round((free/Math.max(pool.length,1))*100)}% of scope`} icon={<CheckCircle2 size={16}/>} variant="success" />
-        <StatCard label="In Class"   value={inClass} sub="Currently unavailable"                                          icon={<XCircle size={16}/>}      variant="destructive" />
-        <StatCard label="Class Soon" value={soon}    sub="Free within 30 min"                                             icon={<AlertCircle size={16}/>}  variant="warning" />
-        <StatCard label="No Routine" value={missing} sub="Action required"                                                icon={<Shield size={16}/>}       variant="muted" />
+        <StatCard label="Free Now" value={free} sub={`${Math.round((free / Math.max(pool.length, 1)) * 100)}% of scope`} icon={<CheckCircle2 size={16} />} variant="success" />
+        <StatCard label="In Class" value={inClass} sub="Currently unavailable" icon={<XCircle size={16} />} variant="destructive" />
+        <StatCard label="Class Soon" value={soon} sub="Free within 30 min" icon={<AlertCircle size={16} />} variant="warning" />
+        <StatCard label="No Routine" value={missing} sub="Action required" icon={<Shield size={16} />} variant="muted" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -1314,10 +1308,10 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
               </div>
               <Tabs value={tab} onValueChange={v => setTab(v as typeof tab)}>
                 <TabsList className="h-8">
-                  <TabsTrigger value="all"      className="text-xs px-2.5">All</TabsTrigger>
-                  <TabsTrigger value="free"     className="text-xs px-2.5">Free</TabsTrigger>
+                  <TabsTrigger value="all" className="text-xs px-2.5">All</TabsTrigger>
+                  <TabsTrigger value="free" className="text-xs px-2.5">Free</TabsTrigger>
                   <TabsTrigger value="in-class" className="text-xs px-2.5">Busy</TabsTrigger>
-                  <TabsTrigger value="soon"     className="text-xs px-2.5">Soon</TabsTrigger>
+                  <TabsTrigger value="soon" className="text-xs px-2.5">Soon</TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
@@ -1332,7 +1326,7 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
                     <TableHead>Status</TableHead>
                     <TableHead className="font-mono text-[11px]">Next Change</TableHead>
                     <TableHead className="font-mono text-[11px]">Remaining</TableHead>
-                    <TableHead className="w-10"/>
+                    <TableHead className="w-10" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1351,16 +1345,16 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
                       >
                         <TableCell className="pl-3">
                           <div className="flex items-center gap-2.5">
-                            <MemberAvatar member={m} size="sm"/>
+                            <MemberAvatar member={m} size="sm" />
                             <span className="text-sm font-medium hover:underline">{m.name}</span>
                           </div>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">{m.subteams[0]}</TableCell>
-                        <TableCell><StatusBadge status={m.status}/></TableCell>
+                        <TableCell><StatusBadge status={m.status} /></TableCell>
                         <TableCell className="font-mono text-xs text-muted-foreground">{m.nextChange}</TableCell>
                         <TableCell>
                           {m.status === "in-class" && m.remainingMin !== undefined
-                            ? <span className="text-xs font-mono text-destructive flex items-center gap-1"><Clock size={10}/>{m.remainingMin}m left</span>
+                            ? <span className="text-xs font-mono text-destructive flex items-center gap-1"><Clock size={10} />{m.remainingMin}m left</span>
                             : <span className="text-xs text-muted-foreground/40">—</span>
                           }
                         </TableCell>
@@ -1369,7 +1363,7 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
                             <TooltipTrigger asChild>
                               <Button variant="ghost" size="icon" className="w-7 h-7" asChild>
                                 <a href={`https://wa.me/${m.whatsapp}`} target="_blank" rel="noreferrer">
-                                  <MessageCircle size={13}/>
+                                  <MessageCircle size={13} />
                                 </a>
                               </Button>
                             </TooltipTrigger>
@@ -1416,7 +1410,7 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-sm flex items-center gap-1.5 font-bold">
-                      <Zap size={14} className="text-primary animate-pulse"/> AI Availability Prediction
+                      <Zap size={14} className="text-primary animate-pulse" /> AI Availability Prediction
                     </CardTitle>
                     <Badge variant="outline" className="text-[10px] font-mono border-primary/30 text-primary">
                       Dhaka BST
@@ -1456,17 +1450,17 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-1.5">
-                  <Clock size={13} className="text-warning"/> Becoming Free Next
+                  <Clock size={13} className="text-warning" /> Becoming Free Next
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0 space-y-2">
-                {becomingFree.slice(0,3).map(m => (
+                {becomingFree.slice(0, 3).map(m => (
                   <div
                     key={m.id}
                     className="flex items-center gap-2.5 p-1.5 -mx-1.5 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
                     onClick={() => setSelected(m)}
                   >
-                    <MemberAvatar member={m} size="sm"/>
+                    <MemberAvatar member={m} size="sm" />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium text-foreground truncate hover:underline">{m.name}</p>
                       <p className="text-[10px] text-muted-foreground">{m.nextChange}</p>
@@ -1496,7 +1490,7 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
                   return { t: h, v: freeCount }
                 })
                 const maxV = Math.max(...chartSlots.map(s => s.v), 1)
-                const nowH = `${getDhakaTimeParts().hours.toString().padStart(2,"0")}:00`
+                const nowH = `${getDhakaTimeParts().hours.toString().padStart(2, "0")}:00`
                 return (
                   <div className="flex items-end gap-1 h-20">
                     {chartSlots.map(s => {
@@ -1509,9 +1503,9 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
                           <TooltipTrigger asChild>
                             <div className="flex-1 flex flex-col items-center gap-1 cursor-default">
                               <div className={cn("w-full rounded-t-sm transition-all", barClass, !isNow && "opacity-70 hover:opacity-100")}
-                                style={{ height: `${Math.max(pct * 76, 2)}px` }}/>
+                                style={{ height: `${Math.max(pct * 76, 2)}px` }} />
                               <span className={cn("text-[9px] font-mono", isNow ? "text-primary font-bold" : "text-muted-foreground")}>
-                                {s.t.slice(0,2)}
+                                {s.t.slice(0, 2)}
                               </span>
                             </div>
                           </TooltipTrigger>
@@ -1533,17 +1527,17 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
             </CardHeader>
             <CardContent className="pt-0 space-y-3">
               {subteams.map(sub => {
-                const total   = pool.filter(m => m.subteams.includes(sub)).length
+                const total = pool.filter(m => m.subteams.includes(sub)).length
                 const freeNow = pool.filter(m => m.subteams.includes(sub) && m.status === "free").length
                 if (!total) return null
-                const pct = Math.round((freeNow/total)*100)
+                const pct = Math.round((freeNow / total) * 100)
                 return (
                   <div key={sub}>
                     <div className="flex justify-between text-xs mb-1.5">
                       <span className="font-medium text-foreground">{sub}</span>
                       <span className="text-muted-foreground font-mono">{freeNow}/{total} · {pct}%</span>
                     </div>
-                    <Progress value={pct} className="h-1.5 bg-secondary" indicatorClassName="bg-success"/>
+                    <Progress value={pct} className="h-1.5 bg-secondary" indicatorClassName="bg-success" />
                   </div>
                 )
               })}
@@ -1603,7 +1597,7 @@ function MemberDialog({ member, open, onOpenChange, canManage }: {
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
-            <MemberAvatar member={liveMember} size="lg"/>
+            <MemberAvatar member={liveMember} size="lg" />
             <div>
               <p>{liveMember.name}</p>
               <p className="text-xs font-normal text-muted-foreground mt-0.5">
@@ -1617,15 +1611,16 @@ function MemberDialog({ member, open, onOpenChange, canManage }: {
           {/* Key info grid */}
           <div className="grid grid-cols-3 gap-2">
             {([
-              { label:"Status",   node:<StatusBadge status={liveMember.status}/> },
-              { label:"Batch",    node:<span className="text-sm font-mono text-foreground">{liveMember.batch}</span> },
-              { label:"Next",     node:<span className="text-sm font-mono text-foreground">{liveMember.nextChange}</span> },
-              { label:"Org",      node:<span className="text-sm text-foreground">{liveMember.org}</span> },
-              { label:"Team",     node:<span className="text-sm text-foreground">{liveMember.team}</span> },
-              { label:"Subteam(s)", node:
-                <div className="flex flex-wrap gap-1">
-                  {liveMember.subteams.map(s => <Badge key={s} variant="secondary" className="text-[10px]">{s}</Badge>)}
-                </div>
+              { label: "Status", node: <StatusBadge status={liveMember.status} /> },
+              { label: "Batch", node: <span className="text-sm font-mono text-foreground">{liveMember.batch}</span> },
+              { label: "Next", node: <span className="text-sm font-mono text-foreground">{liveMember.nextChange}</span> },
+              { label: "Org", node: <span className="text-sm text-foreground">{liveMember.org}</span> },
+              { label: "Team", node: <span className="text-sm text-foreground">{liveMember.team}</span> },
+              {
+                label: "Subteam(s)", node:
+                  <div className="flex flex-wrap gap-1">
+                    {liveMember.subteams.map(s => <Badge key={s} variant="secondary" className="text-[10px]">{s}</Badge>)}
+                  </div>
               },
             ] as { label: string; node: React.ReactNode }[]).map(r => (
               <div key={r.label} className="p-2.5 rounded-lg bg-muted">
@@ -1638,10 +1633,10 @@ function MemberDialog({ member, open, onOpenChange, canManage }: {
           {/* Remaining duration for in-class */}
           {liveMember.status === "in-class" && liveMember.remainingMin !== undefined && (
             <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-destructive/10 border border-destructive/20">
-              <Clock size={14} className="text-destructive shrink-0"/>
+              <Clock size={14} className="text-destructive shrink-0" />
               <div className="flex-1">
                 <p className="text-xs font-medium text-foreground">In {liveMember.currentClass}</p>
-                <Progress value={((90-liveMember.remainingMin)/90)*100} className="h-1 mt-1.5 bg-destructive/20" indicatorClassName="bg-destructive"/>
+                <Progress value={((90 - liveMember.remainingMin) / 90) * 100} className="h-1 mt-1.5 bg-destructive/20" indicatorClassName="bg-destructive" />
               </div>
               <span className="text-xs font-mono text-destructive">{liveMember.remainingMin}m left</span>
             </div>
@@ -1734,7 +1729,7 @@ function MemberDialog({ member, open, onOpenChange, canManage }: {
                       </p>
                       {slots.length === 0
                         ? <p className="text-muted-foreground/40 italic">Free</p>
-                        : slots.map((s,i) => (
+                        : slots.map((s, i) => (
                           <div key={i} className="mb-1.5 last:mb-0 border-b border-border/40 pb-1 last:border-0 last:pb-0">
                             <p className="font-medium text-foreground leading-tight">{s.course}</p>
                             <p className="text-muted-foreground font-mono text-[9px] mt-0.5">{s.startTime}–{s.endTime}</p>
@@ -1760,9 +1755,9 @@ function MemberDialog({ member, open, onOpenChange, canManage }: {
           {/* Manager actions */}
           {canManage && (
             <div className="flex gap-2 pt-1 border-t border-border">
-              <Button variant="outline" size="sm" className="gap-1.5 text-xs h-7"><Pencil size={12}/> Edit Role</Button>
+              <Button variant="outline" size="sm" className="gap-1.5 text-xs h-7"><Pencil size={12} /> Edit Role</Button>
               <Button variant="outline" size="sm" className="gap-1.5 text-xs h-7 text-destructive hover:text-destructive">
-                <XCircle size={12}/> Remove
+                <XCircle size={12} /> Remove
               </Button>
             </div>
           )}
@@ -1772,7 +1767,7 @@ function MemberDialog({ member, open, onOpenChange, canManage }: {
           <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
           <Button className="gap-1.5" asChild>
             <a href={`https://wa.me/${member.whatsapp}`} target="_blank" rel="noreferrer">
-              <MessageCircle size={14}/> WhatsApp
+              <MessageCircle size={14} /> WhatsApp
             </a>
           </Button>
         </DialogFooter>
@@ -1784,19 +1779,19 @@ function MemberDialog({ member, open, onOpenChange, canManage }: {
 // ─── Members Page ─────────────────────────────────────────────────────────────
 
 function MembersPage() {
-  const user      = useUser()
-  const tScope    = teamScope(user)
-  const stScope   = subteamScope(user)
+  const user = useUser()
+  const tScope = teamScope(user)
+  const stScope = subteamScope(user)
   const canManage = user.role !== "member"
 
-  const [members,      setMembers]      = useState<Member[]>([])
-  const [teamsList,    setTeamsList]    = useState<string[]>([])
-  const [teamFilter,   setTeamFilter]   = useState(tScope ?? "all")
-  const [subteamView,  setSubteamView]  = useState<"subteam" | "team">(stScope ? "subteam" : "team")
+  const [members, setMembers] = useState<Member[]>([])
+  const [teamsList, setTeamsList] = useState<string[]>([])
+  const [teamFilter, setTeamFilter] = useState(tScope ?? "all")
+  const [subteamView, setSubteamView] = useState<"subteam" | "team">(stScope ? "subteam" : "team")
   const [statusFilter, setStatusFilter] = useState<AvailStatus | "all">("all")
-  const [searchQuery,  setSearchQuery]  = useState("")
-  const [selected,     setSelected]     = useState<Member | null>(null)
-  const [loading,      setLoading]      = useState(true)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selected, setSelected] = useState<Member | null>(null)
+  const [loading, setLoading] = useState(true)
 
   const loadData = () => {
     setLoading(true)
@@ -1808,7 +1803,7 @@ function MembersPage() {
         setMembers((m || []).map(enrichMemberWithLiveStatus))
         setTeamsList((t || []).map((x: any) => x.name))
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false))
   }
 
@@ -1835,9 +1830,9 @@ function MembersPage() {
     return true
   })
 
-  const freeCount    = filtered.filter(m => m.status === "free").length
+  const freeCount = filtered.filter(m => m.status === "free").length
   const inClassCount = filtered.filter(m => m.status === "in-class").length
-  const soonCount    = filtered.filter(m => m.status === "soon").length
+  const soonCount = filtered.filter(m => m.status === "soon").length
 
   const byTeam: Record<string, Member[]> = {}
   filtered.forEach(m => { (byTeam[m.team] = byTeam[m.team] ?? []).push(m) })
@@ -1882,7 +1877,7 @@ function MembersPage() {
 
           {user.role === "org-owner" && teamsList.length > 0 && (
             <Select value={teamFilter} onValueChange={setTeamFilter}>
-              <SelectTrigger className="w-36 h-8 text-xs"><SelectValue placeholder="All Teams"/></SelectTrigger>
+              <SelectTrigger className="w-36 h-8 text-xs"><SelectValue placeholder="All Teams" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Teams</SelectItem>
                 {teamsList.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
@@ -1891,10 +1886,10 @@ function MembersPage() {
           )}
 
           {(user.role === "org-owner" || user.role === "team-manager") && (
-            <Button size="sm" className="gap-1.5 h-8 text-xs"><Plus size={13}/>Add Member</Button>
+            <Button size="sm" className="gap-1.5 h-8 text-xs"><Plus size={13} />Add Member</Button>
           )}
           <Button size="sm" variant="outline" className="gap-1.5 h-8 text-xs" onClick={loadData}>
-            <RefreshCw size={13}/>Refresh
+            <RefreshCw size={13} />Refresh
           </Button>
         </div>
       </div>
@@ -1920,7 +1915,7 @@ function MembersPage() {
           )}
         >
           <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-success"/>
+            <span className="w-2 h-2 rounded-full bg-success" />
             <p className="text-lg font-bold text-success">{freeCount}</p>
           </div>
           <p className="text-xs text-muted-foreground font-medium">Free Right Now</p>
@@ -1934,7 +1929,7 @@ function MembersPage() {
           )}
         >
           <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-destructive"/>
+            <span className="w-2 h-2 rounded-full bg-destructive" />
             <p className="text-lg font-bold text-destructive">{inClassCount}</p>
           </div>
           <p className="text-xs text-muted-foreground font-medium">In Class</p>
@@ -1948,7 +1943,7 @@ function MembersPage() {
           )}
         >
           <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-warning"/>
+            <span className="w-2 h-2 rounded-full bg-warning" />
             <p className="text-lg font-bold text-warning">{soonCount}</p>
           </div>
           <p className="text-xs text-muted-foreground font-medium">Class Soon (&lt;30m)</p>
@@ -1957,7 +1952,7 @@ function MembersPage() {
 
       {/* Search Input */}
       <div className="relative">
-        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/>
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
@@ -1969,12 +1964,12 @@ function MembersPage() {
       {/* Main Members Content */}
       {loading ? (
         <Card><CardContent className="py-16 text-center">
-          <RefreshCw size={24} className="mx-auto mb-3 text-muted-foreground/30 animate-spin"/>
+          <RefreshCw size={24} className="mx-auto mb-3 text-muted-foreground/30 animate-spin" />
           <p className="text-sm text-muted-foreground">Loading members live availability...</p>
         </CardContent></Card>
       ) : filtered.length === 0 ? (
         <Card><CardContent className="py-16 text-center">
-          <Users size={32} className="mx-auto mb-3 text-muted-foreground/30"/>
+          <Users size={32} className="mx-auto mb-3 text-muted-foreground/30" />
           <p className="text-sm font-medium text-foreground">No teammates match this filter</p>
           <p className="text-xs text-muted-foreground mt-1">Try switching to All Members or resetting the search filter</p>
         </CardContent></Card>
@@ -1984,9 +1979,9 @@ function MembersPage() {
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-semibold text-foreground">{team}</h2>
               <Badge variant="secondary" className="font-mono text-xs">{teamMembers.length}</Badge>
-              <Separator className="flex-1"/>
+              <Separator className="flex-1" />
               <span className="text-xs text-success font-medium flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-success"/>
+                <span className="w-1.5 h-1.5 rounded-full bg-success" />
                 {teamMembers.filter(m => m.status === "free").length} free now
               </span>
             </div>
@@ -2013,7 +2008,7 @@ function MembersPage() {
                     >
                       <TableCell className="pl-4 py-3">
                         <div className="flex items-center gap-2.5">
-                          <MemberAvatar member={m}/>
+                          <MemberAvatar member={m} />
                           <div>
                             <p className="text-sm font-semibold text-foreground leading-none">{m.name}</p>
                             {m.currentClass ? (
@@ -2041,7 +2036,7 @@ function MembersPage() {
                       <TableCell className="font-mono text-xs text-muted-foreground">{m.batch}</TableCell>
                       <TableCell>
                         <div className="space-y-0.5">
-                          <StatusBadge status={m.status}/>
+                          <StatusBadge status={m.status} />
                           {m.remainingMin !== undefined && m.status === "in-class" && (
                             <p className="text-[10px] text-muted-foreground font-mono">Free in ~{m.remainingMin}m</p>
                           )}
@@ -2056,7 +2051,7 @@ function MembersPage() {
                       <TableCell className="text-right pr-4" onClick={e => e.stopPropagation()}>
                         <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full text-success hover:text-success hover:bg-success/10" asChild>
                           <a href={`https://wa.me/${m.whatsapp}`} target="_blank" rel="noreferrer" title="Chat on WhatsApp">
-                            <MessageCircle size={14}/>
+                            <MessageCircle size={14} />
                           </a>
                         </Button>
                       </TableCell>
@@ -2069,7 +2064,7 @@ function MembersPage() {
         ))
       )}
 
-      <MemberDialog member={selected} open={!!selected} onOpenChange={o => !o && setSelected(null)} canManage={canManage}/>
+      <MemberDialog member={selected} open={!!selected} onOpenChange={o => !o && setSelected(null)} canManage={canManage} />
     </div>
   )
 }
@@ -2077,23 +2072,23 @@ function MembersPage() {
 // ─── Search Page ──────────────────────────────────────────────────────────────
 
 function SearchPage() {
-  const user    = useUser()
-  const tScope  = teamScope(user)
+  const user = useUser()
+  const tScope = teamScope(user)
   const stScope = subteamScope(user)
 
-  const [query,     setQuery]   = useState("")
-  const [team,      setTeam]    = useState(tScope ?? "all")
-  const [sub,       setSub]     = useState(stScope ?? "all")
-  const [status,    setStatus]  = useState("all")
-  const [skill,     setSkill]   = useState("all")
-  const [day,       setDay]     = useState("all")
-  const [time,      setTime]    = useState("all")
-  const [batch,     setBatch]   = useState("all")
-  const [selected,  setSelected] = useState<Member | null>(null)
-  const [results,   setResults] = useState<Member[]>([])
-  const [loading,   setLoading] = useState(false)
+  const [query, setQuery] = useState("")
+  const [team, setTeam] = useState(tScope ?? "all")
+  const [sub, setSub] = useState(stScope ?? "all")
+  const [status, setStatus] = useState("all")
+  const [skill, setSkill] = useState("all")
+  const [day, setDay] = useState("all")
+  const [time, setTime] = useState("all")
+  const [batch, setBatch] = useState("all")
+  const [selected, setSelected] = useState<Member | null>(null)
+  const [results, setResults] = useState<Member[]>([])
+  const [loading, setLoading] = useState(false)
   const [teamsList, setTeamsList] = useState<string[]>([])
-  const [subsList,  setSubsList] = useState<string[]>([])
+  const [subsList, setSubsList] = useState<string[]>([])
   const [batchList, setBatchList] = useState<string[]>([])
   const [skillList, setSkillList] = useState<string[]>([])
 
@@ -2102,13 +2097,13 @@ function SearchPage() {
     Promise.all([teamsApi.getTeams(), teamsApi.getOrgMeta()])
       .then(([teams, meta]) => {
         const allTeams = (teams || []).map((t: any) => t.name)
-        const allSubs  = [...new Set((teams || []).flatMap((t: any) => (t.subteams || []).map((s: any) => s.name)))]
+        const allSubs = [...new Set((teams || []).flatMap((t: any) => (t.subteams || []).map((s: any) => s.name)))]
         setTeamsList(allTeams)
         setSubsList(allSubs)
         setBatchList(meta?.batches || [])
         setSkillList((meta?.skills || []).map((s: any) => s.name))
       })
-      .catch(() => {})
+      .catch(() => { })
   }, [])
 
   // Load members from API whenever filters change
@@ -2116,12 +2111,12 @@ function SearchPage() {
     setLoading(true)
     const filters: Record<string, string> = {}
     if (query.trim()) filters.search = query.trim()
-    if (team !== "all") filters.team    = team
-    if (sub  !== "all") filters.subteam = sub
+    if (team !== "all") filters.team = team
+    if (sub !== "all") filters.subteam = sub
     if (status !== "all") filters.status = status
-    if (skill  !== "all") filters.skill  = skill
-    if (batch  !== "all") filters.batch  = batch
-    if (day    !== "all") filters.day    = day
+    if (skill !== "all") filters.skill = skill
+    if (batch !== "all") filters.batch = batch
+    if (day !== "all") filters.day = day
     const enrichMemberStatus = (m: Member): Member => {
       const d = day !== "all" ? (day as DayOfWeek) : undefined
       const t = time !== "all" ? time : undefined
@@ -2221,7 +2216,7 @@ function SearchPage() {
           <p className="text-muted-foreground text-sm mt-0.5">
             {stScope ? `Search within ${stScope} subteam`
               : tScope ? `Search within ${tScope} team`
-              : "Search by name, team, subteam, day/time, skill, or availability"
+                : "Search by name, team, subteam, day/time, skill, or availability"
             }
           </p>
           <p className="text-xs text-muted-foreground/60 mt-0.5">{filteredResults.length} result{filteredResults.length !== 1 ? "s" : ""}{loading ? " · loading…" : ""}</p>
@@ -2254,12 +2249,12 @@ function SearchPage() {
           {/* Row 1 */}
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative flex-1 min-w-44">
-              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/>
-              <Input placeholder="Search by name…" value={query} onChange={e => setQuery(e.target.value)} className="pl-8"/>
+              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input placeholder="Search by name…" value={query} onChange={e => setQuery(e.target.value)} className="pl-8" />
             </div>
             {!tScope && teamsList.length > 0 && (
               <Select value={team} onValueChange={setTeam}>
-                <SelectTrigger className="w-32"><SelectValue placeholder="Team"/></SelectTrigger>
+                <SelectTrigger className="w-32"><SelectValue placeholder="Team" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Teams</SelectItem>
                   {teamsList.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
@@ -2268,7 +2263,7 @@ function SearchPage() {
             )}
             {!stScope && subsList.length > 0 && (
               <Select value={sub} onValueChange={setSub}>
-                <SelectTrigger className="w-36"><SelectValue placeholder="Subteam"/></SelectTrigger>
+                <SelectTrigger className="w-36"><SelectValue placeholder="Subteam" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Subteams</SelectItem>
                   {subsList.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
@@ -2276,7 +2271,7 @@ function SearchPage() {
               </Select>
             )}
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="w-36"><SelectValue placeholder="Availability"/></SelectTrigger>
+              <SelectTrigger className="w-36"><SelectValue placeholder="Availability" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Any Status</SelectItem>
                 <SelectItem value="free">Free Now</SelectItem>
@@ -2286,58 +2281,58 @@ function SearchPage() {
               </SelectContent>
             </Select>
             <Select value={skill} onValueChange={setSkill}>
-              <SelectTrigger className="w-40"><SelectValue placeholder="Skill"/></SelectTrigger>
+              <SelectTrigger className="w-40"><SelectValue placeholder="Skill" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Any Skill</SelectItem>
                 {skillList.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
               </SelectContent>
             </Select>
             {batchList.length > 0 && (
-            <Select value={batch} onValueChange={setBatch}>
-              <SelectTrigger className="w-32"><SelectValue placeholder="Batch"/></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Any Batch</SelectItem>
-                {batchList.map(b => <SelectItem key={b} value={b}>Batch {b}</SelectItem>)}
-              </SelectContent>
-            </Select>
+              <Select value={batch} onValueChange={setBatch}>
+                <SelectTrigger className="w-32"><SelectValue placeholder="Batch" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Any Batch</SelectItem>
+                  {batchList.map(b => <SelectItem key={b} value={b}>Batch {b}</SelectItem>)}
+                </SelectContent>
+              </Select>
             )}
           </div>
 
           {/* Row 2 — Day + Time (key feature from spec) */}
           <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-border">
             <div className="flex items-center gap-1.5">
-              <Calendar size={12} className="text-muted-foreground"/>
+              <Calendar size={12} className="text-muted-foreground" />
               <span className="text-xs text-muted-foreground font-medium">Availability at:</span>
             </div>
             <Select value={day} onValueChange={setDay}>
-              <SelectTrigger className="w-32"><SelectValue placeholder="Day"/></SelectTrigger>
+              <SelectTrigger className="w-32"><SelectValue placeholder="Day" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Any Day</SelectItem>
                 {DAYS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={time} onValueChange={setTime}>
-              <SelectTrigger className="w-28"><SelectValue placeholder="Time"/></SelectTrigger>
+              <SelectTrigger className="w-28"><SelectValue placeholder="Time" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Any Time</SelectItem>
-                {["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00"].map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}
+                {["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"].map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}
               </SelectContent>
             </Select>
             {dayTimeActive && (
               <Badge variant="success" className="text-[11px] gap-1">
-                <CheckCircle2 size={10}/>
+                <CheckCircle2 size={10} />
                 Free on {day} at {time}
               </Badge>
             )}
             {(tScope || stScope) && (
               <div className="ml-auto flex items-center gap-1.5">
-                <Lock size={10} className="text-muted-foreground"/>
+                <Lock size={10} className="text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">Scoped to {stScope ?? tScope}</span>
               </div>
             )}
             {dirty && (
               <Button variant="ghost" size="sm" onClick={reset} className="gap-1.5 text-muted-foreground ml-auto">
-                <Filter size={13}/> Clear filters
+                <Filter size={13} /> Clear filters
               </Button>
             )}
           </div>
@@ -2347,7 +2342,7 @@ function SearchPage() {
       {filteredResults.length === 0 && !loading ? (
         <Card>
           <CardContent className="py-16 text-center">
-            <Search size={32} className="mx-auto mb-3 text-muted-foreground/30"/>
+            <Search size={32} className="mx-auto mb-3 text-muted-foreground/30" />
             <p className="text-sm font-medium text-foreground">
               {dirty ? "No members match your filters" : "No members yet"}
             </p>
@@ -2368,7 +2363,7 @@ function SearchPage() {
                 <TableHead>Skills</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="font-mono text-[11px]">Next Change</TableHead>
-                <TableHead className="w-28"/>
+                <TableHead className="w-28" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -2376,12 +2371,12 @@ function SearchPage() {
                 <TableRow key={m.id} className="cursor-pointer" onClick={() => setSelected(m)}>
                   <TableCell className="pl-4">
                     <div className="flex items-center gap-2.5">
-                      <MemberAvatar member={m}/>
+                      <MemberAvatar member={m} />
                       <div>
                         <p className="text-sm font-medium text-foreground">{m.name}</p>
                         {dayTimeActive && (
                           <p className="text-[10px] text-success flex items-center gap-1">
-                            <CheckCircle2 size={9}/> Free {day} {time}
+                            <CheckCircle2 size={9} /> Free {day} {time}
                           </p>
                         )}
                       </div>
@@ -2394,16 +2389,16 @@ function SearchPage() {
                   <TableCell>
                     <div className="flex gap-1 flex-wrap">
                       {(m.skills || []).map(s => (
-                        <Badge key={s} variant={skill===s ? "default" : "secondary"} className="text-[10px]">{s}</Badge>
+                        <Badge key={s} variant={skill === s ? "default" : "secondary"} className="text-[10px]">{s}</Badge>
                       ))}
                     </div>
                   </TableCell>
-                  <TableCell><StatusBadge status={m.status}/></TableCell>
+                  <TableCell><StatusBadge status={m.status} /></TableCell>
                   <TableCell className="font-mono text-xs text-muted-foreground">{m.nextChange}</TableCell>
                   <TableCell onClick={e => e.stopPropagation()}>
                     <Button variant="outline" size="sm" className="gap-1.5 h-7 text-xs" asChild>
                       <a href={`https://wa.me/${m.whatsapp}`} target="_blank" rel="noreferrer">
-                        <MessageCircle size={12}/> Chat
+                        <MessageCircle size={12} /> Chat
                       </a>
                     </Button>
                   </TableCell>
@@ -2414,7 +2409,7 @@ function SearchPage() {
         </Card>
       )}
 
-      <MemberDialog member={selected} open={!!selected} onOpenChange={o => !o && setSelected(null)} canManage={false}/>
+      <MemberDialog member={selected} open={!!selected} onOpenChange={o => !o && setSelected(null)} canManage={false} />
     </div>
   )
 }
@@ -2422,17 +2417,17 @@ function SearchPage() {
 // ─── Heatmap Page ─────────────────────────────────────────────────────────────
 
 function HeatmapPage() {
-  const user   = useUser()
+  const user = useUser()
   const tScope = teamScope(user)
 
-  const [fromHour,    setFromHour]    = useState("08:00")
-  const [toHour,      setToHour]      = useState("17:00")
+  const [fromHour, setFromHour] = useState("08:00")
+  const [toHour, setToHour] = useState("17:00")
   const [selectedDay, setSelectedDay] = useState<DayOfWeek>(() => getTodayDayOfWeek())
-  const [heatData,    setHeatData]    = useState<any>(null)
-  const [snapshots,   setSnapshots]   = useState<any[]>([])
-  const [loading,     setLoading]     = useState(true)
-  const [activeTab,   setActiveTab]   = useState("live")
-  const [selectedSnap,setSelectedSnap] = useState<any>(null)
+  const [heatData, setHeatData] = useState<any>(null)
+  const [snapshots, setSnapshots] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState("live")
+  const [selectedSnap, setSelectedSnap] = useState<any>(null)
   const [subteamTeam, setSubteamTeam] = useState("")
 
   const loadHeatmap = () => {
@@ -2448,7 +2443,7 @@ function HeatmapPage() {
         const firstTeam = Object.keys(live?.teamMatrix || {})[0] || ""
         setSubteamTeam(st => st || firstTeam)
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false))
   }
 
@@ -2456,8 +2451,8 @@ function HeatmapPage() {
 
   const displayData = activeTab === "snapshot" && selectedSnap ? selectedSnap.matrix : heatData
 
-  const teams       = displayData ? Object.keys(displayData.teamMatrix || {}) : []
-  const hours       = (displayData?.hours || HOURS).filter((h: string) => h >= fromHour && h <= toHour)
+  const teams = displayData ? Object.keys(displayData.teamMatrix || {}) : []
+  const hours = (displayData?.hours || HOURS).filter((h: string) => h >= fromHour && h <= toHour)
 
   const defaultTab = tScope ? "team" : "org"
 
@@ -2475,17 +2470,17 @@ function HeatmapPage() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs" onClick={loadHeatmap}>
-            <RefreshCw size={13} className={loading ? "animate-spin" : ""}/> Refresh
+            <RefreshCw size={13} className={loading ? "animate-spin" : ""} /> Refresh
           </Button>
           {/* Time range */}
           <div className="flex items-center gap-1 bg-card p-1 rounded-lg border border-border">
             <Select value={fromHour} onValueChange={setFromHour}>
-              <SelectTrigger className="w-20 h-7 text-xs border-0 bg-transparent shadow-none"><SelectValue/></SelectTrigger>
+              <SelectTrigger className="w-20 h-7 text-xs border-0 bg-transparent shadow-none"><SelectValue /></SelectTrigger>
               <SelectContent>{HOURS.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
             </Select>
             <span className="text-muted-foreground text-xs">to</span>
             <Select value={toHour} onValueChange={setToHour}>
-              <SelectTrigger className="w-20 h-7 text-xs border-0 bg-transparent shadow-none"><SelectValue/></SelectTrigger>
+              <SelectTrigger className="w-20 h-7 text-xs border-0 bg-transparent shadow-none"><SelectValue /></SelectTrigger>
               <SelectContent>{HOURS.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
             </Select>
           </div>
@@ -2494,12 +2489,12 @@ function HeatmapPage() {
 
       {loading ? (
         <Card><CardContent className="py-20 text-center">
-          <RefreshCw size={28} className="mx-auto mb-3 text-muted-foreground/30 animate-spin"/>
+          <RefreshCw size={28} className="mx-auto mb-3 text-muted-foreground/30 animate-spin" />
           <p className="text-sm text-muted-foreground">Computing heatmap...</p>
         </CardContent></Card>
       ) : teams.length === 0 ? (
         <Card><CardContent className="py-20 text-center">
-          <BarChart3 size={32} className="mx-auto mb-3 text-muted-foreground/30"/>
+          <BarChart3 size={32} className="mx-auto mb-3 text-muted-foreground/30" />
           <p className="text-sm font-medium text-foreground">No availability data yet</p>
           <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
             Heatmap appears after members register and upload their class routines.
@@ -2545,12 +2540,12 @@ function HeatmapPage() {
                     if (found) setSelectedSnap(found)
                   }
                 }}>
-                  <SelectTrigger className="w-36 h-8 text-xs"><SelectValue placeholder="Live Now"/></SelectTrigger>
+                  <SelectTrigger className="w-36 h-8 text-xs"><SelectValue placeholder="Live Now" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="live">Live Now (Real-time)</SelectItem>
                     {snapshots.map((s, i) => (
                       <SelectItem key={s.id} value={s.id}>
-                        Snap {i+1} · {formatDhakaDate(new Date(s.computedAt))}
+                        Snap {i + 1} · {formatDhakaDate(new Date(s.computedAt))}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -2588,8 +2583,8 @@ function HeatmapPage() {
                           <TableRow key={h}>
                             <TableCell className="pl-5 font-mono text-xs text-muted-foreground">{h}</TableCell>
                             {teams.map((t: string, i: number) => {
-                              const cell  = displayData?.teamMatrix?.[t]?.[selectedDay]?.[h]
-                              const free  = cell?.free ?? 0
+                              const cell = displayData?.teamMatrix?.[t]?.[selectedDay]?.[h]
+                              const free = cell?.free ?? 0
                               const total = cell?.total ?? 0
                               const ratio = ratios[i]
                               return (
@@ -2601,13 +2596,13 @@ function HeatmapPage() {
                                       </Badge>
                                     </TableCell>
                                   </TooltipTrigger>
-                                  <TooltipContent>{Math.round(ratio*100)}% of {t} free on {selectedDay} at {h}</TooltipContent>
+                                  <TooltipContent>{Math.round(ratio * 100)}% of {t} free on {selectedDay} at {h}</TooltipContent>
                                 </Tooltip>
                               )
                             })}
                             <TableCell className="text-center">
                               {best >= 0.75
-                                ? <Badge variant="success"><TrendingUp size={10}/> Good slot</Badge>
+                                ? <Badge variant="success"><TrendingUp size={10} /> Good slot</Badge>
                                 : <span className="text-xs text-muted-foreground">—</span>
                               }
                             </TableCell>
@@ -2642,18 +2637,18 @@ function HeatmapPage() {
                       const dayData = displayData?.teamMatrix?.[team]?.[day]
                       if (!dayData) return null
                       const total = displayData?.teamTotals?.[team] ?? 0
-                      const bestH  = hours.reduce((best: string, h: string) => {
-                        const f  = dayData[h]?.free ?? 0
+                      const bestH = hours.reduce((best: string, h: string) => {
+                        const f = dayData[h]?.free ?? 0
                         const bf = dayData[best]?.free ?? 0
                         return f > bf ? h : best
                       }, hours[0] ?? "09:00")
                       const bestFree = dayData[bestH]?.free ?? 0
                       const ratio = total > 0 ? bestFree / total : 0
-                      const ind   = ratio >= 0.7 ? "bg-success" : ratio >= 0.5 ? "bg-warning" : "bg-destructive"
+                      const ind = ratio >= 0.7 ? "bg-success" : ratio >= 0.5 ? "bg-warning" : "bg-destructive"
                       return (
                         <div key={day} className={cn("flex items-center gap-2 p-1 rounded-md", day === selectedDay && "bg-muted")}>
                           <span className={cn("text-[10px] font-mono w-7 shrink-0", day === selectedDay ? "text-primary font-bold" : "text-muted-foreground")}>{day}</span>
-                          <Progress value={ratio*100} className="flex-1 h-1.5 bg-secondary" indicatorClassName={ind}/>
+                          <Progress value={ratio * 100} className="flex-1 h-1.5 bg-secondary" indicatorClassName={ind} />
                           <span className="text-[10px] font-mono text-muted-foreground w-14 text-right">Best {bestH}</span>
                         </div>
                       )
@@ -2712,8 +2707,8 @@ function HeatmapPage() {
                               <TableRow key={h}>
                                 <TableCell className="pl-5 font-mono text-xs text-muted-foreground">{h}</TableCell>
                                 {subNames.map((sub: string, i: number) => {
-                                  const cell  = displayData.subteamMatrix[subteamTeam]?.[sub]?.[selectedDay]?.[h]
-                                  const free  = cell?.free ?? 0
+                                  const cell = displayData.subteamMatrix[subteamTeam]?.[sub]?.[selectedDay]?.[h]
+                                  const free = cell?.free ?? 0
                                   const total = cell?.total ?? 0
                                   return (
                                     <Tooltip key={sub}>
@@ -2724,13 +2719,13 @@ function HeatmapPage() {
                                           </Badge>
                                         </TableCell>
                                       </TooltipTrigger>
-                                      <TooltipContent>{Math.round(ratios[i]*100)}% of {sub} free at {h}</TooltipContent>
+                                      <TooltipContent>{Math.round(ratios[i] * 100)}% of {sub} free at {h}</TooltipContent>
                                     </Tooltip>
                                   )
                                 })}
                                 <TableCell className="text-center">
                                   {best >= 0.75
-                                    ? <Badge variant="success"><TrendingUp size={10}/> Good slot</Badge>
+                                    ? <Badge variant="success"><TrendingUp size={10} /> Good slot</Badge>
                                     : <span className="text-xs text-muted-foreground">—</span>
                                   }
                                 </TableCell>
@@ -2765,31 +2760,31 @@ function HeatmapPage() {
 
 
 function SkillsPage() {
-  const user    = useUser()
-  const tScope  = teamScope(user)
+  const user = useUser()
+  const tScope = teamScope(user)
   const stScope = subteamScope(user)
   const isMember = user.role === "member"
 
-  const [pending,        setPending]        = useState<any[]>([])
-  const [catalog,        setCatalog]        = useState<any[]>([])
-  const [mySkills,       setMySkills]       = useState<string[]>([])
-  const [myPending,      setMyPending]      = useState<string[]>([])
-  const [requesting,     setRequesting]     = useState(false)
-  const [requestMode,    setRequestMode]    = useState<"catalog" | "custom">("catalog")
-  const [requested,      setRequested]      = useState("")
+  const [pending, setPending] = useState<any[]>([])
+  const [catalog, setCatalog] = useState<any[]>([])
+  const [mySkills, setMySkills] = useState<string[]>([])
+  const [myPending, setMyPending] = useState<string[]>([])
+  const [requesting, setRequesting] = useState(false)
+  const [requestMode, setRequestMode] = useState<"catalog" | "custom">("catalog")
+  const [requested, setRequested] = useState("")
   const [customSkillName, setCustomSkillName] = useState("")
   const [customCategory, setCustomCategory] = useState("General")
   const [addCatalogOpen, setAddCatalogOpen] = useState(false)
-  const [newCatSkill,    setNewCatSkill]    = useState("")
+  const [newCatSkill, setNewCatSkill] = useState("")
   const [newCatCategory, setNewCatCategory] = useState("Software")
-  const [catError,       setCatError]       = useState<string | null>(null)
-  const [reqError,       setReqError]       = useState<string | null>(null)
+  const [catError, setCatError] = useState<string | null>(null)
+  const [reqError, setReqError] = useState<string | null>(null)
 
   const reloadSkills = () => {
     skillsApi.getPendingSkills()
       .then(res => {
         const filtered = (res || []).filter((r: any) => {
-          if (tScope  && r.team    !== tScope)  return false
+          if (tScope && r.team !== tScope) return false
           if (stScope && r.subteam !== stScope) return false
           return true
         })
@@ -2803,24 +2798,24 @@ function SkillsPage() {
         setMySkills(res.mySkills?.filter((s: any) => s.status === "APPROVED").map((s: any) => s.name) || [])
         setMyPending(res.mySkills?.filter((s: any) => s.status === "PENDING").map((s: any) => s.name) || [])
       })
-      .catch(() => {})
+      .catch(() => { })
   }
 
   useEffect(() => {
     reloadSkills()
   }, [tScope, stScope])
 
-  function approve(id: string) { 
+  function approve(id: string) {
     skillsApi.approveSkill(id).then(() => {
       setPending(p => p.filter(x => x.id !== id))
       reloadSkills()
-    }) 
+    })
   }
-  function reject(id: string)  { 
+  function reject(id: string) {
     skillsApi.rejectSkill(id).then(() => {
       setPending(p => p.filter(x => x.id !== id))
       reloadSkills()
-    }) 
+    })
   }
 
   function handleRequestSkill() {
@@ -2882,7 +2877,7 @@ function SkillsPage() {
         </div>
         {isMember && (
           <Button size="sm" className="gap-1.5" onClick={() => { setReqError(null); setRequesting(true) }}>
-            <Plus size={13}/> Request Skill
+            <Plus size={13} /> Request Skill
           </Button>
         )}
       </div>
@@ -2902,7 +2897,7 @@ function SkillsPage() {
                 <div className="flex flex-wrap gap-2">
                   {mySkills.map(s => (
                     <Badge key={s} variant="success" className="gap-1.5 text-xs py-1 px-2.5">
-                      <CheckCircle2 size={11}/> {s}
+                      <CheckCircle2 size={11} /> {s}
                     </Badge>
                   ))}
                 </div>
@@ -2921,7 +2916,7 @@ function SkillsPage() {
                   <div className="flex flex-wrap gap-2">
                     {myPending.map(s => (
                       <Badge key={s} variant="warning" className="gap-1.5 text-xs py-1 px-2.5">
-                        <AlertCircle size={11}/> {s}
+                        <AlertCircle size={11} /> {s}
                       </Badge>
                     ))}
                   </div>
@@ -2951,7 +2946,7 @@ function SkillsPage() {
               <CardContent className="pt-0">
                 {pending.length === 0 ? (
                   <div className="text-center py-12">
-                    <CheckCircle2 size={32} className="mx-auto mb-3 text-success opacity-60"/>
+                    <CheckCircle2 size={32} className="mx-auto mb-3 text-success opacity-60" />
                     <p className="text-sm font-medium text-foreground">All caught up</p>
                     <p className="text-xs text-muted-foreground mt-1">No pending skill approvals in your scope</p>
                   </div>
@@ -2983,10 +2978,10 @@ function SkillsPage() {
                           <TableCell className="text-right pr-3">
                             <div className="flex items-center justify-end gap-1.5">
                               <Button size="sm" className="h-7 text-xs gap-1" onClick={() => approve(r.id)}>
-                                <CheckCircle2 size={12}/> Approve
+                                <CheckCircle2 size={12} /> Approve
                               </Button>
                               <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => reject(r.id)}>
-                                <XCircle size={12}/> Reject
+                                <XCircle size={12} /> Reject
                               </Button>
                             </div>
                           </TableCell>
@@ -3007,7 +3002,7 @@ function SkillsPage() {
                   <CardDescription className="text-xs">Approved members per skill</CardDescription>
                 </div>
                 <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => { setCatError(null); setAddCatalogOpen(true) }}>
-                  <Plus size={11}/> Add Skill
+                  <Plus size={11} /> Add Skill
                 </Button>
               </div>
             </CardHeader>
@@ -3017,7 +3012,7 @@ function SkillsPage() {
                 return (
                   <div key={s.id} className="flex items-center gap-2">
                     <span className="text-sm text-foreground flex-1">{s.name}</span>
-                    <Progress value={Math.min(count * 10, 100)} className="w-16 h-1.5 bg-secondary"/>
+                    <Progress value={Math.min(count * 10, 100)} className="w-16 h-1.5 bg-secondary" />
                     <span className="text-xs font-mono text-muted-foreground w-4 text-right">{count}</span>
                   </div>
                 )
@@ -3061,7 +3056,7 @@ function SkillsPage() {
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground">Select Predefined Skill</label>
                 <Select value={requested} onValueChange={setRequested}>
-                  <SelectTrigger><SelectValue placeholder="Choose a skill"/></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Choose a skill" /></SelectTrigger>
                   <SelectContent>
                     {catalog.map(s => (
                       <SelectItem key={s.id} value={s.name}>{s.name} ({s.category || "General"})</SelectItem>
@@ -3082,7 +3077,7 @@ function SkillsPage() {
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-muted-foreground">Category</label>
                   <Select value={customCategory} onValueChange={setCustomCategory}>
-                    <SelectTrigger><SelectValue/></SelectTrigger>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Software">Software</SelectItem>
                       <SelectItem value="Hardware">Hardware / Embedded</SelectItem>
@@ -3130,7 +3125,7 @@ function SkillsPage() {
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground">Category</label>
               <Select value={newCatCategory} onValueChange={setNewCatCategory}>
-                <SelectTrigger><SelectValue/></SelectTrigger>
+                <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Software">Software</SelectItem>
                   <SelectItem value="Hardware">Hardware / Embedded</SelectItem>
@@ -3162,18 +3157,18 @@ function SkillsPage() {
 
 function TeamsTab({ user }: { user: AppUser }) {
   const [managingTeam, setManagingTeam] = useState<string | null>(null)
-  const [newName,      setNewName]      = useState("")
-  const [addSubteam,   setAddSubteam]   = useState("")
-  const [saved,        setSaved]        = useState(false)
+  const [newName, setNewName] = useState("")
+  const [addSubteam, setAddSubteam] = useState("")
+  const [saved, setSaved] = useState(false)
 
-  const isOwner   = user.role === "org-owner"
+  const isOwner = user.role === "org-owner"
   const [teamsData, setTeamsData] = useState<any[]>([])
   const items = isOwner
     ? teamsData.map(t => t.name)
     : teamsData.flatMap(t => (t.subteams || []).map((s: any) => s.name))
 
   useEffect(() => {
-    teamsApi.getTeams().then(setTeamsData).catch(() => {})
+    teamsApi.getTeams().then(setTeamsData).catch(() => { })
   }, [])
 
   const managedPool: any[] = []
@@ -3203,7 +3198,7 @@ function TeamsTab({ user }: { user: AppUser }) {
                 </CardDescription>
               </div>
               <Button size="sm" className="gap-1.5">
-                <Plus size={13}/>{user.role === "team-manager" ? "Add Subteam" : "Add Team"}
+                <Plus size={13} />{user.role === "team-manager" ? "Add Subteam" : "Add Team"}
               </Button>
             </div>
           </CardHeader>
@@ -3215,7 +3210,7 @@ function TeamsTab({ user }: { user: AppUser }) {
                   <TableHead>Members</TableHead>
                   <TableHead>Free Now</TableHead>
                   <TableHead>Missing Routine</TableHead>
-                  <TableHead className="w-20"/>
+                  <TableHead className="w-20" />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -3231,7 +3226,7 @@ function TeamsTab({ user }: { user: AppUser }) {
                     <TableCell><span className="text-xs text-muted-foreground">—</span></TableCell>
                     <TableCell>
                       <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => openManage(name)}>
-                        <Pencil size={11}/>Manage
+                        <Pencil size={11} />Manage
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -3248,7 +3243,7 @@ function TeamsTab({ user }: { user: AppUser }) {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Building2 size={15} className="text-primary"/>
+                <Building2 size={15} className="text-primary" />
               </div>
               Manage {isOwner ? "Team" : "Subteam"}: {managingTeam}
             </DialogTitle>
@@ -3262,9 +3257,9 @@ function TeamsTab({ user }: { user: AppUser }) {
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground">{isOwner ? "Team" : "Subteam"} Name</label>
               <div className="flex gap-2">
-                <Input value={newName} onChange={e => { setNewName(e.target.value); setSaved(false) }} className="flex-1"/>
+                <Input value={newName} onChange={e => { setNewName(e.target.value); setSaved(false) }} className="flex-1" />
                 <Button size="sm" variant="outline" className="gap-1.5 shrink-0" onClick={() => setSaved(true)} disabled={newName === managingTeam || !newName}>
-                  {saved ? <><CheckCircle2 size={13}/> Saved</> : <><Save size={13}/> Rename</>}
+                  {saved ? <><CheckCircle2 size={13} /> Saved</> : <><Save size={13} /> Rename</>}
                 </Button>
               </div>
             </div>
@@ -3278,7 +3273,7 @@ function TeamsTab({ user }: { user: AppUser }) {
                     <div key={s} className="flex items-center gap-1 rounded-full bg-secondary border border-border px-2.5 py-0.5">
                       <span className="text-xs text-foreground">{s}</span>
                       <button className="text-muted-foreground hover:text-destructive transition-colors ml-0.5">
-                        <XCircle size={12}/>
+                        <XCircle size={12} />
                       </button>
                     </div>
                   ))}
@@ -3290,7 +3285,7 @@ function TeamsTab({ user }: { user: AppUser }) {
                       className="h-7 text-xs w-28"
                     />
                     <Button size="sm" variant="outline" className="h-7 text-xs gap-1" disabled={!addSubteam}>
-                      <Plus size={11}/>Add
+                      <Plus size={11} />Add
                     </Button>
                   </div>
                 </div>
@@ -3302,35 +3297,35 @@ function TeamsTab({ user }: { user: AppUser }) {
               <div className="flex items-center justify-between">
                 <p className="text-xs font-medium text-muted-foreground">Members ({managedPool.length})</p>
                 <Badge variant="secondary" className="font-mono text-[10px]">
-                  {managedPool.filter(m=>m.status==="free").length} free now
+                  {managedPool.filter(m => m.status === "free").length} free now
                 </Badge>
               </div>
               <ScrollArea className="h-52 rounded-lg border border-border">
                 <div className="divide-y divide-border">
                   {managedPool.length === 0
-                    ? <p className="text-xs text-muted-foreground text-center py-8">No members in this {isOwner?"team":"subteam"}</p>
+                    ? <p className="text-xs text-muted-foreground text-center py-8">No members in this {isOwner ? "team" : "subteam"}</p>
                     : managedPool.map(m => (
                       <div key={m.id} className="flex items-center gap-3 px-3 py-2.5">
-                        <MemberAvatar member={m} size="sm"/>
+                        <MemberAvatar member={m} size="sm" />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-foreground truncate">{m.name}</p>
                           <p className="text-[10px] text-muted-foreground">{m.batch} · {m.subteams.join(", ")}</p>
                         </div>
-                        <StatusBadge status={m.status}/>
+                        <StatusBadge status={m.status} />
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="w-7 h-7 shrink-0">
-                              <ChevronDown size={12}/>
+                              <ChevronDown size={12} />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-44">
                             <DropdownMenuLabel className="text-[11px]">Member Actions</DropdownMenuLabel>
-                            <DropdownMenuSeparator/>
-                            <DropdownMenuItem className="text-xs gap-2"><Pencil size={12}/>Change Role</DropdownMenuItem>
-                            <DropdownMenuItem className="text-xs gap-2"><ArrowUpRight size={12}/>Move to Team</DropdownMenuItem>
-                            <DropdownMenuSeparator/>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-xs gap-2"><Pencil size={12} />Change Role</DropdownMenuItem>
+                            <DropdownMenuItem className="text-xs gap-2"><ArrowUpRight size={12} />Move to Team</DropdownMenuItem>
+                            <DropdownMenuSeparator />
                             <DropdownMenuItem className="text-xs gap-2 text-destructive focus:text-destructive">
-                              <XCircle size={12}/>Remove from {isOwner ? "team" : "subteam"}
+                              <XCircle size={12} />Remove from {isOwner ? "team" : "subteam"}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -3345,7 +3340,7 @@ function TeamsTab({ user }: { user: AppUser }) {
           <DialogFooter>
             <Button variant="outline" onClick={() => setManagingTeam(null)}>Close</Button>
             <Button className="gap-1.5 text-destructive hover:text-destructive" variant="outline">
-              <XCircle size={13}/> Delete {isOwner ? "Team" : "Subteam"}
+              <XCircle size={13} /> Delete {isOwner ? "Team" : "Subteam"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -3393,27 +3388,27 @@ function SettingsPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    { label:"Semester Name",   value:"Fall 2026" },
-                    { label:"Start Date",      value:"September 1, 2026" },
-                    { label:"End Date",        value:"December 31, 2026" },
-                    { label:"Upload Deadline", value:"September 10, 2026" },
+                    { label: "Semester Name", value: "Fall 2026" },
+                    { label: "Start Date", value: "September 1, 2026" },
+                    { label: "End Date", value: "December 31, 2026" },
+                    { label: "Upload Deadline", value: "September 10, 2026" },
                   ].map(f => (
                     <div key={f.label} className="space-y-1.5">
                       <label className="text-xs font-medium text-muted-foreground">{f.label}</label>
-                      <Input defaultValue={f.value}/>
+                      <Input defaultValue={f.value} />
                     </div>
                   ))}
                 </div>
                 <div className="p-3 rounded-lg bg-warning/5 border border-warning/20">
                   <p className="text-xs font-medium text-foreground flex items-center gap-1.5">
-                    <AlertTriangle size={12} className="text-warning"/>
+                    <AlertTriangle size={12} className="text-warning" />
                     Post-deadline enforcement
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Members who have not uploaded a valid routine after the deadline will be restricted from the platform until they upload their current semester schedule.
                   </p>
                 </div>
-                <Separator/>
+                <Separator />
                 <div className="flex justify-end gap-2">
                   <Button variant="outline">Cancel</Button>
                   <Button>Save Changes</Button>
@@ -3434,7 +3429,7 @@ function SettingsPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
                     <CardTitle className="text-base">Page Access</CardTitle>
                     <CardDescription>Toggle which pages each role can navigate to. Changes take effect immediately.</CardDescription>
                   </div>
-                  <Badge variant="secondary" className="text-[10px] gap-1"><Shield size={10}/>Live</Badge>
+                  <Badge variant="secondary" className="text-[10px] gap-1"><Shield size={10} />Live</Badge>
                 </div>
               </CardHeader>
               <CardContent>
@@ -3446,7 +3441,7 @@ function SettingsPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {(["team-manager","subteam-manager","member"] as UserRole[]).map(role => {
+                    {(["team-manager", "subteam-manager", "member"] as UserRole[]).map(role => {
                       const allowed = pagePerms[role] ?? []
                       return (
                         <TableRow key={role}>
@@ -3471,7 +3466,7 @@ function SettingsPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
                                         : "bg-muted border-border text-muted-foreground/50 line-through hover:bg-accent"
                                     )}
                                   >
-                                    {on ? <CheckCircle2 size={9}/> : <XCircle size={9}/>}
+                                    {on ? <CheckCircle2 size={9} /> : <XCircle size={9} />}
                                     {pg.label}
                                   </button>
                                 )
@@ -3484,7 +3479,7 @@ function SettingsPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
                   </TableBody>
                 </Table>
                 <p className="text-[10px] text-muted-foreground mt-3 flex items-center gap-1">
-                  <Lock size={9}/> Organization Owner always has full access and cannot be restricted.
+                  <Lock size={9} /> Organization Owner always has full access and cannot be restricted.
                 </p>
               </CardContent>
             </Card>
@@ -3506,10 +3501,10 @@ function SettingsPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
                   </TableHeader>
                   <TableBody>
                     {([
-                      { roleKey:"org-owner"       as UserRole, scope:"Entire org",       locked:true },
-                      { roleKey:"team-manager"    as UserRole, scope:"Assigned team",    locked:false },
-                      { roleKey:"subteam-manager" as UserRole, scope:"Assigned subteam", locked:false },
-                      { roleKey:"member"          as UserRole, scope:"Own subteam(s)",   locked:false },
+                      { roleKey: "org-owner" as UserRole, scope: "Entire org", locked: true },
+                      { roleKey: "team-manager" as UserRole, scope: "Assigned team", locked: false },
+                      { roleKey: "subteam-manager" as UserRole, scope: "Assigned subteam", locked: false },
+                      { roleKey: "member" as UserRole, scope: "Own subteam(s)", locked: false },
                     ]).map(({ roleKey, scope, locked }) => {
                       const enabled = featurePerms[roleKey] ?? []
                       const allOpts = ALL_FEATURE_OPTIONS[roleKey] ?? enabled
@@ -3523,7 +3518,7 @@ function SettingsPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
                                 const on = enabled.includes(p)
                                 if (locked) return (
                                   <span key={p} className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-0.5 text-[10px] font-medium bg-secondary text-secondary-foreground">
-                                    <CheckCircle2 size={9} className="text-success"/>{p}
+                                    <CheckCircle2 size={9} className="text-success" />{p}
                                   </span>
                                 )
                                 return (
@@ -3542,7 +3537,7 @@ function SettingsPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
                                         : "bg-muted border-border text-muted-foreground/40 line-through hover:bg-accent"
                                     )}
                                   >
-                                    {on ? <CheckCircle2 size={9} className="text-success"/> : <XCircle size={9} className="text-destructive/50"/>}
+                                    {on ? <CheckCircle2 size={9} className="text-success" /> : <XCircle size={9} className="text-destructive/50" />}
                                     {p}
                                   </button>
                                 )
@@ -3561,7 +3556,7 @@ function SettingsPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
 
         {/* Teams — Org Owner and Team Manager */}
         {(user.role === "org-owner" || user.role === "team-manager") && (
-          <TeamsTab user={user}/>
+          <TeamsTab user={user} />
         )}
 
         {/* Routine Upload — all roles */}
@@ -3587,7 +3582,7 @@ function RoutineTab({ onUploadRoutine }: { onUploadRoutine: () => void }) {
       .then(res => {
         if (Array.isArray(res)) setSchedule(res)
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false))
   }
 
@@ -3619,14 +3614,14 @@ function RoutineTab({ onUploadRoutine }: { onUploadRoutine: () => void }) {
           </CardDescription>
         </div>
         <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs" onClick={fetchSchedule} disabled={loading}>
-          <RefreshCw size={12} className={loading ? "animate-spin" : ""}/> Refresh
+          <RefreshCw size={12} className={loading ? "animate-spin" : ""} /> Refresh
         </Button>
       </CardHeader>
 
       <CardContent className="space-y-5">
         {loading ? (
           <div className="py-12 text-center">
-            <RefreshCw size={24} className="mx-auto mb-2 text-muted-foreground animate-spin"/>
+            <RefreshCw size={24} className="mx-auto mb-2 text-muted-foreground animate-spin" />
             <p className="text-xs text-muted-foreground">Loading your class schedule from database...</p>
           </div>
         ) : schedule.length > 0 ? (
@@ -3634,7 +3629,7 @@ function RoutineTab({ onUploadRoutine }: { onUploadRoutine: () => void }) {
             <div className="flex items-center justify-between p-3.5 rounded-xl bg-success/10 border border-success/20">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-success/20 text-success">
-                  <CheckCircle2 size={18}/>
+                  <CheckCircle2 size={18} />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-foreground">Routine Synced Active</p>
@@ -3644,7 +3639,7 @@ function RoutineTab({ onUploadRoutine }: { onUploadRoutine: () => void }) {
                 </div>
               </div>
               <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" onClick={onUploadRoutine}>
-                <Upload size={12}/> Update Routine
+                <Upload size={12} /> Update Routine
               </Button>
             </div>
 
@@ -3689,7 +3684,7 @@ function RoutineTab({ onUploadRoutine }: { onUploadRoutine: () => void }) {
         ) : (
           <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 space-y-2">
             <div className="flex items-center gap-2 text-destructive">
-              <AlertCircle size={16}/>
+              <AlertCircle size={16} />
               <p className="text-sm font-semibold">No Routine Uploaded Yet</p>
             </div>
             <p className="text-xs text-muted-foreground">
@@ -3703,7 +3698,7 @@ function RoutineTab({ onUploadRoutine }: { onUploadRoutine: () => void }) {
           className="rounded-xl border-2 border-dashed border-border bg-muted/30 p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors"
           onClick={onUploadRoutine}
         >
-          <Upload size={24} className="mx-auto mb-2 text-muted-foreground"/>
+          <Upload size={24} className="mx-auto mb-2 text-muted-foreground" />
           <p className="text-sm font-medium text-foreground">Upload or Update UCAM XLSX</p>
           <p className="text-xs text-muted-foreground mt-0.5">Drag and drop your spreadsheet or click to browse</p>
           <Button variant="outline" size="sm" className="mt-3 text-xs" onClick={e => { e.stopPropagation(); onUploadRoutine() }}>
@@ -3712,7 +3707,7 @@ function RoutineTab({ onUploadRoutine }: { onUploadRoutine: () => void }) {
         </div>
 
         <div className="p-3 rounded-lg bg-muted flex items-start gap-2.5">
-          <Clock size={14} className="text-muted-foreground shrink-0 mt-0.5"/>
+          <Clock size={14} className="text-muted-foreground shrink-0 mt-0.5" />
           <div className="text-xs">
             <p className="font-medium text-foreground">Automatic Routine Parser</p>
             <p className="text-muted-foreground mt-0.5">
@@ -4006,22 +4001,22 @@ interface KanbanTask {
 }
 
 const KANBAN_COLUMNS: { id: KanbanStatus; label: string; color: string; bg: string; border: string }[] = [
-  { id: "Backlog",     label: "Backlog",     color: "text-slate-400",   bg: "bg-slate-500/10",   border: "border-slate-500/20" },
-  { id: "To Do",      label: "To Do",       color: "text-blue-400",    bg: "bg-blue-500/10",    border: "border-blue-500/20" },
-  { id: "In Progress",label: "In Progress", color: "text-amber-400",   bg: "bg-amber-500/10",   border: "border-amber-500/20" },
-  { id: "Review",     label: "Review",      color: "text-violet-400",  bg: "bg-violet-500/10",  border: "border-violet-500/20" },
-  { id: "Testing",    label: "Testing",     color: "text-orange-400",  bg: "bg-orange-500/10",  border: "border-orange-500/20" },
-  { id: "Completed",  label: "Completed",   color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+  { id: "Backlog", label: "Backlog", color: "text-slate-400", bg: "bg-slate-500/10", border: "border-slate-500/20" },
+  { id: "To Do", label: "To Do", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
+  { id: "In Progress", label: "In Progress", color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
+  { id: "Review", label: "Review", color: "text-violet-400", bg: "bg-violet-500/10", border: "border-violet-500/20" },
+  { id: "Testing", label: "Testing", color: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20" },
+  { id: "Completed", label: "Completed", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
 ]
 
 const PRIORITY_STYLES: Record<KanbanPriority, { label: string; dot: string; text: string }> = {
-  Low:      { label: "Low",      dot: "bg-slate-400",   text: "text-slate-400" },
-  Medium:   { label: "Medium",   dot: "bg-blue-400",    text: "text-blue-400" },
-  High:     { label: "High",     dot: "bg-amber-400",   text: "text-amber-400" },
-  Critical: { label: "Critical", dot: "bg-red-500",     text: "text-red-400" },
+  Low: { label: "Low", dot: "bg-slate-400", text: "text-slate-400" },
+  Medium: { label: "Medium", dot: "bg-blue-400", text: "text-blue-400" },
+  High: { label: "High", dot: "bg-amber-400", text: "text-amber-400" },
+  Critical: { label: "Critical", dot: "bg-red-500", text: "text-red-400" },
 }
 
-const PROJECT_PALETTE = ["#6366f1","#22d3ee","#f59e0b","#10b981","#f43f5e","#a78bfa","#fb923c","#34d399"]
+const PROJECT_PALETTE = ["#6366f1", "#22d3ee", "#f59e0b", "#10b981", "#f43f5e", "#a78bfa", "#fb923c", "#34d399"]
 
 const DEFAULT_PROJECTS: KanbanProject[] = [
   { id: "proj-1", name: "Rover Control System", description: "Core telemetry, obstacle avoidance, and navigation modules", color: "#6366f1", createdAt: new Date().toISOString() },
@@ -4043,7 +4038,7 @@ function loadStoredKanban(userId: string) {
   try {
     const raw = localStorage.getItem(`kanban_data_${userId}`) || localStorage.getItem("kanban_data_global")
     if (raw) return JSON.parse(raw) as { projects: KanbanProject[]; tasks: KanbanTask[] }
-  } catch {}
+  } catch { }
   return null
 }
 
@@ -4052,7 +4047,7 @@ function saveStoredKanban(userId: string, projects: KanbanProject[], tasks: Kanb
     const payload = JSON.stringify({ projects, tasks })
     localStorage.setItem(`kanban_data_${userId}`, payload)
     localStorage.setItem("kanban_data_global", payload)
-  } catch {}
+  } catch { }
 }
 
 function ProjectsPage() {
@@ -4061,21 +4056,21 @@ function ProjectsPage() {
 
   const isManager = user.role === "org-owner" || user.role === "team-manager"
 
-  const [projects,      setProjects]      = useState<KanbanProject[]>(() => stored?.projects || DEFAULT_PROJECTS)
-  const [tasks,         setTasks]         = useState<KanbanTask[]>(() => stored?.tasks || DEFAULT_TASKS)
-  const [loading,       setLoading]       = useState(false)
-  const [error,         setError]         = useState<string | null>(null)
+  const [projects, setProjects] = useState<KanbanProject[]>(() => stored?.projects || DEFAULT_PROJECTS)
+  const [tasks, setTasks] = useState<KanbanTask[]>(() => stored?.tasks || DEFAULT_TASKS)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const [activeProject, setActiveProject] = useState<string>("all")
-  const [memberFilter,  setMemberFilter]  = useState<string>("all")
-  const [dragTaskId,    setDragTaskId]    = useState<string | null>(null)
-  const [dragOver,      setDragOver]      = useState<KanbanStatus | null>(null)
-  const [dragOverPrio,  setDragOverPrio]  = useState<KanbanPriority | null>(null)
-  const [taskModal,     setTaskModal]     = useState<{ open: boolean; task: KanbanTask | null; column?: KanbanStatus }>({ open: false, task: null })
-  const [projectModal,  setProjectModal]  = useState<{ open: boolean; project: KanbanProject | null }>({ open: false, project: null })
+  const [memberFilter, setMemberFilter] = useState<string>("all")
+  const [dragTaskId, setDragTaskId] = useState<string | null>(null)
+  const [dragOver, setDragOver] = useState<KanbanStatus | null>(null)
+  const [dragOverPrio, setDragOverPrio] = useState<KanbanPriority | null>(null)
+  const [taskModal, setTaskModal] = useState<{ open: boolean; task: KanbanTask | null; column?: KanbanStatus }>({ open: false, task: null })
+  const [projectModal, setProjectModal] = useState<{ open: boolean; project: KanbanProject | null }>({ open: false, project: null })
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
-  const [view,          setView]          = useState<"kanban" | "list">("kanban")
-  const [saving,        setSaving]        = useState(false)
+  const [view, setView] = useState<"kanban" | "list">("kanban")
+  const [saving, setSaving] = useState(false)
 
   // ── Sync to localStorage on any state update ──
   useEffect(() => {
@@ -4154,7 +4149,7 @@ function ProjectsPage() {
     const currentId = dragTaskId
     setTasks(prev => prev.map(t => t.id === currentId ? { ...t, status: col } : t))
     setDragTaskId(null); setDragOver(null); setDragOverPrio(null)
-    projectsApi.updateTask(currentId, { status: col }).catch(() => {})
+    projectsApi.updateTask(currentId, { status: col }).catch(() => { })
   }
 
   // ── Drag & Drop Priority Drop Target (Managers only) ──
@@ -4169,7 +4164,7 @@ function ProjectsPage() {
     const currentId = dragTaskId
     setTasks(prev => prev.map(t => t.id === currentId ? { ...t, priority: prio } : t))
     setDragTaskId(null); setDragOver(null); setDragOverPrio(null)
-    projectsApi.updateTask(currentId, { priority: prio }).catch(() => {})
+    projectsApi.updateTask(currentId, { priority: prio }).catch(() => { })
   }
 
   const onDragEnd = () => { setDragTaskId(null); setDragOver(null); setDragOverPrio(null) }
@@ -4182,7 +4177,7 @@ function ProjectsPage() {
     const nextIdx = (priorities.indexOf(task.priority) + 1) % priorities.length
     const nextPrio = priorities[nextIdx]
     setTasks(prev => prev.map(t => t.id === task.id ? { ...t, priority: nextPrio } : t))
-    projectsApi.updateTask(task.id, { priority: nextPrio }).catch(() => {})
+    projectsApi.updateTask(task.id, { priority: nextPrio }).catch(() => { })
   }
 
   // ── Quick Column Progression (Managers only) ──
@@ -4195,7 +4190,7 @@ function ProjectsPage() {
     if (newIdx === currentIdx) return
     const newStatus = colIds[newIdx]
     setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: newStatus } : t))
-    projectsApi.updateTask(task.id, { status: newStatus }).catch(() => {})
+    projectsApi.updateTask(task.id, { status: newStatus }).catch(() => { })
   }
 
   // ── Task CRUD ──
@@ -4211,7 +4206,7 @@ function ProjectsPage() {
           priority: task.priority, assigneeLabel: task.assignee, due: task.due, tags: task.tags,
         }).then(updated => {
           if (updated?.id) setTasks(prev => prev.map(t => t.id === task.id ? apiToTask(updated) : t))
-        }).catch(() => {})
+        }).catch(() => { })
       } else {
         const newTask: KanbanTask = {
           ...task,
@@ -4226,7 +4221,7 @@ function ProjectsPage() {
           priority: newTask.priority, assigneeLabel: newTask.assignee, due: newTask.due, tags: newTask.tags,
         }).then(created => {
           if (created?.id) setTasks(prev => prev.map(t => t.id === newTask.id ? apiToTask(created) : t))
-        }).catch(() => {})
+        }).catch(() => { })
       }
       setTaskModal({ open: false, task: null })
     } finally { setSaving(false) }
@@ -4237,7 +4232,7 @@ function ProjectsPage() {
     setTasks(prev => prev.filter(t => t.id !== id))
     setConfirmDelete(null)
     setTaskModal({ open: false, task: null })
-    projectsApi.deleteTask(id).catch(() => {})
+    projectsApi.deleteTask(id).catch(() => { })
   }
 
   // ── Project CRUD ──
@@ -4250,7 +4245,7 @@ function ProjectsPage() {
         setProjects(prev => prev.map(p => p.id === proj.id ? { ...proj } : p))
         projectsApi.updateProject(proj.id, { name: proj.name, description: proj.description, color: proj.color })
           .then(updated => { if (updated?.id) setProjects(prev => prev.map(p => p.id === proj.id ? apiToProject(updated) : p)) })
-          .catch(() => {})
+          .catch(() => { })
       } else {
         const newProj: KanbanProject = {
           ...proj,
@@ -4261,7 +4256,7 @@ function ProjectsPage() {
         setProjects(prev => [...prev, newProj])
         projectsApi.createProject({ name: newProj.name, description: newProj.description, color: newProj.color })
           .then(created => { if (created?.id) setProjects(prev => prev.map(p => p.id === newProj.id ? apiToProject(created) : p)) })
-          .catch(() => {})
+          .catch(() => { })
       }
       setProjectModal({ open: false, project: null })
     } finally { setSaving(false) }
@@ -4272,7 +4267,7 @@ function ProjectsPage() {
     setProjects(prev => prev.filter(p => p.id !== id))
     setTasks(prev => prev.filter(t => t.projectId !== id))
     if (activeProject === id) setActiveProject("all")
-    projectsApi.deleteProject(id).catch(() => {})
+    projectsApi.deleteProject(id).catch(() => { })
   }
 
   const totalByStatus = (col: KanbanStatus) => filteredTasks.filter(t => t.status === col).length
@@ -4283,423 +4278,423 @@ function ProjectsPage() {
       {loading && (
         <div className="flex items-center justify-center py-20">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-9 h-9 rounded-full border-2 border-primary border-t-transparent animate-spin"/>
+            <div className="w-9 h-9 rounded-full border-2 border-primary border-t-transparent animate-spin" />
             <p className="text-xs font-medium text-muted-foreground">Syncing Projects & Kanban from database...</p>
           </div>
         </div>
       )}
       {error && !loading && (
         <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 flex items-center gap-3">
-          <AlertCircle size={16} className="text-destructive shrink-0"/>
+          <AlertCircle size={16} className="text-destructive shrink-0" />
           <p className="text-sm text-destructive">{error}</p>
           <Button size="sm" variant="outline" className="ml-auto text-xs" onClick={loadData}>Retry</Button>
         </div>
       )}
 
       {!loading && (<>
-      {/* Workspace Banner */}
-      <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5 flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-primary/15 flex items-center justify-center text-primary font-bold text-xs">
-            ⚡
+        {/* Workspace Banner */}
+        <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5 flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-primary/15 flex items-center justify-center text-primary font-bold text-xs">
+              ⚡
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                Live Team Kanban Board & Sprint Tracker
+                <Badge variant={isManager ? "default" : "secondary"} className="text-[9px] px-1.5 py-0">
+                  {isManager ? "Full Manager Control" : "View-Only Mode • Managed by Team Managers"}
+                </Badge>
+              </p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                {isManager
+                  ? "Drag and drop cards across columns, click priority badges to cycle priority, or click cards to edit full details."
+                  : "Live engineering board view. Only Organization Owners and Team Managers can modify tasks and sprint statuses."
+                }
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-              Live Team Kanban Board & Sprint Tracker
-              <Badge variant={isManager ? "default" : "secondary"} className="text-[9px] px-1.5 py-0">
-                {isManager ? "Full Manager Control" : "View-Only Mode • Managed by Team Managers"}
-              </Badge>
-            </p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">
-              {isManager 
-                ? "Drag and drop cards across columns, click priority badges to cycle priority, or click cards to edit full details."
-                : "Live engineering board view. Only Organization Owners and Team Managers can modify tasks and sprint statuses."
-              }
-            </p>
-          </div>
-        </div>
-        {uniqueAssignees.length > 1 && (
-          <div className="flex items-center gap-1.5">
-            <span className="text-xs text-muted-foreground font-medium">Filter Member:</span>
-            <Select value={memberFilter} onValueChange={setMemberFilter}>
-              <SelectTrigger className="h-7 text-xs w-40 bg-card">
-                <SelectValue placeholder="All Members"/>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Members ({tasks.length})</SelectItem>
-                {uniqueAssignees.map(a => (
-                  <SelectItem key={a} value={a}>{a} ({tasks.filter(t => t.assignee === a).length})</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-      </div>
-
-      {/* Header */}
-      <div className="flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Projects & Kanban Board</h1>
-          <p className="text-muted-foreground text-sm mt-0.5">
-            Track engineering sprints, task priorities, and subteam milestones
-          </p>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
-            <button onClick={() => setView("kanban")} className={cn("px-3 py-1 rounded-md text-xs font-medium transition-all", view === "kanban" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>Board</button>
-            <button onClick={() => setView("list")} className={cn("px-3 py-1 rounded-md text-xs font-medium transition-all", view === "list" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>List</button>
-          </div>
-          {isManager && (
-            <>
-              <Button size="sm" variant="outline" className="gap-1.5 h-8 text-xs" onClick={() => setProjectModal({ open: true, project: null })} disabled={saving}>
-                <Plus size={13}/>New Project
-              </Button>
-              <Button size="sm" className="gap-1.5 h-8 text-xs" onClick={() => setTaskModal({ open: true, task: null, column: "To Do" })} disabled={saving}>
-                <Plus size={13}/>{saving ? "Saving..." : "Add Task"}
-              </Button>
-            </>
+          {uniqueAssignees.length > 1 && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-muted-foreground font-medium">Filter Member:</span>
+              <Select value={memberFilter} onValueChange={setMemberFilter}>
+                <SelectTrigger className="h-7 text-xs w-40 bg-card">
+                  <SelectValue placeholder="All Members" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Members ({tasks.length})</SelectItem>
+                  {uniqueAssignees.map(a => (
+                    <SelectItem key={a} value={a}>{a} ({tasks.filter(t => t.assignee === a).length})</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           )}
         </div>
-      </div>
 
-      {/* Priority Drop Target Bar (Visible when dragging a task to allow instant priority drop) */}
-      {isManager && dragTaskId && (
-        <div className="rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 p-3 animate-in fade-in zoom-in duration-150">
-          <p className="text-[11px] font-semibold text-primary mb-2 text-center uppercase tracking-wider">
-            🎯 Drop onto a Priority Zone or Column Below:
-          </p>
-          <div className="grid grid-cols-4 gap-2">
-            {(["Low", "Medium", "High", "Critical"] as KanbanPriority[]).map(prio => {
-              const pStyle = PRIORITY_STYLES[prio]
-              const isTarget = dragOverPrio === prio
+        {/* Header */}
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Projects & Kanban Board</h1>
+            <p className="text-muted-foreground text-sm mt-0.5">
+              Track engineering sprints, task priorities, and subteam milestones
+            </p>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
+              <button onClick={() => setView("kanban")} className={cn("px-3 py-1 rounded-md text-xs font-medium transition-all", view === "kanban" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>Board</button>
+              <button onClick={() => setView("list")} className={cn("px-3 py-1 rounded-md text-xs font-medium transition-all", view === "list" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>List</button>
+            </div>
+            {isManager && (
+              <>
+                <Button size="sm" variant="outline" className="gap-1.5 h-8 text-xs" onClick={() => setProjectModal({ open: true, project: null })} disabled={saving}>
+                  <Plus size={13} />New Project
+                </Button>
+                <Button size="sm" className="gap-1.5 h-8 text-xs" onClick={() => setTaskModal({ open: true, task: null, column: "To Do" })} disabled={saving}>
+                  <Plus size={13} />{saving ? "Saving..." : "Add Task"}
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Priority Drop Target Bar (Visible when dragging a task to allow instant priority drop) */}
+        {isManager && dragTaskId && (
+          <div className="rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 p-3 animate-in fade-in zoom-in duration-150">
+            <p className="text-[11px] font-semibold text-primary mb-2 text-center uppercase tracking-wider">
+              🎯 Drop onto a Priority Zone or Column Below:
+            </p>
+            <div className="grid grid-cols-4 gap-2">
+              {(["Low", "Medium", "High", "Critical"] as KanbanPriority[]).map(prio => {
+                const pStyle = PRIORITY_STYLES[prio]
+                const isTarget = dragOverPrio === prio
+                return (
+                  <div
+                    key={prio}
+                    onDragOver={(e) => { e.preventDefault(); setDragOverPrio(prio) }}
+                    onDragLeave={() => setDragOverPrio(null)}
+                    onDrop={(e) => onDropPriority(e, prio)}
+                    className={cn(
+                      "rounded-lg border p-2 text-center transition-all cursor-pointer",
+                      isTarget ? "border-primary bg-primary/20 scale-105 shadow-md ring-2 ring-primary/40" : "border-border/60 bg-card hover:bg-muted/40"
+                    )}
+                  >
+                    <div className="flex items-center justify-center gap-1.5">
+                      <span className={cn("w-2 h-2 rounded-full", pStyle.dot)} />
+                      <span className={cn("text-xs font-bold", pStyle.text)}>Set {prio}</span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Project Tabs */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={() => setActiveProject("all")}
+            className={cn("px-3 py-1.5 rounded-lg text-xs font-medium border transition-all", activeProject === "all" ? "bg-primary text-primary-foreground border-primary shadow-sm" : "border-border bg-muted/30 text-muted-foreground hover:text-foreground hover:bg-muted/60")}
+          >
+            All Projects
+            <span className={cn("ml-1.5 font-mono", activeProject === "all" ? "opacity-70" : "opacity-50")}>{tasks.length}</span>
+          </button>
+          {projects.map(proj => (
+            <div key={proj.id} className="group relative">
+              <button
+                onClick={() => setActiveProject(proj.id)}
+                className={cn("px-3 py-1.5 rounded-lg text-xs font-medium border transition-all flex items-center gap-1.5", activeProject === proj.id ? "text-foreground border-transparent shadow-sm" : "border-border bg-muted/30 text-muted-foreground hover:text-foreground hover:bg-muted/60")}
+                style={activeProject === proj.id ? { backgroundColor: proj.color + "22", borderColor: proj.color + "55" } : {}}
+              >
+                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: proj.color }} />
+                {proj.name}
+                <span className="font-mono opacity-60 ml-0.5">{tasks.filter(t => t.projectId === proj.id).length}</span>
+              </button>
+              {isManager && (
+                <button
+                  onClick={() => setProjectModal({ open: true, project: proj })}
+                  className="absolute -top-1.5 -right-1.5 opacity-0 group-hover:opacity-100 transition-opacity w-4 h-4 rounded-full bg-secondary border border-border text-muted-foreground hover:text-foreground flex items-center justify-center shadow-xs"
+                  title="Edit project"
+                >
+                  <Pencil size={8} />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Stats Strip */}
+        <div className="grid grid-cols-6 gap-2">
+          {KANBAN_COLUMNS.map(col => (
+            <div key={col.id} className={cn("rounded-lg border p-2.5 text-center", col.bg, col.border)}>
+              <p className={cn("text-lg font-bold", col.color)}>{totalByStatus(col.id)}</p>
+              <p className="text-[10px] text-muted-foreground font-medium">{col.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {view === "kanban" ? (
+          /* ─── Kanban Board ─── */
+          <div className="flex gap-3 overflow-x-auto pb-4" style={{ minHeight: "480px" }}>
+            {KANBAN_COLUMNS.map(col => {
+              const colTasks = filteredTasks.filter(t => t.status === col.id)
+              const isDragTarget = dragOver === col.id
               return (
                 <div
-                  key={prio}
-                  onDragOver={(e) => { e.preventDefault(); setDragOverPrio(prio) }}
-                  onDragLeave={() => setDragOverPrio(null)}
-                  onDrop={(e) => onDropPriority(e, prio)}
+                  key={col.id}
                   className={cn(
-                    "rounded-lg border p-2 text-center transition-all cursor-pointer",
-                    isTarget ? "border-primary bg-primary/20 scale-105 shadow-md ring-2 ring-primary/40" : "border-border/60 bg-card hover:bg-muted/40"
+                    "rounded-xl border flex flex-col transition-all duration-150",
+                    col.bg,
+                    isDragTarget ? "border-primary scale-[1.02] shadow-xl ring-2 ring-primary/30" : col.border
                   )}
+                  style={{ minWidth: "230px", width: "230px", minHeight: "440px" }}
+                  onDragOver={e => onDragOver(e, col.id)}
+                  onDrop={e => onDrop(e, col.id)}
+                  onDragLeave={() => setDragOver(null)}
                 >
-                  <div className="flex items-center justify-center gap-1.5">
-                    <span className={cn("w-2 h-2 rounded-full", pStyle.dot)}/>
-                    <span className={cn("text-xs font-bold", pStyle.text)}>Set {prio}</span>
+                  {/* Column header */}
+                  <div className={cn("flex items-center justify-between p-3 border-b", col.border)}>
+                    <div className="flex items-center gap-1.5">
+                      <span className={cn("w-2 h-2 rounded-full", col.color.replace("text-", "bg-"))} />
+                      <span className={cn("text-xs font-bold uppercase tracking-wider", col.color)}>{col.label}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Badge variant="secondary" className="font-mono text-[10px] h-4 px-1">{colTasks.length}</Badge>
+                      {isManager && (
+                        <button
+                          onClick={() => setTaskModal({ open: true, task: null, column: col.id })}
+                          className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                          title={`Add task to ${col.label}`}
+                        >
+                          <Plus size={11} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Task cards */}
+                  <div className="flex-1 p-2 space-y-2.5 overflow-y-auto">
+                    {colTasks.length === 0 && (
+                      <div
+                        className={cn(
+                          "rounded-lg border-2 border-dashed flex items-center justify-center h-24 transition-colors",
+                          isDragTarget ? "border-primary/60 bg-primary/10" : "border-border/30"
+                        )}
+                      >
+                        <p className="text-[11px] text-muted-foreground/50 font-medium">
+                          {isDragTarget ? "Drop here to move" : "No tasks in " + col.label}
+                        </p>
+                      </div>
+                    )}
+
+                    {colTasks.map(task => {
+                      const proj = projects.find(p => p.id === task.projectId)
+                      const prio = PRIORITY_STYLES[task.priority]
+                      const isBeingDragged = dragTaskId === task.id
+
+                      return (
+                        <div
+                          key={task.id}
+                          draggable={isManager}
+                          onDragStart={e => onDragStart(e, task.id)}
+                          onDragEnd={onDragEnd}
+                          onClick={() => setTaskModal({ open: true, task })}
+                          className={cn(
+                            "group rounded-xl border bg-card p-3 space-y-2 transition-all select-none shadow-xs hover:shadow-md hover:border-primary/50",
+                            isManager ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
+                            isBeingDragged ? "opacity-30 scale-95 border-primary" : "opacity-100 scale-100"
+                          )}
+                        >
+                          {/* Project Badge */}
+                          {proj && (
+                            <div className="flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: proj.color }} />
+                              <span className="text-[9px] font-semibold truncate max-w-[140px]" style={{ color: proj.color }}>{proj.name}</span>
+                            </div>
+                          )}
+
+                          {/* Title & Priority Pill */}
+                          <div className="flex items-start justify-between gap-1.5">
+                            <p className="text-xs font-semibold text-foreground leading-snug flex-1">{task.title}</p>
+
+                            <button
+                              type="button"
+                              onClick={(e) => cyclePriority(e, task)}
+                              title={isManager ? "Click to cycle priority (Low ➔ Medium ➔ High ➔ Critical)" : "Priority level"}
+                              className={cn(
+                                "flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[9px] font-bold shrink-0 transition-all bg-muted/60 hover:bg-muted",
+                                isManager ? "hover:scale-105 active:scale-95 cursor-pointer" : "cursor-default"
+                              )}
+                            >
+                              <span className={cn("w-1.5 h-1.5 rounded-full", prio.dot)} />
+                              <span className={prio.text}>{prio.label}</span>
+                            </button>
+                          </div>
+
+                          {/* Description */}
+                          {task.description && (
+                            <p className="text-[10px] text-muted-foreground leading-relaxed line-clamp-2">{task.description}</p>
+                          )}
+
+                          {/* Tags */}
+                          {task.tags.length > 0 && (
+                            <div className="flex gap-1 flex-wrap">
+                              {task.tags.slice(0, 3).map(tag => (
+                                <span key={tag} className="px-1.5 py-0.5 rounded-md bg-muted text-[9px] text-muted-foreground font-medium">{tag}</span>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Card Footer with Quick Move Arrows & Assignee */}
+                          <div className="flex items-center justify-between pt-1.5 border-t border-border/40 text-[10px]">
+                            <div className="flex items-center gap-1.5">
+                              <Avatar className="w-5 h-5">
+                                <AvatarFallback className="text-[8px] font-bold bg-primary/20 text-primary">
+                                  {task.assignee.slice(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="text-[9px] text-muted-foreground truncate max-w-[85px]" title={task.assignee}>
+                                {task.assignee}
+                              </span>
+                            </div>
+
+                            {/* Quick 1-Click Column Move Arrows (Managers only) */}
+                            <div className="flex items-center gap-0.5">
+                              {isManager && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => moveTaskColumn(e, task, "prev")}
+                                  className="w-4 h-4 rounded text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center transition-colors"
+                                  title="Move column left (←)"
+                                >
+                                  ←
+                                </button>
+                              )}
+                              <span className="text-[8px] font-mono text-muted-foreground">{task.due || "Active"}</span>
+                              {isManager && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => moveTaskColumn(e, task, "next")}
+                                  className="w-4 h-4 rounded text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center transition-colors"
+                                  title="Move column right (→)"
+                                >
+                                  →
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
               )
             })}
           </div>
-        </div>
-      )}
-
-      {/* Project Tabs */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <button
-          onClick={() => setActiveProject("all")}
-          className={cn("px-3 py-1.5 rounded-lg text-xs font-medium border transition-all", activeProject === "all" ? "bg-primary text-primary-foreground border-primary shadow-sm" : "border-border bg-muted/30 text-muted-foreground hover:text-foreground hover:bg-muted/60")}
-        >
-          All Projects
-          <span className={cn("ml-1.5 font-mono", activeProject === "all" ? "opacity-70" : "opacity-50")}>{tasks.length}</span>
-        </button>
-        {projects.map(proj => (
-          <div key={proj.id} className="group relative">
-            <button
-              onClick={() => setActiveProject(proj.id)}
-              className={cn("px-3 py-1.5 rounded-lg text-xs font-medium border transition-all flex items-center gap-1.5", activeProject === proj.id ? "text-foreground border-transparent shadow-sm" : "border-border bg-muted/30 text-muted-foreground hover:text-foreground hover:bg-muted/60")}
-              style={activeProject === proj.id ? { backgroundColor: proj.color + "22", borderColor: proj.color + "55" } : {}}
-            >
-              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: proj.color }}/>
-              {proj.name}
-              <span className="font-mono opacity-60 ml-0.5">{tasks.filter(t => t.projectId === proj.id).length}</span>
-            </button>
-            {isManager && (
-              <button
-                onClick={() => setProjectModal({ open: true, project: proj })}
-                className="absolute -top-1.5 -right-1.5 opacity-0 group-hover:opacity-100 transition-opacity w-4 h-4 rounded-full bg-secondary border border-border text-muted-foreground hover:text-foreground flex items-center justify-center shadow-xs"
-                title="Edit project"
-              >
-                <Pencil size={8}/>
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Stats Strip */}
-      <div className="grid grid-cols-6 gap-2">
-        {KANBAN_COLUMNS.map(col => (
-          <div key={col.id} className={cn("rounded-lg border p-2.5 text-center", col.bg, col.border)}>
-            <p className={cn("text-lg font-bold", col.color)}>{totalByStatus(col.id)}</p>
-            <p className="text-[10px] text-muted-foreground font-medium">{col.label}</p>
-          </div>
-        ))}
-      </div>
-
-      {view === "kanban" ? (
-        /* ─── Kanban Board ─── */
-        <div className="flex gap-3 overflow-x-auto pb-4" style={{ minHeight: "480px" }}>
-          {KANBAN_COLUMNS.map(col => {
-            const colTasks = filteredTasks.filter(t => t.status === col.id)
-            const isDragTarget = dragOver === col.id
-            return (
-              <div
-                key={col.id}
-                className={cn(
-                  "rounded-xl border flex flex-col transition-all duration-150",
-                  col.bg,
-                  isDragTarget ? "border-primary scale-[1.02] shadow-xl ring-2 ring-primary/30" : col.border
+        ) : (
+          /* ─── List View ─── */
+          <div className="rounded-xl border border-border overflow-hidden bg-card">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-border bg-muted/30">
+                  <th className="text-left p-3 text-muted-foreground font-medium w-[35%]">Task</th>
+                  <th className="text-left p-3 text-muted-foreground font-medium">Project</th>
+                  <th className="text-left p-3 text-muted-foreground font-medium">Status</th>
+                  <th className="text-left p-3 text-muted-foreground font-medium">Priority</th>
+                  <th className="text-left p-3 text-muted-foreground font-medium">Assignee</th>
+                  <th className="text-left p-3 text-muted-foreground font-medium">Due Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredTasks.length === 0 && (
+                  <tr><td colSpan={6} className="text-center p-8 text-muted-foreground">No tasks found</td></tr>
                 )}
-                style={{ minWidth: "230px", width: "230px", minHeight: "440px" }}
-                onDragOver={e => onDragOver(e, col.id)}
-                onDrop={e => onDrop(e, col.id)}
-                onDragLeave={() => setDragOver(null)}
-              >
-                {/* Column header */}
-                <div className={cn("flex items-center justify-between p-3 border-b", col.border)}>
-                  <div className="flex items-center gap-1.5">
-                    <span className={cn("w-2 h-2 rounded-full", col.color.replace("text-","bg-"))}/>
-                    <span className={cn("text-xs font-bold uppercase tracking-wider", col.color)}>{col.label}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Badge variant="secondary" className="font-mono text-[10px] h-4 px-1">{colTasks.length}</Badge>
-                    {isManager && (
-                      <button
-                        onClick={() => setTaskModal({ open: true, task: null, column: col.id })}
-                        className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-                        title={`Add task to ${col.label}`}
-                      >
-                        <Plus size={11}/>
-                      </button>
-                    )}
-                  </div>
-                </div>
+                {filteredTasks.map((task, i) => {
+                  const proj = projects.find(p => p.id === task.projectId)
+                  const col = KANBAN_COLUMNS.find(c => c.id === task.status)
+                  const prio = PRIORITY_STYLES[task.priority]
 
-                {/* Task cards */}
-                <div className="flex-1 p-2 space-y-2.5 overflow-y-auto">
-                  {colTasks.length === 0 && (
-                    <div
+                  return (
+                    <tr
+                      key={task.id}
+                      onClick={() => setTaskModal({ open: true, task })}
                       className={cn(
-                        "rounded-lg border-2 border-dashed flex items-center justify-center h-24 transition-colors",
-                        isDragTarget ? "border-primary/60 bg-primary/10" : "border-border/30"
+                        "border-b border-border/50 transition-colors cursor-pointer hover:bg-muted/20",
+                        i % 2 === 0 ? "" : "bg-muted/10"
                       )}
                     >
-                      <p className="text-[11px] text-muted-foreground/50 font-medium">
-                        {isDragTarget ? "Drop here to move" : "No tasks in " + col.label}
-                      </p>
-                    </div>
-                  )}
-
-                  {colTasks.map(task => {
-                    const proj = projects.find(p => p.id === task.projectId)
-                    const prio = PRIORITY_STYLES[task.priority]
-                    const isBeingDragged = dragTaskId === task.id
-
-                    return (
-                      <div
-                        key={task.id}
-                        draggable={isManager}
-                        onDragStart={e => onDragStart(e, task.id)}
-                        onDragEnd={onDragEnd}
-                        onClick={() => setTaskModal({ open: true, task })}
-                        className={cn(
-                          "group rounded-xl border bg-card p-3 space-y-2 transition-all select-none shadow-xs hover:shadow-md hover:border-primary/50",
-                          isManager ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
-                          isBeingDragged ? "opacity-30 scale-95 border-primary" : "opacity-100 scale-100"
-                        )}
-                      >
-                        {/* Project Badge */}
+                      <td className="p-3">
+                        <p className="font-semibold text-foreground">{task.title}</p>
+                        {task.description && <p className="text-muted-foreground mt-0.5 line-clamp-1">{task.description}</p>}
+                      </td>
+                      <td className="p-3">
                         {proj && (
-                          <div className="flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: proj.color }}/>
-                            <span className="text-[9px] font-semibold truncate max-w-[140px]" style={{ color: proj.color }}>{proj.name}</span>
-                          </div>
+                          <span className="flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: proj.color }} />
+                            <span style={{ color: proj.color }} className="font-medium">{proj.name}</span>
+                          </span>
                         )}
+                      </td>
+                      <td className="p-3">
+                        <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-semibold border", col?.bg, col?.border, col?.color)}>{task.status}</span>
+                      </td>
+                      <td className="p-3">
+                        <button
+                          type="button"
+                          onClick={(e) => cyclePriority(e, task)}
+                          className={cn("flex items-center gap-1", isManager ? "cursor-pointer hover:opacity-80" : "cursor-default")}
+                          title={isManager ? "Click to cycle priority" : "Priority"}
+                        >
+                          <span className={cn("w-1.5 h-1.5 rounded-full", prio.dot)} />
+                          <span className={cn("font-medium", prio.text)}>{prio.label}</span>
+                        </button>
+                      </td>
+                      <td className="p-3 text-muted-foreground font-medium">{task.assignee}</td>
+                      <td className="p-3 font-mono text-muted-foreground">{task.due || "—"}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-                        {/* Title & Priority Pill */}
-                        <div className="flex items-start justify-between gap-1.5">
-                          <p className="text-xs font-semibold text-foreground leading-snug flex-1">{task.title}</p>
-                          
-                          <button
-                            type="button"
-                            onClick={(e) => cyclePriority(e, task)}
-                            title={isManager ? "Click to cycle priority (Low ➔ Medium ➔ High ➔ Critical)" : "Priority level"}
-                            className={cn(
-                              "flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[9px] font-bold shrink-0 transition-all bg-muted/60 hover:bg-muted",
-                              isManager ? "hover:scale-105 active:scale-95 cursor-pointer" : "cursor-default"
-                            )}
-                          >
-                            <span className={cn("w-1.5 h-1.5 rounded-full", prio.dot)}/>
-                            <span className={prio.text}>{prio.label}</span>
-                          </button>
-                        </div>
+        {/* ─── Task Modal ─── */}
+        <TaskModal
+          open={taskModal.open}
+          task={taskModal.task}
+          defaultColumn={taskModal.column}
+          projects={projects}
+          defaultProjectId={activeProject !== "all" ? activeProject : projects[0]?.id || ""}
+          currentUser={user.name || "Member"}
+          canEdit={isManager}
+          onSave={saveTask}
+          onDelete={(id) => setConfirmDelete(id)}
+          onClose={() => setTaskModal({ open: false, task: null })}
+        />
 
-                        {/* Description */}
-                        {task.description && (
-                          <p className="text-[10px] text-muted-foreground leading-relaxed line-clamp-2">{task.description}</p>
-                        )}
+        {/* ─── Project Modal ─── */}
+        <ProjectModal
+          open={projectModal.open}
+          project={projectModal.project}
+          canEdit={isManager}
+          onSave={saveProject}
+          onDelete={(id) => { deleteProject(id); setProjectModal({ open: false, project: null }) }}
+          onClose={() => setProjectModal({ open: false, project: null })}
+        />
 
-                        {/* Tags */}
-                        {task.tags.length > 0 && (
-                          <div className="flex gap-1 flex-wrap">
-                            {task.tags.slice(0,3).map(tag => (
-                              <span key={tag} className="px-1.5 py-0.5 rounded-md bg-muted text-[9px] text-muted-foreground font-medium">{tag}</span>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Card Footer with Quick Move Arrows & Assignee */}
-                        <div className="flex items-center justify-between pt-1.5 border-t border-border/40 text-[10px]">
-                          <div className="flex items-center gap-1.5">
-                            <Avatar className="w-5 h-5">
-                              <AvatarFallback className="text-[8px] font-bold bg-primary/20 text-primary">
-                                {task.assignee.slice(0,2).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span className="text-[9px] text-muted-foreground truncate max-w-[85px]" title={task.assignee}>
-                              {task.assignee}
-                            </span>
-                          </div>
-
-                          {/* Quick 1-Click Column Move Arrows (Managers only) */}
-                          <div className="flex items-center gap-0.5">
-                            {isManager && (
-                              <button
-                                type="button"
-                                onClick={(e) => moveTaskColumn(e, task, "prev")}
-                                className="w-4 h-4 rounded text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center transition-colors"
-                                title="Move column left (←)"
-                              >
-                                ←
-                              </button>
-                            )}
-                            <span className="text-[8px] font-mono text-muted-foreground">{task.due || "Active"}</span>
-                            {isManager && (
-                              <button
-                                type="button"
-                                onClick={(e) => moveTaskColumn(e, task, "next")}
-                                className="w-4 h-4 rounded text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center transition-colors"
-                                title="Move column right (→)"
-                              >
-                                →
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      ) : (
-        /* ─── List View ─── */
-        <div className="rounded-xl border border-border overflow-hidden bg-card">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-b border-border bg-muted/30">
-                <th className="text-left p-3 text-muted-foreground font-medium w-[35%]">Task</th>
-                <th className="text-left p-3 text-muted-foreground font-medium">Project</th>
-                <th className="text-left p-3 text-muted-foreground font-medium">Status</th>
-                <th className="text-left p-3 text-muted-foreground font-medium">Priority</th>
-                <th className="text-left p-3 text-muted-foreground font-medium">Assignee</th>
-                <th className="text-left p-3 text-muted-foreground font-medium">Due Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTasks.length === 0 && (
-                <tr><td colSpan={6} className="text-center p-8 text-muted-foreground">No tasks found</td></tr>
-              )}
-              {filteredTasks.map((task, i) => {
-                const proj = projects.find(p => p.id === task.projectId)
-                const col = KANBAN_COLUMNS.find(c => c.id === task.status)
-                const prio = PRIORITY_STYLES[task.priority]
-
-                return (
-                  <tr
-                    key={task.id}
-                    onClick={() => setTaskModal({ open: true, task })}
-                    className={cn(
-                      "border-b border-border/50 transition-colors cursor-pointer hover:bg-muted/20",
-                      i % 2 === 0 ? "" : "bg-muted/10"
-                    )}
-                  >
-                    <td className="p-3">
-                      <p className="font-semibold text-foreground">{task.title}</p>
-                      {task.description && <p className="text-muted-foreground mt-0.5 line-clamp-1">{task.description}</p>}
-                    </td>
-                    <td className="p-3">
-                      {proj && (
-                        <span className="flex items-center gap-1">
-                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: proj.color }}/>
-                          <span style={{ color: proj.color }} className="font-medium">{proj.name}</span>
-                        </span>
-                      )}
-                    </td>
-                    <td className="p-3">
-                      <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-semibold border", col?.bg, col?.border, col?.color)}>{task.status}</span>
-                    </td>
-                    <td className="p-3">
-                      <button
-                        type="button"
-                        onClick={(e) => cyclePriority(e, task)}
-                        className={cn("flex items-center gap-1", isManager ? "cursor-pointer hover:opacity-80" : "cursor-default")}
-                        title={isManager ? "Click to cycle priority" : "Priority"}
-                      >
-                        <span className={cn("w-1.5 h-1.5 rounded-full", prio.dot)}/>
-                        <span className={cn("font-medium", prio.text)}>{prio.label}</span>
-                      </button>
-                    </td>
-                    <td className="p-3 text-muted-foreground font-medium">{task.assignee}</td>
-                    <td className="p-3 font-mono text-muted-foreground">{task.due || "—"}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* ─── Task Modal ─── */}
-      <TaskModal
-        open={taskModal.open}
-        task={taskModal.task}
-        defaultColumn={taskModal.column}
-        projects={projects}
-        defaultProjectId={activeProject !== "all" ? activeProject : projects[0]?.id || ""}
-        currentUser={user.name || "Member"}
-        canEdit={isManager}
-        onSave={saveTask}
-        onDelete={(id) => setConfirmDelete(id)}
-        onClose={() => setTaskModal({ open: false, task: null })}
-      />
-
-      {/* ─── Project Modal ─── */}
-      <ProjectModal
-        open={projectModal.open}
-        project={projectModal.project}
-        canEdit={isManager}
-        onSave={saveProject}
-        onDelete={(id) => { deleteProject(id); setProjectModal({ open: false, project: null }) }}
-        onClose={() => setProjectModal({ open: false, project: null })}
-      />
-
-      {/* ─── Delete Confirm Dialog ─── */}
-      <Dialog open={!!confirmDelete} onOpenChange={() => setConfirmDelete(null)}>
-        <DialogContent className="sm:max-w-[380px]">
-          <DialogHeader>
-            <DialogTitle>Delete Task</DialogTitle>
-            <DialogDescription>This action cannot be undone. The task will be permanently deleted from the database.</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setConfirmDelete(null)}>Cancel</Button>
-            <Button variant="destructive" onClick={() => confirmDelete && deleteTask(confirmDelete)}>Delete Task</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        {/* ─── Delete Confirm Dialog ─── */}
+        <Dialog open={!!confirmDelete} onOpenChange={() => setConfirmDelete(null)}>
+          <DialogContent className="sm:max-w-[380px]">
+            <DialogHeader>
+              <DialogTitle>Delete Task</DialogTitle>
+              <DialogDescription>This action cannot be undone. The task will be permanently deleted from the database.</DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setConfirmDelete(null)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => confirmDelete && deleteTask(confirmDelete)}>Delete Task</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </>)}
     </div>
   )
@@ -4776,11 +4771,11 @@ function TaskModal({ open, task, defaultColumn, projects, defaultProjectId, curr
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {isNew ? (
-              <><Plus size={16} className="text-primary"/>New Task</>
+              <><Plus size={16} className="text-primary" />New Task</>
             ) : canEdit ? (
-              <><Pencil size={16} className="text-primary"/>Edit Task</>
+              <><Pencil size={16} className="text-primary" />Edit Task</>
             ) : (
-              <><Layers size={16} className="text-primary"/>Task Details</>
+              <><Layers size={16} className="text-primary" />Task Details</>
             )}
           </DialogTitle>
         </DialogHeader>
@@ -4789,7 +4784,7 @@ function TaskModal({ open, task, defaultColumn, projects, defaultProjectId, curr
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">Task Title {canEdit && <span className="text-destructive">*</span>}</label>
             {canEdit ? (
-              <Input value={form.title} onChange={e => set("title", e.target.value)} placeholder="What needs to be done?" className="text-sm font-medium" onKeyDown={e => e.key === "Enter" && handleSave()}/>
+              <Input value={form.title} onChange={e => set("title", e.target.value)} placeholder="What needs to be done?" className="text-sm font-medium" onKeyDown={e => e.key === "Enter" && handleSave()} />
             ) : (
               <p className="text-sm font-semibold text-foreground bg-muted/30 p-2.5 rounded-md">{form.title}</p>
             )}
@@ -4815,12 +4810,12 @@ function TaskModal({ open, task, defaultColumn, projects, defaultProjectId, curr
               <label className="text-xs font-medium text-muted-foreground">Project</label>
               {canEdit ? (
                 <Select value={form.projectId} onValueChange={v => set("projectId", v)}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select project"/></SelectTrigger>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select project" /></SelectTrigger>
                   <SelectContent>
                     {projects.map(p => (
                       <SelectItem key={p.id} value={p.id}>
                         <span className="flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }}/>
+                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
                           {p.name}
                         </span>
                       </SelectItem>
@@ -4829,7 +4824,7 @@ function TaskModal({ open, task, defaultColumn, projects, defaultProjectId, curr
                 </Select>
               ) : (
                 <div className="h-8 flex items-center gap-1.5 px-2 rounded-md bg-muted/30 border border-border text-xs">
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: currentProj?.color || "#6366f1" }}/>
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: currentProj?.color || "#6366f1" }} />
                   <span className="font-medium">{currentProj?.name || "General"}</span>
                 </div>
               )}
@@ -4839,7 +4834,7 @@ function TaskModal({ open, task, defaultColumn, projects, defaultProjectId, curr
               {canEdit ? (
                 <Select value={form.status} onValueChange={v => set("status", v as KanbanStatus)}>
                   <SelectTrigger className={cn("h-8 text-xs border", colMeta?.border, colMeta?.bg)} style={{ color: "inherit" }}>
-                    <SelectValue/>
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {KANBAN_COLUMNS.map(c => (
@@ -4860,12 +4855,12 @@ function TaskModal({ open, task, defaultColumn, projects, defaultProjectId, curr
               <label className="text-xs font-medium text-muted-foreground">Priority</label>
               {canEdit ? (
                 <Select value={form.priority} onValueChange={v => set("priority", v as KanbanPriority)}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue/></SelectTrigger>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {(["Low","Medium","High","Critical"] as KanbanPriority[]).map(p => (
+                    {(["Low", "Medium", "High", "Critical"] as KanbanPriority[]).map(p => (
                       <SelectItem key={p} value={p}>
                         <span className="flex items-center gap-1.5">
-                          <span className={cn("w-1.5 h-1.5 rounded-full", PRIORITY_STYLES[p].dot)}/>
+                          <span className={cn("w-1.5 h-1.5 rounded-full", PRIORITY_STYLES[p].dot)} />
                           <span className={PRIORITY_STYLES[p].text}>{p}</span>
                         </span>
                       </SelectItem>
@@ -4874,7 +4869,7 @@ function TaskModal({ open, task, defaultColumn, projects, defaultProjectId, curr
                 </Select>
               ) : (
                 <div className="h-8 flex items-center gap-1.5 px-2 rounded-md bg-muted/30 border border-border text-xs">
-                  <span className={cn("w-2 h-2 rounded-full", prioMeta.dot)}/>
+                  <span className={cn("w-2 h-2 rounded-full", prioMeta.dot)} />
                   <span className={cn("font-medium", prioMeta.text)}>{prioMeta.label}</span>
                 </div>
               )}
@@ -4882,7 +4877,7 @@ function TaskModal({ open, task, defaultColumn, projects, defaultProjectId, curr
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground">Assignee</label>
               {canEdit ? (
-                <Input value={form.assignee} onChange={e => set("assignee", e.target.value)} placeholder="Name or team" className="h-8 text-xs"/>
+                <Input value={form.assignee} onChange={e => set("assignee", e.target.value)} placeholder="Name or team" className="h-8 text-xs" />
               ) : (
                 <div className="h-8 flex items-center px-2 rounded-md bg-muted/30 border border-border text-xs text-muted-foreground font-medium">
                   {form.assignee || "Unassigned"}
@@ -4892,7 +4887,7 @@ function TaskModal({ open, task, defaultColumn, projects, defaultProjectId, curr
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground">Due Date</label>
               {canEdit ? (
-                <Input value={form.due} onChange={e => set("due", e.target.value)} placeholder="e.g. Aug 30" className="h-8 text-xs"/>
+                <Input value={form.due} onChange={e => set("due", e.target.value)} placeholder="e.g. Aug 30" className="h-8 text-xs" />
               ) : (
                 <div className="h-8 flex items-center px-2 rounded-md bg-muted/30 border border-border text-xs font-mono text-muted-foreground">
                   {form.due || "—"}
@@ -4905,7 +4900,7 @@ function TaskModal({ open, task, defaultColumn, projects, defaultProjectId, curr
             <label className="text-xs font-medium text-muted-foreground">Tags</label>
             {canEdit && (
               <div className="flex gap-1.5">
-                <Input value={tagInput} onChange={e => setTagInput(e.target.value)} placeholder="Add tag..." className="h-8 text-xs flex-1" onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addTag())}/>
+                <Input value={tagInput} onChange={e => setTagInput(e.target.value)} placeholder="Add tag..." className="h-8 text-xs flex-1" onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addTag())} />
                 <Button size="sm" variant="outline" className="h-8 text-xs px-2" onClick={addTag}>Add</Button>
               </div>
             )}
@@ -4915,7 +4910,7 @@ function TaskModal({ open, task, defaultColumn, projects, defaultProjectId, curr
                   <span key={tag} className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted text-[10px] text-muted-foreground font-medium">
                     {tag}
                     {canEdit && (
-                      <button onClick={() => removeTag(tag)} className="text-muted-foreground hover:text-destructive transition-colors"><X size={9}/></button>
+                      <button onClick={() => removeTag(tag)} className="text-muted-foreground hover:text-destructive transition-colors"><X size={9} /></button>
                     )}
                   </span>
                 ))}
@@ -4930,7 +4925,7 @@ function TaskModal({ open, task, defaultColumn, projects, defaultProjectId, curr
           <Button variant="ghost" size="sm" className="text-xs ml-auto" onClick={onClose}>Close</Button>
           {canEdit && (
             <Button size="sm" className="text-xs gap-1.5" onClick={handleSave} disabled={!form.title.trim()}>
-              <Save size={12}/>{isNew ? "Create Task" : "Save Changes"}
+              <Save size={12} />{isNew ? "Create Task" : "Save Changes"}
             </Button>
           )}
         </DialogFooter>
@@ -4973,11 +4968,11 @@ function ProjectModal({ open, project, canEdit, onSave, onDelete, onClose }: {
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">Project Name <span className="text-destructive">*</span></label>
-            <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Rover Navigation System" className="text-sm"/>
+            <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Rover Navigation System" className="text-sm" />
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">Description</label>
-            <Input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Brief description..."/>
+            <Input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Brief description..." />
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">Color</label>
@@ -5011,27 +5006,57 @@ function ProjectModal({ open, project, canEdit, onSave, onDelete, onClose }: {
 
 // ─── AI Meeting Planner Page ──────────────────────────────────────────────────
 
+interface SlotRecommendation {
+  day: DayOfWeek
+  startTime: string
+  endTime: string
+  freeMembers: Member[]
+  conflictingMembers: { member: Member; conflictCourse?: string }[]
+  missingRoutineMembers: Member[]
+  score: number
+  consecutiveFreeBlocks: number
+  peakHour: boolean
+}
+
+function computeSlotScore(
+  freeCount: number,
+  missingCount: number,
+  conflictCount: number,
+  consecutiveFreeBlocks: number,
+  peakHour: boolean,
+  totalCandidates: number
+): number {
+  if (totalCandidates === 0) return 0
+  const availRatio      = freeCount / totalCandidates
+  const missingPenalty  = (missingCount / totalCandidates) * 0.12
+  const consecutiveBonus= Math.min(consecutiveFreeBlocks * 0.03, 0.10)
+  const peakBonus       = peakHour ? 0.05 : 0
+  const raw             = availRatio - missingPenalty + consecutiveBonus + peakBonus
+  return Math.round(Math.min(1, Math.max(0, raw)) * 100)
+}
+
 function MeetingPlannerPage() {
-  const user = useUser()
-  const tScope = teamScope(user)
+  const user    = useUser()
+  const tScope  = teamScope(user)
   const stScope = subteamScope(user)
 
-  const [title, setTitle] = useState("Team Sync & Project Alignment")
-  const [duration, setDuration] = useState("60")
-  const [team, setTeam] = useState<string>(tScope || "all")
-  const [subteam, setSubteam] = useState<string>(stScope || "all")
-  const [skill, setSkill] = useState<string>("all")
-  const [targetDay, setTargetDay] = useState<string>("all")
-  const [windowFilter, setWindowFilter] = useState<"all" | "morning" | "afternoon" | "evening">("all")
-  const [selectedSlotIndex, setSelectedSlotIndex] = useState<number>(0)
-  const [scheduleModalOpen, setScheduleModalOpen] = useState(false)
-  const [copied, setCopied] = useState(false)
-  const [syncStatus, setSyncStatus] = useState<string | null>(null)
+  const [title,           setTitle]           = useState("Team Sync & Project Alignment")
+  const [duration,        setDuration]        = useState("60")
+  const [team,            setTeam]            = useState<string>(tScope  || "all")
+  const [subteam,         setSubteam]         = useState<string>(stScope || "all")
+  const [skill,           setSkill]           = useState<string>("all")
+  const [targetDay,       setTargetDay]       = useState<string>("all")
+  const [windowFilter,    setWindowFilter]    = useState<"all"|"morning"|"afternoon"|"evening">("all")
+  const [selectedSlotIdx, setSelectedSlotIdx] = useState<number>(0)
+  const [scheduleOpen,    setScheduleOpen]    = useState(false)
+  const [copied,          setCopied]          = useState(false)
+  const [syncStatus,      setSyncStatus]      = useState<string|null>(null)
+  const [viewMode,        setViewMode]        = useState<"cards"|"heatmap">("cards")
 
   const [membersList, setMembersList] = useState<Member[]>([])
-  const [teamsList, setTeamsList] = useState<{ name: string; subteams: { name: string }[] }[]>([])
-  const [skillsList, setSkillsList] = useState<string[]>([])
-  const [loading, setLoading] = useState(true)
+  const [teamsList,   setTeamsList]   = useState<{ name: string; subteams: { name: string }[] }[]>([])
+  const [skillsList,  setSkillsList]  = useState<string[]>([])
+  const [loading,     setLoading]     = useState(true)
 
   useEffect(() => {
     setLoading(true)
@@ -5039,509 +5064,572 @@ function MeetingPlannerPage() {
       membersApi.getMembers(),
       teamsApi.getTeams(),
       skillsApi.getSkillsCatalog(),
-    ])
-      .then(([memsRes, teamsRes, skillsRes]) => {
-        const mems = memsRes.status === "fulfilled" && memsRes.value ? memsRes.value : []
-        const teams = teamsRes.status === "fulfilled" && teamsRes.value ? teamsRes.value : []
-        const skillsObj = skillsRes.status === "fulfilled" && skillsRes.value ? skillsRes.value : { catalog: [] }
-        setMembersList(mems)
-        setTeamsList(teams)
-        setSkillsList((skillsObj?.catalog || []).map((s: any) => s.name))
-      })
-      .finally(() => setLoading(false))
+    ]).then(([memsRes, teamsRes, skillsRes]) => {
+      setMembersList(memsRes.status  === "fulfilled" && memsRes.value  ? memsRes.value  : [])
+      setTeamsList(  teamsRes.status === "fulfilled" && teamsRes.value ? teamsRes.value : [])
+      const so = skillsRes.status === "fulfilled" && skillsRes.value ? skillsRes.value : { catalog: [] }
+      setSkillsList((so?.catalog || []).map((s: any) => s.name))
+    }).finally(() => setLoading(false))
   }, [])
 
-  // Filter available subteams based on chosen team
   const availableSubteams = team === "all"
     ? [...new Set(teamsList.flatMap(t => (t.subteams || []).map(s => s.name)))]
     : (teamsList.find(t => t.name === team)?.subteams || []).map(s => s.name)
 
-  // Filter pool of candidate members
   const candidatePool = membersList.filter(m => {
-    if (team !== "all" && m.team !== team) return false
-    if (subteam !== "all" && !m.subteams.includes(subteam)) return false
-    if (skill !== "all" && !m.skills.some(s => s.toLowerCase() === skill.toLowerCase())) return false
+    if (team    !== "all" && m.team !== team) return false
+    if (subteam !== "all" && !(m.subteams || []).includes(subteam)) return false
+    if (skill   !== "all" && !(m.skills   || []).some(s => s.toLowerCase() === skill.toLowerCase())) return false
     return true
   })
 
-  // ─── Slot Evaluation Algorithm ───────────────────────────────────────────────
+  const DAYS: DayOfWeek[] = ["Sat","Sun","Mon","Tue","Wed","Thu","Fri"]
+  const ALL_STARTS: string[] = []
+  for (let h = 8; h <= 19; h++) {
+    ALL_STARTS.push(`${h.toString().padStart(2,"0")}:00`)
+    if (h < 19) ALL_STARTS.push(`${h.toString().padStart(2,"0")}:30`)
+  }
+
+  const filteredStartTimes = ALL_STARTS.filter(t => {
+    const m = timeToMinutes(t)
+    if (windowFilter === "morning")   return m >= 8*60  && m < 12*60
+    if (windowFilter === "afternoon") return m >= 12*60 && m < 16*60
+    if (windowFilter === "evening")   return m >= 16*60 && m <= 19*60
+    return true
+  })
+
+  const candidateDays: DayOfWeek[] = targetDay !== "all" ? [targetDay as DayOfWeek] : DAYS
   const durationMins = parseInt(duration, 10) || 60
-  const candidateDays: DayOfWeek[] = targetDay !== "all"
-    ? [targetDay as DayOfWeek]
-    : ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"]
 
-  // Generate candidate start times in 30-min increments
-  const startTimes: string[] = []
-  for (let h = 8; h <= 18; h++) {
-    const hStr = h.toString().padStart(2, "0")
-    startTimes.push(`${hStr}:00`)
-    if (h < 18) startTimes.push(`${hStr}:30`)
-  }
-
-  // Filter by preferred window
-  const filteredStartTimes = startTimes.filter(t => {
-    const mins = timeToMinutes(t)
-    if (windowFilter === "morning") return mins >= 8 * 60 && mins < 12 * 60
-    if (windowFilter === "afternoon") return mins >= 12 * 60 && mins < 16 * 60
-    if (windowFilter === "evening") return mins >= 16 * 60 && mins <= 19 * 60
-    return true
-  })
-
-  interface SlotRecommendation {
-    day: DayOfWeek
-    startTime: string
-    endTime: string
-    freeMembers: Member[]
-    conflictingMembers: { member: Member; conflictCourse?: string }[]
-    missingRoutineMembers: Member[]
-    score: number
-  }
-
-  const evaluatedSlots: SlotRecommendation[] = []
-
-  for (const day of candidateDays) {
-    for (const st of filteredStartTimes) {
-      const startMins = timeToMinutes(st)
-      const endMins = startMins + durationMins
-      if (endMins > 20 * 60) continue // Skip if goes past 8:00 PM
-
-      const endH = Math.floor(endMins / 60)
-      const endM = endMins % 60
-      const endStr = `${endH.toString().padStart(2, "0")}:${endM.toString().padStart(2, "0")}`
-
-      const freeMembers: Member[] = []
-      const conflictingMembers: { member: Member; conflictCourse?: string }[] = []
-      const missingRoutineMembers: Member[] = []
-
-      for (const m of candidatePool) {
-        if (!m.schedule || m.schedule.length === 0) {
-          missingRoutineMembers.push(m)
-          continue
-        }
-
-        const check = isFreeDuringInterval(m.schedule, day, st, endStr)
-        if (check.isFree) {
-          freeMembers.push(m)
-        } else {
-          conflictingMembers.push({ member: m, conflictCourse: check.conflictCourse })
-        }
+  // Pre-compute per-member per-day 30-min bucket availability (memoised on pool identity)
+  const poolKey = candidatePool.map(m => m.id).join(",")
+  const memberAvailCache = useMemo(() => {
+    const cache: Record<string, boolean[][]> = {}
+    for (const m of candidatePool) {
+      if (!m.schedule || m.schedule.length === 0) {
+        cache[m.id] = DAYS.map(() => ALL_STARTS.map(() => false))
+        continue
       }
-
-      const totalValid = candidatePool.length
-      const score = totalValid > 0 ? Math.round((freeMembers.length / totalValid) * 100) : 0
-
-      evaluatedSlots.push({
-        day,
-        startTime: st,
-        endTime: endStr,
-        freeMembers,
-        conflictingMembers,
-        missingRoutineMembers,
-        score,
-      })
+      cache[m.id] = DAYS.map(day =>
+        ALL_STARTS.map(st => {
+          const endMins = timeToMinutes(st) + 30
+          const endH    = Math.floor(endMins/60), endM = endMins%60
+          const endStr  = `${endH.toString().padStart(2,"0")}:${endM.toString().padStart(2,"0")}`
+          return isFreeDuringInterval(m.schedule, day, st, endStr).isFree
+        })
+      )
     }
+    return cache
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [poolKey])
+
+  const evaluatedSlots: SlotRecommendation[] = useMemo(() => {
+    const slots: SlotRecommendation[] = []
+    for (const day of candidateDays) {
+      const dayIdx = DAYS.indexOf(day)
+      for (const st of filteredStartTimes) {
+        const startMins = timeToMinutes(st)
+        const endMins   = startMins + durationMins
+        if (endMins > 20 * 60) continue
+        const endH = Math.floor(endMins/60), endM = endMins%60
+        const endStr = `${endH.toString().padStart(2,"0")}:${endM.toString().padStart(2,"0")}`
+
+        const freeMembers:            Member[]                                       = []
+        const conflictingMembers:     { member: Member; conflictCourse?: string }[]  = []
+        const missingRoutineMembers:  Member[]                                       = []
+
+        for (const m of candidatePool) {
+          if (!m.schedule || m.schedule.length === 0) { missingRoutineMembers.push(m); continue }
+          const check = isFreeDuringInterval(m.schedule, day, st, endStr)
+          if (check.isFree) freeMembers.push(m)
+          else              conflictingMembers.push({ member: m, conflictCourse: check.conflictCourse })
+        }
+
+        // Count adjacent 30-min windows where all routined members are also free
+        let consecutiveFreeBlocks = 0
+        const bi0 = ALL_STARTS.indexOf(st)
+        const routinedPool = candidatePool.filter(m => m.schedule && m.schedule.length > 0)
+        for (let delta = -2; delta <= 2; delta++) {
+          if (delta === 0) continue
+          const bi = bi0 + delta
+          if (bi < 0 || bi >= ALL_STARTS.length) continue
+          if (routinedPool.every(m => memberAvailCache[m.id]?.[dayIdx]?.[bi] === true))
+            consecutiveFreeBlocks++
+        }
+
+        const peakHour = (startMins >= 16*60 && startMins <= 19*60) || (startMins >= 8*60 && startMins < 10*60)
+        const score    = computeSlotScore(freeMembers.length, missingRoutineMembers.length, conflictingMembers.length, consecutiveFreeBlocks, peakHour, candidatePool.length)
+
+        slots.push({ day, startTime: st, endTime: endStr, freeMembers, conflictingMembers, missingRoutineMembers, score, consecutiveFreeBlocks, peakHour })
+      }
+    }
+    slots.sort((a, b) => b.score - a.score || b.freeMembers.length - a.freeMembers.length || (b.peakHour ? 1 : -1))
+    return slots
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memberAvailCache, candidateDays.join(","), filteredStartTimes.join(","), durationMins])
+
+  const topSlots    = evaluatedSlots.slice(0, 6)
+  const currentSlot = topSlots[selectedSlotIdx] ?? topSlots[0]
+
+  // Weekly heatmap: pct of members free per day × 2-hr window
+  const heatmapData = useMemo(() => {
+    const windows = [
+      { label: "8–10 AM",  range: [8*60,  10*60] },
+      { label: "10–12 PM", range: [10*60, 12*60] },
+      { label: "12–2 PM",  range: [12*60, 14*60] },
+      { label: "2–4 PM",   range: [14*60, 16*60] },
+      { label: "4–6 PM",   range: [16*60, 18*60] },
+      { label: "6–8 PM",   range: [18*60, 20*60] },
+    ]
+    const routinedPool = candidatePool.filter(m => m.schedule && m.schedule.length > 0)
+    return DAYS.map(day => {
+      const dayIdx = DAYS.indexOf(day)
+      return {
+        day,
+        windows: windows.map(w => {
+          const buckets = ALL_STARTS.filter(t => { const m = timeToMinutes(t); return m >= w.range[0] && m < w.range[1] })
+          if (!buckets.length || !routinedPool.length) return { label: w.label, pct: 0 }
+          let free = 0
+          for (const m of routinedPool) for (const st of buckets) {
+            const bi = ALL_STARTS.indexOf(st)
+            if (memberAvailCache[m.id]?.[dayIdx]?.[bi]) free++
+          }
+          return { label: w.label, pct: Math.round((free / (routinedPool.length * buckets.length)) * 100) }
+        })
+      }
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memberAvailCache, poolKey])
+
+  // ── Helpers ──────────────────────────────────────────────────────────────────
+  const resetFilters = () => { setTeam("all"); setSubteam("all"); setSkill("all"); setTargetDay("all"); setWindowFilter("all"); setSelectedSlotIdx(0) }
+
+  const scoreColor = (s: number) =>
+    s >= 80 ? "text-emerald-500" : s >= 60 ? "text-amber-500" : s >= 40 ? "text-orange-500" : "text-rose-500"
+  const scoreBg = (s: number) =>
+    s >= 80 ? "bg-emerald-500/10 border-emerald-500/30" : s >= 60 ? "bg-amber-400/10 border-amber-400/30" : s >= 40 ? "bg-orange-500/10 border-orange-500/30" : "bg-rose-500/10 border-rose-500/30"
+  const scoreBar = (s: number) =>
+    s >= 80 ? "bg-emerald-500" : s >= 60 ? "bg-amber-400" : s >= 40 ? "bg-orange-400" : "bg-rose-500"
+  const heatColor = (pct: number) => {
+    if (pct >= 80) return "bg-emerald-500    text-white"
+    if (pct >= 60) return "bg-emerald-400/80 text-white"
+    if (pct >= 40) return "bg-amber-400/80   text-foreground"
+    if (pct >= 20) return "bg-orange-400/70  text-foreground"
+    if (pct  >  0) return "bg-rose-400/60    text-foreground"
+    return "bg-muted/50 text-muted-foreground"
   }
 
-  // Sort by score descending, then by freeMembers count
-  evaluatedSlots.sort((a, b) => b.score - a.score || b.freeMembers.length - a.freeMembers.length)
-
-  const topRecommendations = evaluatedSlots.slice(0, 4)
-  const currentSlot = topRecommendations[selectedSlotIndex] || topRecommendations[0]
-
-  // ICS & Calendar Sync generator
   const downloadIcsFile = () => {
     if (!currentSlot) return
     const now = new Date()
-    const icsContent = `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//RoverBuddies//MeetingScheduler//EN
-CALSCALE:GREGORIAN
-METHOD:REQUEST
-BEGIN:VEVENT
-UID:rb-meeting-${Date.now()}@roverbuddies.local
-DTSTAMP:${now.toISOString().replace(/[-:]/g, "").split(".")[0]}Z
-SUMMARY:${title} - RoverBuddies
-DESCRIPTION:AI Scheduled Meeting\\nTarget: ${team !== "all" ? team : "All Teams"} (${subteam !== "all" ? subteam : "All Subteams"})\\nAttendance: ${currentSlot.freeMembers.length}/${candidatePool.length} free\\nAttendees: ${currentSlot.freeMembers.map(m => m.name).join(", ")}
-LOCATION:CAIR Lab / Rover Lab
-STATUS:CONFIRMED
-END:VEVENT
-END:VCALENDAR`
-
-    const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = url
-    link.setAttribute("download", `RoverBuddies_Meeting_${currentSlot.day}.ics`)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    setSyncStatus("Downloaded iCalendar (.ics) file!")
-    setTimeout(() => setSyncStatus(null), 3000)
+    const ics = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//RoverBuddies//AI-Scheduler//EN\nCALSCALE:GREGORIAN\nMETHOD:REQUEST\nBEGIN:VEVENT\nUID:rb-${Date.now()}@roverbuddies.local\nDTSTAMP:${now.toISOString().replace(/[-:]/g,"").split(".")[0]}Z\nSUMMARY:${title} – CAIR Lab\nDESCRIPTION:AI Scheduled Meeting\\nScope: ${team !== "all" ? team : "All Teams"}\\nAttendees (${currentSlot.freeMembers.length}): ${currentSlot.freeMembers.map(m => m.name).join(", ")}\nLOCATION:CAIR Lab / Rover Lab\\, UIU\nSTATUS:CONFIRMED\nEND:VEVENT\nEND:VCALENDAR`
+    const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" })
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob)
+    a.setAttribute("download", `RoverBuddies_${currentSlot.day}_Meeting.ics`)
+    document.body.appendChild(a); a.click(); document.body.removeChild(a)
+    setSyncStatus("iCalendar (.ics) file downloaded!"); setTimeout(() => setSyncStatus(null), 3000)
   }
 
   const copyInviteText = () => {
     if (!currentSlot) return
-    const text = `📅 **RoverBuddies Meeting Invitation**
-📌 **Topic:** ${title}
-🕒 **Time:** ${currentSlot.day} · ${format12Hour(currentSlot.startTime)} – ${format12Hour(currentSlot.endTime)} (Dhaka Time / BST)
-👥 **Scope:** ${team !== "all" ? team : "All Teams"}${subteam !== "all" ? ` · ${subteam}` : ""}
-✨ **Expected Attendees (${currentSlot.freeMembers.length}/${candidatePool.length}):**
-${currentSlot.freeMembers.map(m => `• ${m.name} (${m.subteams.join(", ")})`).join("\n")}
-${currentSlot.conflictingMembers.length > 0 ? `\n⚠️ **Conflicts:**\n${currentSlot.conflictingMembers.map(c => `• ${c.member.name} (${c.conflictCourse || "In Class"})`).join("\n")}` : ""}`
-
-    navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    navigator.clipboard.writeText(
+      `📅 *RoverBuddies Meeting*\n📌 *Topic:* ${title}\n🕒 *When:* ${currentSlot.day} · ${format12Hour(currentSlot.startTime)}–${format12Hour(currentSlot.endTime)} (BST)\n👥 *Scope:* ${team !== "all" ? team : "All Teams"}${subteam !== "all" ? ` · ${subteam}` : ""}\n📊 *AI Score:* ${currentSlot.score}%\n✅ *Free (${currentSlot.freeMembers.length}):*\n${currentSlot.freeMembers.map(m => `• ${m.name}`).join("\n")}${currentSlot.conflictingMembers.length > 0 ? `\n⚠️ *In Class:* ${currentSlot.conflictingMembers.map(c => c.member.name).join(", ")}` : ""}`
+    )
+    setCopied(true); setTimeout(() => setCopied(false), 2500)
   }
 
+  // ── Render ────────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">AI Intelligent Meeting Scheduler</h1>
-          <p className="text-muted-foreground text-sm mt-0.5">
-            Optimal meeting recommendations computed across live university routines and team schedules
-          </p>
+
+      {/* Page Header */}
+      <div className="relative rounded-2xl overflow-hidden border border-border bg-gradient-to-br from-primary/8 via-card to-card p-5 sm:p-6">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(var(--primary)/0.08),transparent_60%)] pointer-events-none" />
+        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <div className="w-7 h-7 rounded-lg bg-primary/15 flex items-center justify-center">
+                <Sparkles size={14} className="text-primary" />
+              </div>
+              <Badge variant="outline" className="text-[10px] font-mono border-primary/30 text-primary">AI-Powered · Dhaka BST UTC+6</Badge>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">AI Meeting Scheduler</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Optimal slot recommendations across <strong>{candidatePool.length}</strong> CAIR Lab members' live class routines
+            </p>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-0.5 p-1 rounded-xl bg-muted/60 border border-border">
+              {(["cards","heatmap"] as const).map(m => (
+                <button key={m} onClick={() => setViewMode(m)}
+                  className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all capitalize",
+                    viewMode === m ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}>
+                  {m === "cards" ? <><Layers size={11}/> Cards</> : <><BarChart3 size={11}/> Heatmap</>}
+                </button>
+              ))}
+            </div>
+            <Button variant="ghost" size="sm" className="gap-1.5 text-xs text-muted-foreground" onClick={resetFilters}>
+              <RefreshCw size={11}/> Reset
+            </Button>
+          </div>
         </div>
-        <Badge variant="outline" className="text-xs px-3 py-1 font-mono border-primary/30 text-primary w-fit">
-          <Sparkles size={13} className="mr-1.5 inline"/> Dhaka Time (BST / UTC+6)
-        </Badge>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* ── Left Column: Meeting Criteria ── */}
-        <Card className="col-span-1 border-border shadow-xs">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Zap size={16} className="text-primary"/> Meeting Criteria
-            </CardTitle>
-            <CardDescription className="text-xs">Configure meeting scope and duration</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Meeting Title</label>
-              <Input
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-                placeholder="e.g. Weekly Robotics Review"
-                className="text-sm"
-              />
-            </div>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
 
-            <div className="grid grid-cols-2 gap-2.5">
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground">Target Team</label>
-                <Select value={team} onValueChange={v => { setTeam(v); setSubteam("all"); setSelectedSlotIndex(0) }}>
-                  <SelectTrigger><SelectValue/></SelectTrigger>
+        {/* ── Config Panel ── */}
+        <div className="col-span-1 space-y-3">
+          <Card className="border-border shadow-xs">
+            <CardHeader className="pb-2 pt-4 px-4">
+              <CardTitle className="text-sm font-bold flex items-center gap-1.5"><Zap size={13} className="text-primary"/> Config</CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pb-4 space-y-3">
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Meeting Title</label>
+                <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Rover Sprint Review" className="text-sm h-8"/>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Team</label>
+                  <Select value={team} onValueChange={v => { setTeam(v); setSubteam("all"); setSelectedSlotIdx(0) }}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue/></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Teams</SelectItem>
+                      {teamsList.map(t => <SelectItem key={t.name} value={t.name}>{t.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Subteam</label>
+                  <Select value={subteam} onValueChange={v => { setSubteam(v); setSelectedSlotIdx(0) }}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue/></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+                      {availableSubteams.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Duration</label>
+                  <Select value={duration} onValueChange={v => { setDuration(v); setSelectedSlotIdx(0) }}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue/></SelectTrigger>
+                    <SelectContent>
+                      {[["15","15 min"],["30","30 min"],["45","45 min"],["60","1 hr"],["90","1.5 hr"],["120","2 hr"]].map(([v,l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Day</label>
+                  <Select value={targetDay} onValueChange={v => { setTargetDay(v); setSelectedSlotIdx(0) }}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue/></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Any Day</SelectItem>
+                      {DAYS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Time Window</label>
+                <div className="grid grid-cols-2 gap-1">
+                  {(["all","morning","afternoon","evening"] as const).map(w => (
+                    <button key={w} onClick={() => { setWindowFilter(w); setSelectedSlotIdx(0) }}
+                      className={cn("rounded-lg border px-2 py-1.5 text-[11px] font-semibold transition-all capitalize",
+                        windowFilter === w ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-muted-foreground hover:border-primary/40 hover:text-foreground")}>
+                      {w === "all" ? "All Day" : w}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Skill Required</label>
+                <Select value={skill} onValueChange={v => { setSkill(v); setSelectedSlotIdx(0) }}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Any Skill"/></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Teams</SelectItem>
-                    {teamsList.map(t => <SelectItem key={t.name} value={t.name}>{t.name}</SelectItem>)}
+                    <SelectItem value="all">Any Skill</SelectItem>
+                    {skillsList.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
+            </CardContent>
+          </Card>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground">Subteam</label>
-                <Select value={subteam} onValueChange={v => { setSubteam(v); setSelectedSlotIndex(0) }}>
-                  <SelectTrigger><SelectValue/></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Subteams</SelectItem>
-                    {availableSubteams.map(st => <SelectItem key={st} value={st}>{st}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
+          {/* Audience chip */}
+          <div className="rounded-xl border border-border bg-card p-3 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <Users size={14} className="text-primary"/>
             </div>
-
-            <div className="grid grid-cols-2 gap-2.5">
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground">Meeting Duration</label>
-                <Select value={duration} onValueChange={v => { setDuration(v); setSelectedSlotIndex(0) }}>
-                  <SelectTrigger><SelectValue/></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="15">15 Minutes</SelectItem>
-                    <SelectItem value="30">30 Minutes</SelectItem>
-                    <SelectItem value="45">45 Minutes</SelectItem>
-                    <SelectItem value="60">1 Hour</SelectItem>
-                    <SelectItem value="90">1.5 Hours</SelectItem>
-                    <SelectItem value="120">2 Hours</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground">Target Day</label>
-                <Select value={targetDay} onValueChange={v => { setTargetDay(v); setSelectedSlotIndex(0) }}>
-                  <SelectTrigger><SelectValue/></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Any Day (Sat–Fri)</SelectItem>
-                    <SelectItem value="Sat">Saturday</SelectItem>
-                    <SelectItem value="Sun">Sunday</SelectItem>
-                    <SelectItem value="Mon">Monday</SelectItem>
-                    <SelectItem value="Tue">Tuesday</SelectItem>
-                    <SelectItem value="Wed">Wednesday</SelectItem>
-                    <SelectItem value="Thu">Thursday</SelectItem>
-                    <SelectItem value="Fri">Friday</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div>
+              <p className="text-lg font-black text-foreground leading-none">{candidatePool.length}</p>
+              <p className="text-[11px] text-muted-foreground">members in scope</p>
             </div>
+          </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Preferred Time Window</label>
-              <Select value={windowFilter} onValueChange={(v: any) => { setWindowFilter(v); setSelectedSlotIndex(0) }}>
-                <SelectTrigger><SelectValue/></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Full Day (08:00 AM – 06:00 PM)</SelectItem>
-                  <SelectItem value="morning">Morning (08:00 AM – 12:00 PM)</SelectItem>
-                  <SelectItem value="afternoon">Afternoon (12:00 PM – 04:00 PM)</SelectItem>
-                  <SelectItem value="evening">Evening (04:00 PM – 07:00 PM)</SelectItem>
-                </SelectContent>
-              </Select>
+          {candidatePool.filter(m => !m.schedule || !m.schedule.length).length > 0 && (
+            <div className="rounded-xl border border-warning/30 bg-warning/5 p-3 flex gap-2 text-xs text-muted-foreground">
+              <AlertTriangle size={12} className="text-warning shrink-0 mt-0.5"/>
+              <span><strong className="text-foreground">{candidatePool.filter(m => !m.schedule || !m.schedule.length).length}</strong> members have no routine — marked as uncertain</span>
             </div>
+          )}
+        </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Skill Requirement Filter</label>
-              <Select value={skill} onValueChange={v => { setSkill(v); setSelectedSlotIndex(0) }}>
-                <SelectTrigger><SelectValue placeholder="Any Skill"/></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Any Skill</SelectItem>
-                  {skillsList.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="p-3 rounded-lg bg-muted/60 text-xs text-muted-foreground space-y-1">
-              <p className="font-semibold text-foreground flex items-center gap-1.5">
-                <Users size={13} className="text-primary"/> Target Audience
-              </p>
-              <p>{candidatePool.length} member(s) matching selected criteria.</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* ── Right Column: AI Slot Recommendations ── */}
-        <div className="col-span-1 lg:col-span-2 space-y-4">
+        {/* ── Results Panel ── */}
+        <div className="col-span-1 lg:col-span-3 space-y-4">
           {loading ? (
-            <Card><CardContent className="py-20 text-center text-muted-foreground">
-              <RefreshCw size={24} className="mx-auto mb-2 animate-spin text-primary"/>
-              <p className="text-sm">Calculating optimal meeting slots...</p>
-            </CardContent></Card>
-          ) : candidatePool.length === 0 ? (
-            <Card><CardContent className="py-16 text-center text-muted-foreground space-y-3">
-              <Users size={36} className="mx-auto text-muted-foreground/40"/>
-              <div>
-                <p className="text-sm font-semibold text-foreground">No members match this filter</p>
-                <p className="text-xs text-muted-foreground mt-1">Try selecting &quot;All Teams&quot; or clearing your filter criteria.</p>
+            <div className="flex flex-col items-center justify-center py-28 gap-4">
+              <div className="relative">
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+                  <Sparkles size={26} className="text-primary animate-pulse"/>
+                </div>
+                <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary animate-ping opacity-60"/>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setTeam("all")
-                  setSubteam("all")
-                  setSkill("all")
-                  setTargetDay("all")
-                  setWindowFilter("all")
-                }}
-              >
-                Reset Filters
-              </Button>
-            </CardContent></Card>
-          ) : !currentSlot ? (
-            <Card><CardContent className="py-20 text-center text-muted-foreground">
-              <AlertCircle size={32} className="mx-auto mb-2 text-warning"/>
-              <p className="text-sm font-semibold text-foreground">No matching time window found</p>
-              <p className="text-xs mt-1">Try selecting a shorter duration or &quot;Full Day&quot; window.</p>
-            </CardContent></Card>
+              <div className="text-center">
+                <p className="text-sm font-bold text-foreground">AI computing optimal windows…</p>
+                <p className="text-xs text-muted-foreground mt-1">Analysing {membersList.length} members across {DAYS.length * ALL_STARTS.length} time slots</p>
+              </div>
+            </div>
+
+          ) : candidatePool.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-24 gap-3 text-center">
+              <Users size={42} className="text-muted-foreground/25"/>
+              <p className="text-sm font-bold text-foreground">No members match current filters</p>
+              <p className="text-xs text-muted-foreground">Try resetting the team, subteam, or skill criteria</p>
+              <Button size="sm" variant="outline" className="mt-1 gap-1.5" onClick={resetFilters}><RefreshCw size={12}/> Reset Filters</Button>
+            </div>
+
+          ) : viewMode === "heatmap" ? (
+            <Card className="border-border shadow-xs overflow-hidden">
+              <CardHeader className="pb-3 border-b border-border/50">
+                <CardTitle className="text-sm font-bold flex items-center gap-2"><BarChart3 size={13} className="text-primary"/> Weekly Availability Heatmap</CardTitle>
+                <CardDescription className="text-xs">Percentage of members free across each day × 2-hour window. Click a cell to see details.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-4 overflow-x-auto">
+                <table className="w-full border-separate border-spacing-1 min-w-[480px] text-xs">
+                  <thead>
+                    <tr>
+                      <th className="text-left text-muted-foreground font-bold pb-1 w-10"/>
+                      {heatmapData[0].windows.map(w => (
+                        <th key={w.label} className="text-center text-muted-foreground font-semibold pb-1 whitespace-nowrap px-1">{w.label}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {heatmapData.map(row => (
+                      <tr key={row.day}>
+                        <td className="font-black text-foreground pr-1 py-0.5">{row.day}</td>
+                        {row.windows.map(w => (
+                          <td key={w.label} className="px-0.5 py-0.5">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className={cn("rounded-lg text-center font-bold py-3 select-none transition-transform hover:scale-105 cursor-pointer", heatColor(w.pct))}>
+                                  {w.pct}%
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent side="top" className="text-xs">{row.day} {w.label}: {w.pct}% of members available</TooltipContent>
+                            </Tooltip>
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="flex flex-wrap items-center gap-3 mt-4 pt-3 border-t border-border/50">
+                  <span className="text-[11px] font-semibold text-muted-foreground">Legend:</span>
+                  {[["≥80%","bg-emerald-500"],["60–79%","bg-emerald-400/80"],["40–59%","bg-amber-400/80"],["20–39%","bg-orange-400/70"],["<20%","bg-rose-400/60"],["N/A","bg-muted/50"]].map(([l,c]) => (
+                    <div key={l} className="flex items-center gap-1.5">
+                      <div className={cn("w-3 h-3 rounded", c)}/><span className="text-[10px] text-muted-foreground">{l}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+          ) : topSlots.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
+              <AlertCircle size={38} className="text-warning/60"/>
+              <p className="text-sm font-bold text-foreground">No available windows found</p>
+              <p className="text-xs text-muted-foreground">Try a shorter duration or expand the time window</p>
+              <Button size="sm" variant="outline" className="mt-1 gap-1.5" onClick={resetFilters}><RefreshCw size={12}/> Reset Filters</Button>
+            </div>
+
           ) : (
             <>
-              {/* Primary Selected Recommendation Banner */}
-              <Card className="border-success/30 bg-gradient-to-r from-success/5 via-card to-card shadow-xs overflow-hidden">
-                <CardHeader className="pb-3 border-b border-border/40">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-success flex items-center gap-1">
-                        <TrendingUp size={12}/> Top Recommended Meeting Window
-                      </span>
-                      <h2 className="text-xl sm:text-2xl font-black text-foreground mt-0.5 tracking-tight">
+              {/* ── Best Slot Spotlight ── */}
+              {currentSlot && (
+                <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", scoreBg(currentSlot.score))}>
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                        <span className={cn("text-[10px] font-black uppercase tracking-widest flex items-center gap-1", scoreColor(currentSlot.score))}>
+                          <TrendingUp size={11}/> #{selectedSlotIdx+1} AI Best Slot
+                        </span>
+                        {currentSlot.peakHour && (
+                          <Badge variant="outline" className="text-[10px] px-1.5 h-4 border-primary/30 text-primary font-mono">⚡ Prime Hour</Badge>
+                        )}
+                      </div>
+                      <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">
                         {currentSlot.day} · {format12Hour(currentSlot.startTime)} – {format12Hour(currentSlot.endTime)}
                       </h2>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        Duration: {duration} min · Dhaka Time (BST)
-                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">{duration} min · Dhaka BST · {currentSlot.consecutiveFreeBlocks} adjacent free windows</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={currentSlot.score >= 75 ? "success" : currentSlot.score >= 50 ? "warning" : "destructive"} className="text-sm px-3.5 py-1 font-mono">
-                        {currentSlot.score}% Match Score
-                      </Badge>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-4 space-y-4">
-                  {/* Availability breakdown metrics */}
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="p-2.5 rounded-lg bg-success/10 border border-success/20">
-                      <p className="text-lg font-black text-success">{currentSlot.freeMembers.length}</p>
-                      <p className="text-[11px] font-semibold text-success uppercase tracking-wider">Free to Attend</p>
-                    </div>
-                    <div className="p-2.5 rounded-lg bg-destructive/10 border border-destructive/20">
-                      <p className="text-lg font-black text-destructive">{currentSlot.conflictingMembers.length}</p>
-                      <p className="text-[11px] font-semibold text-destructive uppercase tracking-wider">In Class Conflict</p>
-                    </div>
-                    <div className="p-2.5 rounded-lg bg-muted border border-border">
-                      <p className="text-lg font-black text-muted-foreground">{currentSlot.missingRoutineMembers.length}</p>
-                      <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">No Routine</p>
+                    {/* Score Dial */}
+                    <div className={cn("flex flex-col items-center justify-center w-20 h-20 rounded-2xl border-2 shrink-0", scoreBg(currentSlot.score))}>
+                      <p className={cn("text-2xl font-black leading-none", scoreColor(currentSlot.score))}>{currentSlot.score}</p>
+                      <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mt-0.5">AI Score</p>
                     </div>
                   </div>
 
-                  {/* Available attendees preview */}
-                  <div>
-                    <p className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
-                      <CheckCircle2 size={13} className="text-success"/> Confirmed Free Members ({currentSlot.freeMembers.length})
-                    </p>
-                    <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto pr-1">
-                      {currentSlot.freeMembers.map(m => (
-                        <Badge key={m.id} variant="secondary" className="gap-1.5 text-xs py-1 px-2.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-success"/>
-                          {m.name} <span className="text-muted-foreground text-[10px]">({(m.subteams && m.subteams[0]) || m.team})</span>
-                        </Badge>
-                      ))}
+                  {/* Stats row */}
+                  <div className="grid grid-cols-3 gap-2 mt-4">
+                    {[
+                      { val: currentSlot.freeMembers.length,           label: "Free",      dot: "bg-emerald-500", cls: "text-emerald-500", bg: "bg-emerald-500/10 border-emerald-500/25" },
+                      { val: currentSlot.conflictingMembers.length,     label: "In Class",  dot: "bg-rose-500",    cls: "text-rose-500",    bg: "bg-rose-500/10   border-rose-500/25"    },
+                      { val: currentSlot.missingRoutineMembers.length,  label: "Unknown",   dot: "bg-muted-foreground", cls: "text-muted-foreground", bg: "bg-muted/60 border-border"   },
+                    ].map(s => (
+                      <div key={s.label} className={cn("rounded-xl border p-2.5 text-center", s.bg)}>
+                        <p className={cn("text-2xl font-black", s.cls)}>{s.val}</p>
+                        <p className={cn("text-[10px] font-bold uppercase tracking-wide", s.cls)}>{s.label}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Progress bar */}
+                  <div className="mt-3.5">
+                    <div className="flex justify-between text-[11px] text-muted-foreground mb-1">
+                      <span>{currentSlot.freeMembers.length} of {candidatePool.length} members available</span>
+                      <span className={cn("font-bold", scoreColor(currentSlot.score))}>{currentSlot.score}%</span>
+                    </div>
+                    <div className="w-full h-2 bg-muted/60 rounded-full overflow-hidden">
+                      <div className={cn("h-full rounded-full transition-all duration-700", scoreBar(currentSlot.score))} style={{ width: `${currentSlot.score}%` }}/>
                     </div>
                   </div>
 
-                  {/* Conflicts breakdown if any */}
+                  {/* Members */}
+                  {currentSlot.freeMembers.length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-[11px] font-semibold text-muted-foreground mb-1.5 flex items-center gap-1"><CheckCircle2 size={11} className="text-emerald-500"/> Free Members</p>
+                      <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
+                        {currentSlot.freeMembers.map(m => (
+                          <Badge key={m.id} variant="secondary" className="text-[11px] py-0.5 px-2 gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"/>
+                            {m.name.split(" ").slice(0,2).join(" ")}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   {currentSlot.conflictingMembers.length > 0 && (
-                    <div>
-                      <p className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
-                        <XCircle size={13} className="text-destructive"/> Members with Class Conflicts ({currentSlot.conflictingMembers.length})
-                      </p>
-                      <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1">
+                    <div className="mt-2">
+                      <p className="text-[11px] font-semibold text-muted-foreground mb-1.5 flex items-center gap-1"><XCircle size={11} className="text-rose-500"/> Class Conflicts</p>
+                      <div className="flex flex-wrap gap-1.5 max-h-16 overflow-y-auto">
                         {currentSlot.conflictingMembers.map(c => (
-                          <Badge key={c.member.id} variant="outline" className="gap-1.5 text-xs py-1 px-2.5 border-destructive/30 text-muted-foreground">
-                            <span className="w-1.5 h-1.5 rounded-full bg-destructive"/>
-                            {c.member.name}
-                            {c.conflictCourse && <span className="text-destructive text-[10px]">({c.conflictCourse})</span>}
+                          <Badge key={c.member.id} variant="outline" className="text-[11px] py-0.5 px-2 gap-1 border-rose-500/25">
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0"/>
+                            {c.member.name.split(" ").slice(0,2).join(" ")}
+                            {c.conflictCourse && <span className="text-rose-500/70 text-[9px]">({c.conflictCourse})</span>}
                           </Badge>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  {/* Action buttons */}
-                  <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-border">
-                    <Button className="flex-1 gap-2" onClick={() => setScheduleModalOpen(true)}>
-                      <Calendar size={15}/> Schedule & Sync Calendar
+                  {/* Actions */}
+                  <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-border/30">
+                    <Button className="flex-1 min-w-36 gap-2" onClick={() => setScheduleOpen(true)}>
+                      <Calendar size={14}/> Export & Schedule
                     </Button>
                     <Button variant="outline" className="gap-1.5" onClick={copyInviteText}>
-                      {copied ? <><CheckCircle2 size={14} className="text-success"/> Copied!</> : <>Copy Invite</>}
+                      {copied ? <><CheckCircle2 size={13} className="text-emerald-500"/> Copied!</> : <>Copy Invite</>}
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              )}
 
-              {/* Alternative Recommended Slots */}
-              {topRecommendations.length > 1 && (
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
-                      <Clock size={14} className="text-primary"/> Alternative Optimal Windows
-                    </CardTitle>
-                    <CardDescription className="text-xs">Click any slot to switch and view attendee breakdown</CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-0 space-y-2">
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                      {topRecommendations.slice(1).map((slot, idx) => {
-                        const actualIdx = idx + 1
-                        const isSelected = selectedSlotIndex === actualIdx
-                        return (
-                          <button
-                            key={`${slot.day}-${slot.startTime}`}
-                            type="button"
-                            onClick={() => setSelectedSlotIndex(actualIdx)}
-                            className={cn(
-                              "p-3 rounded-xl border text-left transition-all cursor-pointer hover:border-primary/50",
-                              isSelected ? "bg-primary/10 border-primary shadow-xs" : "bg-card border-border"
-                            )}
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs font-bold text-foreground">{slot.day}</span>
-                              <Badge variant={slot.score >= 75 ? "success" : "warning"} className="text-[10px] font-mono">
-                                {slot.score}%
-                              </Badge>
-                            </div>
-                            <p className="text-xs font-medium text-muted-foreground mt-1">
-                              {format12Hour(slot.startTime)} – {format12Hour(slot.endTime)}
-                            </p>
-                            <p className="text-[10px] text-muted-foreground/70 mt-0.5">
-                              {slot.freeMembers.length}/{candidatePool.length} free
-                            </p>
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </CardContent>
-                </Card>
+              {/* ── Alternative Slot Cards ── */}
+              {topSlots.length > 1 && (
+                <div>
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <Clock size={10}/> All Recommended Windows
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                    {topSlots.map((slot, idx) => (
+                      <button key={`${slot.day}-${slot.startTime}`} onClick={() => setSelectedSlotIdx(idx)}
+                        className={cn(
+                          "rounded-xl border p-3 text-left transition-all hover:shadow-sm",
+                          selectedSlotIdx === idx
+                            ? "border-primary bg-primary/10 ring-1 ring-primary/30 shadow-sm"
+                            : "border-border bg-card hover:border-primary/40"
+                        )}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-black text-foreground">{slot.day}</span>
+                          {idx === 0 && <span className="text-[8px] font-bold text-primary bg-primary/15 px-1 rounded">BEST</span>}
+                        </div>
+                        <p className="text-[10px] text-muted-foreground">{format12Hour(slot.startTime)}</p>
+                        <p className="text-[10px] text-muted-foreground">–{format12Hour(slot.endTime)}</p>
+                        <div className="mt-1.5 w-full h-1 bg-muted/60 rounded-full overflow-hidden">
+                          <div className={cn("h-full rounded-full", scoreBar(slot.score))} style={{ width: `${slot.score}%` }}/>
+                        </div>
+                        <div className="flex items-center justify-between mt-1">
+                          <p className="text-[9px] text-muted-foreground">{slot.freeMembers.length}/{candidatePool.length} free</p>
+                          <p className={cn("text-[10px] font-bold", scoreColor(slot.score))}>{slot.score}%</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
             </>
           )}
         </div>
       </div>
 
-      {/* ── Schedule / Calendar Sync Dialog ── */}
-      <Dialog open={scheduleModalOpen} onOpenChange={setScheduleModalOpen}>
-        <DialogContent className="max-w-md">
+      {/* Calendar Export Dialog */}
+      <Dialog open={scheduleOpen} onOpenChange={setScheduleOpen}>
+        <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Calendar size={18} className="text-primary"/> Meeting Confirmation & Sync
-            </DialogTitle>
-            <DialogDescription>
-              Sync this meeting with Google Calendar or export an iCalendar (.ics) invite.
-            </DialogDescription>
+            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-1">
+              <Calendar size={20}/>
+            </div>
+            <DialogTitle className="text-base font-bold">Export & Schedule Meeting</DialogTitle>
+            <DialogDescription className="text-xs">Download .ics file or open directly in Google Calendar.</DialogDescription>
           </DialogHeader>
-
           {currentSlot && (
-            <div className="space-y-4 py-2">
-              <div className="p-3.5 rounded-xl bg-muted/60 border border-border space-y-2">
-                <p className="text-sm font-bold text-foreground">{title}</p>
-                <div className="text-xs text-muted-foreground space-y-1">
-                  <p>📅 <strong>When:</strong> {currentSlot.day} · {format12Hour(currentSlot.startTime)} – {format12Hour(currentSlot.endTime)} (BST)</p>
-                  <p>👥 <strong>Audience:</strong> {team !== "all" ? team : "All Teams"} ({subteam !== "all" ? subteam : "All Subteams"})</p>
-                  <p>✨ <strong>Expected Attendance:</strong> {currentSlot.freeMembers.length} of {candidatePool.length} members ({currentSlot.score}%)</p>
-                </div>
+            <div className="space-y-3 pt-1">
+              <div className="rounded-xl bg-muted/50 border border-border p-3 space-y-1.5 text-xs text-muted-foreground">
+                <p className="font-bold text-foreground text-sm">{title}</p>
+                <p>📅 <strong>When:</strong> {currentSlot.day} · {format12Hour(currentSlot.startTime)}–{format12Hour(currentSlot.endTime)} (BST)</p>
+                <p>👥 <strong>Scope:</strong> {team !== "all" ? team : "All Teams"}{subteam !== "all" ? ` · ${subteam}` : ""}</p>
+                <p>✅ <strong>Attendance:</strong> {currentSlot.freeMembers.length}/{candidatePool.length} free ({currentSlot.score}% AI score)</p>
               </div>
-
               {syncStatus && (
-                <p className="text-xs font-medium text-success bg-success/10 p-2.5 rounded-lg flex items-center gap-1.5">
-                  <CheckCircle2 size={14}/> {syncStatus}
+                <p className="text-xs font-medium text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-lg flex items-center gap-1.5">
+                  <CheckCircle2 size={13}/> {syncStatus}
                 </p>
               )}
-
-              <div className="space-y-2">
-                <Button className="w-full gap-2 justify-center" onClick={downloadIcsFile}>
-                  <Upload size={14} className="rotate-180"/> Download iCalendar (.ics) File
-                </Button>
-
-                <Button variant="outline" className="w-full gap-2 justify-center" asChild>
-                  <a
-                    href={`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title + " - RoverBuddies")}&details=${encodeURIComponent("Meeting scheduled via RoverBuddies AI Scheduler\nAttendees: " + currentSlot.freeMembers.map(m => m.name).join(", "))}&location=CAIR+Lab`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <ArrowUpRight size={14}/> Open in Google Calendar
-                  </a>
-                </Button>
-              </div>
+              <Button className="w-full gap-2" onClick={downloadIcsFile}><Upload size={13} className="rotate-180"/> Download .ics File</Button>
+              <Button variant="outline" className="w-full gap-2" asChild>
+                <a href={`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title + " – CAIR Lab")}&details=${encodeURIComponent("AI-Scheduled via RoverBuddies\nAttendees: " + currentSlot.freeMembers.map(m => m.name).join(", "))}&location=CAIR+Lab+UIU`} target="_blank" rel="noreferrer">
+                  <ArrowUpRight size={13}/> Open in Google Calendar
+                </a>
+              </Button>
             </div>
           )}
-
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setScheduleModalOpen(false)}>Done</Button>
+            <Button variant="ghost" size="sm" onClick={() => setScheduleOpen(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
   )
 }
+
 
 // ─── Portfolio Page ───────────────────────────────────────────────────────────
 
@@ -5827,7 +5915,7 @@ function RoutineUploadDialog({ open, onOpenChange, onSuccess }: {
             className="flex-1 h-8 text-xs gap-1.5"
             onClick={() => { setActiveTab("upload"); setError(null); setSuccess(null) }}
           >
-            <Upload size={13}/> Upload UCAM XLSX
+            <Upload size={13} /> Upload UCAM XLSX
           </Button>
           <Button
             type="button"
@@ -5836,7 +5924,7 @@ function RoutineUploadDialog({ open, onOpenChange, onSuccess }: {
             className="flex-1 h-8 text-xs gap-1.5"
             onClick={() => { setActiveTab("custom"); setError(null); setSuccess(null) }}
           >
-            <Clock size={13}/> Custom Slots & Exceptions ({mySlots.length})
+            <Clock size={13} /> Custom Slots & Exceptions ({mySlots.length})
           </Button>
         </div>
 
@@ -5848,7 +5936,7 @@ function RoutineUploadDialog({ open, onOpenChange, onSuccess }: {
 
         {success && (
           <p className="text-xs font-medium text-success bg-success/10 p-2.5 rounded-lg flex items-center gap-1.5">
-            <CheckCircle2 size={14}/> {success}
+            <CheckCircle2 size={14} /> {success}
           </p>
         )}
 
@@ -5870,7 +5958,7 @@ function RoutineUploadDialog({ open, onOpenChange, onSuccess }: {
               onDragOver={(e) => e.preventDefault()}
               onDrop={handleDrop}
             >
-              <Upload size={28} className="mx-auto mb-2 text-muted-foreground"/>
+              <Upload size={28} className="mx-auto mb-2 text-muted-foreground" />
               {file ? (
                 <div>
                   <p className="text-sm font-semibold text-primary">{file.name}</p>
@@ -5904,13 +5992,13 @@ function RoutineUploadDialog({ open, onOpenChange, onSuccess }: {
             {/* Add custom slot form */}
             <form onSubmit={handleAddCustomSlot} className="p-3.5 rounded-xl bg-muted/40 border border-border space-y-3">
               <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <Plus size={13} className="text-primary"/> Add Custom Busy Slot / Occasion
+                <Plus size={13} className="text-primary" /> Add Custom Busy Slot / Occasion
               </p>
               <div className="grid grid-cols-3 gap-2">
                 <div className="space-y-1">
                   <label className="text-[11px] font-medium text-muted-foreground">Day</label>
                   <Select value={customDay} onValueChange={(v: any) => setCustomDay(v)}>
-                    <SelectTrigger className="h-8 text-xs"><SelectValue/></SelectTrigger>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Sat">Saturday</SelectItem>
                       <SelectItem value="Sun">Sunday</SelectItem>
@@ -5967,7 +6055,7 @@ function RoutineUploadDialog({ open, onOpenChange, onSuccess }: {
               </div>
 
               <Button type="submit" size="sm" className="w-full h-8 text-xs gap-1.5" disabled={addingSlot || !customTitle.trim()}>
-                <Plus size={13}/> {addingSlot ? "Adding Slot..." : "Add Custom Slot"}
+                <Plus size={13} /> {addingSlot ? "Adding Slot..." : "Add Custom Slot"}
               </Button>
             </form>
 
@@ -6000,7 +6088,7 @@ function RoutineUploadDialog({ open, onOpenChange, onSuccess }: {
                         onClick={() => handleDeleteSlot(s.id)}
                         title="Delete slot"
                       >
-                        <Trash2 size={13}/>
+                        <Trash2 size={13} />
                       </Button>
                     </div>
                   ))}
@@ -6021,7 +6109,7 @@ function RoutineUploadDialog({ open, onOpenChange, onSuccess }: {
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [user,          setUser]          = useState<AppUser | null>(() => {
+  const [user, setUser] = useState<AppUser | null>(() => {
     const saved = localStorage.getItem("userSession")
     if (!saved) return null
     try {
@@ -6030,14 +6118,14 @@ export default function App() {
       return null
     }
   })
-  const [showAuth,      setShowAuth]      = useState<"login" | "register" | null>(null)
-  const [page,          setPage]          = useState<NavPage>(() => (localStorage.getItem("activePage") as NavPage) || "dashboard")
-  const [profileOpen,   setProfileOpen]   = useState(false)
-  const [routineOpen,   setRoutineOpen]   = useState(false)
+  const [showAuth, setShowAuth] = useState<"login" | "register" | null>(null)
+  const [page, setPage] = useState<NavPage>(() => (localStorage.getItem("activePage") as NavPage) || "dashboard")
+  const [profileOpen, setProfileOpen] = useState(false)
+  const [routineOpen, setRoutineOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [chatMember,    setChatMember]    = useState<Member | null>(null)
-  const [pagePerms,     setPagePerms]     = useState<Record<string, string[]>>(DEFAULT_PAGE_PERMS)
-  const [featurePerms,  setFeaturePerms]  = useState<Record<string, string[]>>(DEFAULT_FEATURE_PERMS)
+  const [chatMember, setChatMember] = useState<Member | null>(null)
+  const [pagePerms, setPagePerms] = useState<Record<string, string[]>>(DEFAULT_PAGE_PERMS)
+  const [featurePerms, setFeaturePerms] = useState<Record<string, string[]>>(DEFAULT_FEATURE_PERMS)
 
   useEffect(() => {
     localStorage.setItem("activePage", page)
@@ -6098,23 +6186,23 @@ export default function App() {
     })
   }
 
-  const handleSignOut = () => { 
-    authApi.logout().catch(()=>{})
+  const handleSignOut = () => {
+    authApi.logout().catch(() => { })
     localStorage.removeItem("accessToken")
     localStorage.removeItem("refreshToken")
     localStorage.removeItem("userSession")
     localStorage.removeItem("activePage")
-    setUser(null); 
-    setPage("dashboard") 
+    setUser(null);
+    setPage("dashboard")
   }
 
   if (!user) {
     if (!showAuth) {
       return (
         <TooltipProvider>
-          <LandingPage 
-            onGetStarted={() => setShowAuth("register")} 
-            onLogin={() => setShowAuth("login")} 
+          <LandingPage
+            onGetStarted={() => setShowAuth("register")}
+            onLogin={() => setShowAuth("login")}
           />
         </TooltipProvider>
       )
@@ -6137,19 +6225,17 @@ export default function App() {
   }
 
   const pageContent = (): React.ReactNode => {
-    const normRole = normalizeRole(user.role)
-    const allowed = pagePerms[user.role] || pagePerms[normRole] || ALL_PAGE_OPTIONS.map(p => p.id)
-    if (!allowed.includes(page)) return <AccessDenied requiredRole="Team Manager"/>
+    if (!(pagePerms[user.role] ?? []).includes(page)) return <AccessDenied requiredRole="Team Manager" />
     switch (page) {
-      case "dashboard":       return <DashboardPage onUploadRoutine={() => setRoutineOpen(true)}/>
-      case "members":         return <MembersPage/>
-      case "search":          return <SearchPage/>
-      case "heatmap":         return <HeatmapPage/>
-      case "skills":          return <SkillsPage/>
-      case "projects":        return <ProjectsPage/>
-      case "meeting-planner": return <MeetingPlannerPage/>
-      case "portfolio":       return <PortfolioPage/>
-      case "settings":        return <SettingsPage onUploadRoutine={() => setRoutineOpen(true)}/>
+      case "dashboard": return <DashboardPage onUploadRoutine={() => setRoutineOpen(true)} />
+      case "members": return <MembersPage />
+      case "search": return <SearchPage />
+      case "heatmap": return <HeatmapPage />
+      case "skills": return <SkillsPage />
+      case "projects": return <ProjectsPage />
+      case "meeting-planner": return <MeetingPlannerPage />
+      case "portfolio": return <PortfolioPage />
+      case "settings": return <SettingsPage onUploadRoutine={() => setRoutineOpen(true)} />
     }
   }
 
@@ -6166,14 +6252,14 @@ export default function App() {
           </div>
         </div>
 
-        <ProfileEditDialog open={profileOpen} onOpenChange={setProfileOpen}/>
+        <ProfileEditDialog open={profileOpen} onOpenChange={setProfileOpen} />
         <MemberDialog
           member={chatMember}
           open={!!chatMember}
           onOpenChange={o => !o && setChatMember(null)}
           canManage={user.role === "org-owner" || user.role === "team-manager" || user.role === "subteam-manager"}
         />
-        <AIChat members={[]} user={user} onMemberClick={m => setChatMember(m)}/>
+        <AIChat members={[]} user={user} onMemberClick={m => setChatMember(m)} />
 
         <RoutineUploadDialog open={routineOpen} onOpenChange={setRoutineOpen} />
       </TooltipProvider>
