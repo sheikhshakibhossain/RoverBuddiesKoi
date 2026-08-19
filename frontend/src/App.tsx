@@ -1411,6 +1411,32 @@ function MemberDialog({ member, open, onOpenChange, canManage }: {
   const todayDay = getTodayDayOfWeek()
   const todaySlots = liveMember.schedule.filter(s => s.day === todayDay)
 
+  const [memberTasks, setMemberTasks] = useState<any[]>([])
+  const [memberProjects, setMemberProjects] = useState<any[]>([])
+  const [loadingTasks, setLoadingTasks] = useState(false)
+
+  useEffect(() => {
+    if (open && member) {
+      setLoadingTasks(true)
+      Promise.allSettled([
+        projectsApi.getProjects(),
+        projectsApi.getAllTasks(),
+      ]).then(([projRes, taskRes]) => {
+        const projs = projRes.status === "fulfilled" && projRes.value ? projRes.value : []
+        const ts = taskRes.status === "fulfilled" && taskRes.value ? taskRes.value : []
+        setMemberProjects(projs)
+        const assigned = ts.filter((t: any) => {
+          if (t.assigneeId && t.assigneeId === member.id) return true
+          const label = (t.assigneeLabel || "").toLowerCase()
+          const mName = (member.name || "").toLowerCase()
+          const mInit = (member.initials || "").toLowerCase()
+          return (mName && label.includes(mName)) || (mInit && label === mInit)
+        })
+        setMemberTasks(assigned)
+      }).finally(() => setLoadingTasks(false))
+    }
+  }, [open, member?.id])
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
@@ -1459,6 +1485,52 @@ function MemberDialog({ member, open, onOpenChange, canManage }: {
               <span className="text-xs font-mono text-destructive">{liveMember.remainingMin}m left</span>
             </div>
           )}
+
+          {/* Contribution History (Projects & Kanban Board verified assignments) */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Contribution History</p>
+              <span className="text-[10px] text-muted-foreground font-mono">Projects & Kanban Board</span>
+            </div>
+            {loadingTasks ? (
+              <div className="p-3 rounded-lg bg-muted text-xs text-muted-foreground animate-pulse">Loading contributions...</div>
+            ) : memberTasks.length === 0 ? (
+              <div className="p-3 rounded-lg bg-muted/60 text-xs text-muted-foreground">
+                No active tasks assigned yet from Projects & Kanban Board.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {memberTasks.map((t, idx) => {
+                  const proj = memberProjects.find(p => p.id === t.projectId)
+                  const isDone = t.status === "Completed"
+                  const isInProgress = t.status === "In Progress"
+                  return (
+                    <div key={t.id || idx} className="p-3 rounded-xl bg-muted border border-border space-y-1.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: proj?.color || "#6366f1" }} />
+                          <p className="text-xs font-semibold text-foreground">{t.title}</p>
+                        </div>
+                        <Badge variant={isDone ? "success" : isInProgress ? "warning" : "secondary"} className="text-[10px]">
+                          {t.status}
+                        </Badge>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground">
+                        {proj?.name || "Rover Control System"} · Priority: <span className="font-medium text-foreground">{t.priority}</span>
+                      </p>
+                      {t.tags && t.tags.length > 0 && (
+                        <div className="flex gap-1 flex-wrap pt-0.5">
+                          {t.tags.map((tag: string) => (
+                            <Badge key={tag} variant="secondary" className="text-[9px] px-1.5 py-0">{tag}</Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
 
           {/* Today's schedule */}
           <div>
@@ -1883,8 +1955,8 @@ function SearchPage() {
     setLoading(true)
     const filters: Record<string, string> = {}
     if (query.trim()) filters.search = query.trim()
-    if (!tScope  && team   !== "all") filters.team    = team
-    if (!stScope && sub    !== "all") filters.subteam = sub
+    if (team !== "all") filters.team    = team
+    if (sub  !== "all") filters.subteam = sub
     if (status !== "all") filters.status = status
     if (skill  !== "all") filters.skill  = skill
     if (batch  !== "all") filters.batch  = batch
@@ -4779,20 +4851,19 @@ function MeetingPlannerPage() {
 
   useEffect(() => {
     setLoading(true)
-    Promise.all([
+    Promise.allSettled([
       membersApi.getMembers(),
       teamsApi.getTeams(),
       skillsApi.getSkillsCatalog(),
     ])
-      .then(([mems, teams, skillsRes]) => {
-        setMembersList(mems || [])
-        setTeamsList(teams || [])
-        setSkillsList((skillsRes?.catalog || []).map((s: any) => s.name))
-        if (!tScope && teams && teams.length > 0 && team === "all") {
-          // Keep all or first team
-        }
+      .then(([memsRes, teamsRes, skillsRes]) => {
+        const mems = memsRes.status === "fulfilled" && memsRes.value ? memsRes.value : []
+        const teams = teamsRes.status === "fulfilled" && teamsRes.value ? teamsRes.value : []
+        const skillsObj = skillsRes.status === "fulfilled" && skillsRes.value ? skillsRes.value : { catalog: [] }
+        setMembersList(mems)
+        setTeamsList(teams)
+        setSkillsList((skillsObj?.catalog || []).map((s: any) => s.name))
       })
-      .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
 
@@ -4803,8 +4874,6 @@ function MeetingPlannerPage() {
 
   // Filter pool of candidate members
   const candidatePool = membersList.filter(m => {
-    if (tScope && m.team !== tScope) return false
-    if (stScope && !m.subteams.includes(stScope)) return false
     if (team !== "all" && m.team !== team) return false
     if (subteam !== "all" && !m.subteams.includes(subteam)) return false
     if (skill !== "all" && !m.skills.some(s => s.toLowerCase() === skill.toLowerCase())) return false
@@ -5279,6 +5348,39 @@ ${currentSlot.conflictingMembers.length > 0 ? `\n⚠️ **Conflicts:**\n${curren
 
 function PortfolioPage() {
   const user = useUser()
+  const [projects, setProjects] = useState<any[]>([])
+  const [tasks, setTasks] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    setLoading(true)
+    Promise.allSettled([
+      projectsApi.getProjects(),
+      projectsApi.getAllTasks(),
+    ]).then(([projRes, taskRes]) => {
+      const projs = projRes.status === "fulfilled" && projRes.value ? projRes.value : []
+      const ts = taskRes.status === "fulfilled" && taskRes.value ? taskRes.value : []
+      setProjects(projs)
+      setTasks(ts)
+    }).finally(() => setLoading(false))
+  }, [])
+
+  // Assigned work from Projects & Kanban Board
+  const myAssignedTasks = tasks.filter(t => {
+    if (t.assigneeId && t.assigneeId === user.id) return true
+    const label = (t.assigneeLabel || "").toLowerCase()
+    const uName = (user.name || "").toLowerCase()
+    const uInit = (user.initials || "").toLowerCase()
+    const uSub = (user.subteam || "").toLowerCase()
+    const uTeam = (user.team || "").toLowerCase()
+    return (
+      (uName && label.includes(uName)) ||
+      (uInit && label === uInit) ||
+      (uSub && label.includes(uSub)) ||
+      (uTeam && label.includes(uTeam))
+    )
+  })
+
   return (
     <div className="space-y-5">
       <div>
@@ -5312,22 +5414,61 @@ function PortfolioPage() {
 
         <Card className="col-span-1 lg:col-span-2">
           <CardHeader>
-            <CardTitle className="text-base">Contribution History</CardTitle>
-            <CardDescription className="text-xs">Projects and verified task completions in CAIR Lab</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-base">Contribution History</CardTitle>
+                <CardDescription className="text-xs">Projects and verified task completions in CAIR Lab</CardDescription>
+              </div>
+              <Badge variant="secondary" className="text-[10px] font-mono">
+                {myAssignedTasks.length} Assigned {myAssignedTasks.length === 1 ? "Task" : "Tasks"}
+              </Badge>
+            </div>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="p-3.5 rounded-xl bg-muted border border-border space-y-2">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-foreground">Rover Control & Telemetry Module</p>
-                <Badge variant="success" className="text-[10px]">Active Project</Badge>
+            {loading ? (
+              <div className="p-4 rounded-xl bg-muted text-xs text-muted-foreground animate-pulse text-center">
+                Loading assigned projects & contributions from Kanban board...
               </div>
-              <p className="text-xs text-muted-foreground">Software Team · Role: Lead Developer</p>
-              <div className="flex gap-1.5 flex-wrap pt-1">
-                <Badge variant="secondary" className="text-[10px]">React</Badge>
-                <Badge variant="secondary" className="text-[10px]">TypeScript</Badge>
-                <Badge variant="secondary" className="text-[10px]">ROS2</Badge>
+            ) : myAssignedTasks.length === 0 ? (
+              <div className="p-6 rounded-xl bg-muted/60 text-center space-y-1.5">
+                <p className="text-sm font-medium text-foreground">No Tasks Assigned Yet</p>
+                <p className="text-xs text-muted-foreground">
+                  Work items assigned to you from the Projects & Kanban Board will automatically display here.
+                </p>
               </div>
-            </div>
+            ) : (
+              myAssignedTasks.map((t, idx) => {
+                const proj = projects.find(p => p.id === t.projectId)
+                const isDone = t.status === "Completed"
+                const isInProgress = t.status === "In Progress"
+                return (
+                  <div key={t.id || idx} className="p-3.5 rounded-xl bg-muted border border-border space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: proj?.color || "#6366f1" }} />
+                        <p className="text-sm font-semibold text-foreground">{t.title}</p>
+                      </div>
+                      <Badge variant={isDone ? "success" : isInProgress ? "warning" : "secondary"} className="text-[10px]">
+                        {t.status}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {proj?.name || "Rover Control System"} · Priority: <span className="font-medium text-foreground">{t.priority}</span> · Assigned: <span className="font-medium text-foreground">{t.assigneeLabel || user.name}</span>
+                    </p>
+                    {t.description && (
+                      <p className="text-xs text-muted-foreground/90 line-clamp-2">{t.description}</p>
+                    )}
+                    {t.tags && t.tags.length > 0 && (
+                      <div className="flex gap-1.5 flex-wrap pt-1">
+                        {t.tags.map((tag: string) => (
+                          <Badge key={tag} variant="secondary" className="text-[10px]">{tag}</Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              })
+            )}
           </CardContent>
         </Card>
       </div>

@@ -19,18 +19,7 @@ export async function getMembers(req: Request, res: Response, next: NextFunction
       organizationId: currentUser.organizationId,
     }
 
-    // Role-based scope checks
-    if (currentUser.role === "TEAM_MANAGER" && currentUser.teamId) {
-      whereClause.teamId = currentUser.teamId
-    } else if ((currentUser.role === "SUBTEAM_MANAGER" || currentUser.role === "MEMBER") && currentUser.subteamIds.length > 0) {
-      whereClause.subteams = {
-        some: {
-          subteamId: { in: currentUser.subteamIds },
-        },
-      }
-    }
-
-    // Explicit Filter Overrides if allowed
+    // Explicit Filter Overrides
     if (team && typeof team === "string" && team !== "all") {
       const teamObj = await prisma.team.findFirst({ where: { name: team, organizationId: currentUser.organizationId } })
       if (teamObj) whereClause.teamId = teamObj.id
