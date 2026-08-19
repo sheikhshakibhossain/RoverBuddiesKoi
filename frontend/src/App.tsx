@@ -6,8 +6,9 @@ import {
   CheckCircle2, XCircle, AlertCircle, Minus, ArrowUpRight,
   Upload, Building2, ChevronDown, Lock, Layers, Plus, Pencil,
   Clock, AlertTriangle, Save, ArrowLeft, Menu, X, Eye, Loader2,
-  Sparkles
+  Sparkles, Phone, Trash2
 } from "lucide-react"
+
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
