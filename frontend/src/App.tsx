@@ -1299,14 +1299,17 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
         <StatCard label="No Routine" value={missing} sub="Action required" icon={<Shield size={16} />} variant="muted" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
         {/* Live table */}
         <Card className="col-span-1 lg:col-span-2">
           <CardHeader className="pb-0">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
               <div>
-                <CardTitle className="text-base">Live Availability</CardTitle>
-                <CardDescription className="text-xs mt-0.5">{pool.length} members · Live at {formatDhakaTime(dhakaNow)} BST</CardDescription>
+                <CardTitle className="text-base flex items-center gap-2">
+                  Live Availability
+                  <Badge variant="secondary" className="text-[11px] font-mono px-2">{shown.length}/{pool.length}</Badge>
+                </CardTitle>
+                <CardDescription className="text-xs mt-0.5">Live at {formatDhakaTime(dhakaNow)} BST · click a member to view details</CardDescription>
               </div>
               <Tabs value={tab} onValueChange={v => setTab(v as typeof tab)}>
                 <TabsList className="h-8">
@@ -1319,7 +1322,7 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
             </div>
           </CardHeader>
           <CardContent className="pt-3 pb-0">
-            <ScrollArea className="h-64">
+            <ScrollArea className="h-[520px]">
               <Table>
                 <TableHeader>
                   <TableRow>
