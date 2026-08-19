@@ -59,8 +59,8 @@ const MEMBERS: Member[] = []
 const DEFAULT_PAGE_PERMS: Record<string, string[]> = {
   "org-owner":       ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
   "team-manager":    ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
-  "subteam-manager": ["dashboard","members","search","heatmap","skills","projects","portfolio"],
-  "member":          ["dashboard","members","search","skills","projects","portfolio","settings"],
+  "subteam-manager": ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
+  "member":          ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
 }
 
 const DEFAULT_FEATURE_PERMS: Record<string, string[]> = {
@@ -2007,18 +2007,41 @@ function SearchPage() {
     }
     if (query.trim()) {
       const q = query.toLowerCase().trim()
-      const matchName = m.name.toLowerCase().includes(q)
-      const matchInitials = m.initials.toLowerCase().includes(q)
-      const matchTeam = m.team.toLowerCase().includes(q)
-      const matchSub = m.subteams.some(s => s.toLowerCase().includes(q))
-      const matchSkill = m.skills.some(s => s.toLowerCase().includes(q))
-      const matchBatch = m.batch.includes(q)
+      const matchName = (m.name || "").toLowerCase().includes(q)
+      const matchInitials = (m.initials || "").toLowerCase().includes(q)
+      const matchTeam = (m.team || "").toLowerCase().includes(q)
+      const matchSub = (m.subteams || []).some(s => s.toLowerCase().includes(q))
+      const matchSkill = (m.skills || []).some(s => s.toLowerCase().includes(q))
+      const matchBatch = (m.batch || "").includes(q)
       if (!matchName && !matchInitials && !matchTeam && !matchSub && !matchSkill && !matchBatch) {
         return false
       }
     }
     return true
   })
+
+  const dayTimeActive = day !== "all" && time !== "all"
+  const dirty = Boolean(
+    query.trim() ||
+    team !== "all" ||
+    sub !== "all" ||
+    status !== "all" ||
+    skill !== "all" ||
+    batch !== "all" ||
+    day !== "all" ||
+    time !== "all"
+  )
+
+  const reset = () => {
+    setQuery("")
+    setTeam("all")
+    setSub("all")
+    setStatus("all")
+    setSkill("all")
+    setBatch("all")
+    setDay("all")
+    setTime("all")
+  }
 
   const [dhakaNow, setDhakaNow] = useState<Date>(new Date())
 
@@ -2204,12 +2227,12 @@ function SearchPage() {
                     </div>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {m.team} / {m.subteams.join(", ")}
+                    {m.team} / {(m.subteams || []).join(", ")}
                   </TableCell>
                   <TableCell className="font-mono text-xs text-muted-foreground">{m.batch}</TableCell>
                   <TableCell>
                     <div className="flex gap-1 flex-wrap">
-                      {m.skills.map(s => (
+                      {(m.skills || []).map(s => (
                         <Badge key={s} variant={skill===s ? "default" : "secondary"} className="text-[10px]">{s}</Badge>
                       ))}
                     </div>
@@ -5204,7 +5227,7 @@ ${currentSlot.conflictingMembers.length > 0 ? `\n⚠️ **Conflicts:**\n${curren
                       {currentSlot.freeMembers.map(m => (
                         <Badge key={m.id} variant="secondary" className="gap-1.5 text-xs py-1 px-2.5">
                           <span className="w-1.5 h-1.5 rounded-full bg-success"/>
-                          {m.name} <span className="text-muted-foreground text-[10px]">({m.subteams[0] || m.team})</span>
+                          {m.name} <span className="text-muted-foreground text-[10px]">({(m.subteams && m.subteams[0]) || m.team})</span>
                         </Badge>
                       ))}
                     </div>
