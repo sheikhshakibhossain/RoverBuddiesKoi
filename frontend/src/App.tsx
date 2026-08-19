@@ -61,6 +61,10 @@ const DEFAULT_PAGE_PERMS: Record<string, string[]> = {
   "team-manager":    ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
   "subteam-manager": ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
   "member":          ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
+  "ORG_OWNER":       ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
+  "TEAM_MANAGER":    ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
+  "SUBTEAM_MANAGER": ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
+  "MEMBER":          ["dashboard","members","search","heatmap","skills","projects","meeting-planner","portfolio","settings"],
 }
 
 const DEFAULT_FEATURE_PERMS: Record<string, string[]> = {
@@ -633,7 +637,9 @@ function Sidebar({ page, setPage, mobileOpen, setMobileOpen }: {
   setMobileOpen: (o: boolean) => void;
 }) {
   const { user, pagePerms } = useUserCtx()
-  const nav  = ALL_NAV.filter(n => (pagePerms[user.role] ?? []).includes(n.id))
+  const normRole = normalizeRole(user.role)
+  const allowed = pagePerms[user.role] || pagePerms[normRole] || ALL_NAV.map(n => n.id)
+  const nav  = ALL_NAV.filter(n => allowed.includes(n.id))
 
   return (
     <>
@@ -5228,7 +5234,7 @@ ${currentSlot.conflictingMembers.length > 0 ? `\n⚠️ **Conflicts:**\n${curren
                 <Select value={team} onValueChange={v => { setTeam(v); setSubteam("all"); setSelectedSlotIndex(0) }}>
                   <SelectTrigger><SelectValue/></SelectTrigger>
                   <SelectContent>
-                    {!tScope && <SelectItem value="all">All Teams</SelectItem>}
+                    <SelectItem value="all">All Teams</SelectItem>
                     {teamsList.map(t => <SelectItem key={t.name} value={t.name}>{t.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -5321,10 +5327,25 @@ ${currentSlot.conflictingMembers.length > 0 ? `\n⚠️ **Conflicts:**\n${curren
               <p className="text-sm">Calculating optimal meeting slots...</p>
             </CardContent></Card>
           ) : candidatePool.length === 0 ? (
-            <Card><CardContent className="py-20 text-center text-muted-foreground">
-              <Users size={32} className="mx-auto mb-2 text-muted-foreground/40"/>
-              <p className="text-sm font-semibold text-foreground">No members match this filter</p>
-              <p className="text-xs mt-1">Try selecting &quot;All Teams&quot; or resetting the skill filter.</p>
+            <Card><CardContent className="py-16 text-center text-muted-foreground space-y-3">
+              <Users size={36} className="mx-auto text-muted-foreground/40"/>
+              <div>
+                <p className="text-sm font-semibold text-foreground">No members match this filter</p>
+                <p className="text-xs text-muted-foreground mt-1">Try selecting &quot;All Teams&quot; or clearing your filter criteria.</p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setTeam("all")
+                  setSubteam("all")
+                  setSkill("all")
+                  setTargetDay("all")
+                  setWindowFilter("all")
+                }}
+              >
+                Reset Filters
+              </Button>
             </CardContent></Card>
           ) : !currentSlot ? (
             <Card><CardContent className="py-20 text-center text-muted-foreground">
@@ -6116,7 +6137,9 @@ export default function App() {
   }
 
   const pageContent = (): React.ReactNode => {
-    if (!(pagePerms[user.role] ?? []).includes(page)) return <AccessDenied requiredRole="Team Manager"/>
+    const normRole = normalizeRole(user.role)
+    const allowed = pagePerms[user.role] || pagePerms[normRole] || ALL_PAGE_OPTIONS.map(p => p.id)
+    if (!allowed.includes(page)) return <AccessDenied requiredRole="Team Manager"/>
     switch (page) {
       case "dashboard":       return <DashboardPage onUploadRoutine={() => setRoutineOpen(true)}/>
       case "members":         return <MembersPage/>
