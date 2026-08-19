@@ -83,12 +83,16 @@ app.use((_req, res) => {
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error("Unhandled Error:", err)
 
-  if (err instanceof AppError) {
-    return res.status(err.statusCode).json({ error: err.message })
+  const statusCode = typeof err.statusCode === "number" ? err.statusCode : (err instanceof AppError ? err.statusCode : 500)
+  const message = err.message || "Internal server error"
+
+  if (statusCode >= 400 && statusCode < 500) {
+    return res.status(statusCode).json({ error: message, message })
   }
 
   res.status(500).json({
-    error: config.NODE_ENV === "production" ? "Internal server error" : err.message || "Unknown error",
+    error: config.NODE_ENV === "production" ? (err.message || "Internal server error") : err.message || "Unknown error",
+    message: err.message || "Internal server error",
   })
 })
 

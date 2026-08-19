@@ -172,8 +172,19 @@ export async function login(req: Request, res: Response, next: NextFunction) {
   try {
     const { email, password } = req.body
 
-    const user = await prisma.user.findUnique({
-      where: { email },
+    if (!email || !password) {
+      throw new ValidationError("Email and password are required")
+    }
+
+    const cleanEmail = email.trim().toLowerCase()
+
+    const user = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: cleanEmail,
+          mode: "insensitive",
+        },
+      },
       include: {
         team: true,
         subteams: { include: { subteam: true } },
@@ -192,13 +203,17 @@ export async function login(req: Request, res: Response, next: NextFunction) {
     const accessToken = jwt.sign({ userId: user.id }, config.JWT_SECRET, { expiresIn: "15m" })
     const refreshToken = jwt.sign({ userId: user.id }, config.JWT_REFRESH_SECRET, { expiresIn: "7d" })
 
-    await prisma.refreshToken.create({
-      data: {
-        userId: user.id,
-        token: refreshToken,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      },
-    })
+    try {
+      await prisma.refreshToken.create({
+        data: {
+          userId: user.id,
+          token: refreshToken,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        },
+      })
+    } catch (tokenErr) {
+      console.warn("Non-fatal: could not persist refresh token:", tokenErr)
+    }
 
     const primarySubteam = user.subteams[0]?.subteam?.name || "Software"
 
