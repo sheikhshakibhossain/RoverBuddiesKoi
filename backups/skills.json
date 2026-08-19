@@ -1,0 +1,72 @@
+[
+  {
+    "id": "cd01ca4f-46ee-4c41-8816-b32e059f3b8f",
+    "name": "React",
+    "category": "General",
+    "createdAt": "2026-08-06T12:35:48.782Z",
+    "updatedAt": "2026-08-06T12:35:48.782Z"
+  },
+  {
+    "id": "816d35da-f42f-4008-ac7a-04213de673a9",
+    "name": "TypeScript",
+    "category": "General",
+    "createdAt": "2026-08-06T12:35:49.313Z",
+    "updatedAt": "2026-08-06T12:35:49.313Z"
+  },
+  {
+    "id": "f88b0aac-80a6-4c22-825f-ae11901e8f03",
+    "name": "Python",
+    "category": "General",
+    "createdAt": "2026-08-06T12:35:49.561Z",
+    "updatedAt": "2026-08-06T12:35:49.561Z"
+  },
+  {
+    "id": "fd84ba80-a251-47cf-ba0c-9a58aa4b6266",
+    "name": "ROS",
+    "category": "General",
+    "createdAt": "2026-08-06T12:35:49.810Z",
+    "updatedAt": "2026-08-06T12:35:49.810Z"
+  },
+  {
+    "id": "2c7d6511-10fe-44b5-bd1e-da154a2626e8",
+    "name": "PCB Design",
+    "category": "General",
+    "createdAt": "2026-08-06T12:35:50.082Z",
+    "updatedAt": "2026-08-06T12:35:50.082Z"
+  },
+  {
+    "id": "ab72a53f-b7f9-4471-bea2-2965d646b65b",
+    "name": "Embedded Systems",
+    "category": "General",
+    "createdAt": "2026-08-06T12:35:50.389Z",
+    "updatedAt": "2026-08-06T12:35:50.389Z"
+  },
+  {
+    "id": "0a22f350-7286-4354-8b0c-e91305a7faea",
+    "name": "CAD",
+    "category": "General",
+    "createdAt": "2026-08-06T12:35:50.697Z",
+    "updatedAt": "2026-08-06T12:35:50.697Z"
+  },
+  {
+    "id": "3c90fba4-9a3c-4d7b-bb6b-2447f5f77d43",
+    "name": "Machine Learning",
+    "category": "General",
+    "createdAt": "2026-08-06T12:35:50.946Z",
+    "updatedAt": "2026-08-06T12:35:50.946Z"
+  },
+  {
+    "id": "51c8fbb7-6bc6-47ed-8d7d-70359d42dc90",
+    "name": "UI/UX",
+    "category": "General",
+    "createdAt": "2026-08-06T12:35:51.194Z",
+    "updatedAt": "2026-08-06T12:35:51.194Z"
+  },
+  {
+    "id": "4e4a44cc-c223-4ffe-8777-1ae13157dfa2",
+    "name": "DevOps",
+    "category": "General",
+    "createdAt": "2026-08-06T12:35:51.516Z",
+    "updatedAt": "2026-08-06T12:35:51.516Z"
+  }
+]

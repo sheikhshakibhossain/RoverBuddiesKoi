@@ -85,24 +85,48 @@ async function backupDatabase() {
   const timestampFile = path.join(backupDir, `db_backup_${timestamp}.json`)
   const latestFile = path.join(backupDir, "db_backup_latest.json")
 
+  // Full backup
   fs.writeFileSync(timestampFile, JSON.stringify(backupData, null, 2), "utf8")
   fs.writeFileSync(latestFile, JSON.stringify(backupData, null, 2), "utf8")
 
+  // Individual JSON exports
+  fs.writeFileSync(path.join(backupDir, "members.json"), JSON.stringify(users, null, 2), "utf8")
+  fs.writeFileSync(path.join(backupDir, "routines.json"), JSON.stringify(classRoutines, null, 2), "utf8")
+  fs.writeFileSync(path.join(backupDir, "skills.json"), JSON.stringify(skills, null, 2), "utf8")
+  fs.writeFileSync(path.join(backupDir, "teams.json"), JSON.stringify(teams, null, 2), "utf8")
+  fs.writeFileSync(path.join(backupDir, "subteams.json"), JSON.stringify(subteams, null, 2), "utf8")
+  fs.writeFileSync(path.join(backupDir, "projects.json"), JSON.stringify(projects, null, 2), "utf8")
+
+  // CSV for members
+  const memberHeaders = "ID,Name,Initials,Email,Role,Batch,WhatsApp,TeamId,CreatedAt\n"
+  const memberRows = users.map(u => 
+    `"${u.id}","${u.name}","${u.initials}","${u.email}","${u.role}","${u.batch}","${u.whatsapp}","${u.teamId || ''}","${u.createdAt}"`
+  ).join("\n")
+  fs.writeFileSync(path.join(backupDir, "members.csv"), memberHeaders + memberRows, "utf8")
+
+  // CSV for routines
+  const routineHeaders = "ID,UserId,SemesterId,Day,StartTime,EndTime,Course,Room,CreatedAt\n"
+  const routineRows = classRoutines.map(r => 
+    `"${r.id}","${r.userId}","${r.semesterId}","${r.day}","${r.startTime}","${r.endTime}","${r.course}","${r.room || ''}","${r.createdAt}"`
+  ).join("\n")
+  fs.writeFileSync(path.join(backupDir, "routines.csv"), routineHeaders + routineRows, "utf8")
+
   console.log(`\n========================================`)
-  console.log(`DATABASE BACKUP COMPLETED SUCCESSFULLY!`)
+  console.log(`ALL DATA BACKED UP & EXPORTED RIGHT NOW!`)
   console.log(`========================================`)
-  console.log(`Stats:`)
-  console.log(`- Users: ${users.length}`)
-  console.log(`- Routines: ${classRoutines.length}`)
+  console.log(`Records Summary:`)
+  console.log(`- Members/Users: ${users.length}`)
+  console.log(`- Class Routines: ${classRoutines.length}`)
+  console.log(`- User Skills: ${userSkills.length}`)
   console.log(`- Skills: ${skills.length}`)
-  console.log(`- UserSkills: ${userSkills.length}`)
   console.log(`- Teams: ${teams.length}`)
   console.log(`- Subteams: ${subteams.length}`)
   console.log(`- Projects: ${projects.length}`)
-  console.log(`- Tasks: ${tasks.length}`)
-  console.log(`\nFiles saved:`)
-  console.log(`1. ${timestampFile}`)
-  console.log(`2. ${latestFile}`)
+  console.log(`\nExports Generated in /backups:`)
+  console.log(`- db_backup_latest.json (Complete DB bundle)`)
+  console.log(`- members.json & members.csv`)
+  console.log(`- routines.json & routines.csv`)
+  console.log(`- skills.json, teams.json, subteams.json, projects.json`)
 }
 
 backupDatabase()

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "name": "UMRT",
+    "description": "Underwater Mars Rover Team",
+    "createdAt": "2026-08-06T12:35:43.836Z",
+    "updatedAt": "2026-08-06T12:35:43.836Z"
+  },
+  {
+    "id": "14d9bc59-4cb0-4daf-94b9-34cdde8626bf",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "name": "URRT",
+    "description": "University Rover Rescue Team",
+    "createdAt": "2026-08-06T12:35:44.348Z",
+    "updatedAt": "2026-08-06T12:35:44.348Z"
+  },
+  {
+    "id": "900cff3d-07c3-40c9-8157-3a4ea71ad8f2",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "name": "Team XYZ",
+    "description": "Advanced Projects Team",
+    "createdAt": "2026-08-06T12:35:44.655Z",
+    "updatedAt": "2026-08-06T12:35:44.655Z"
+  }
+]

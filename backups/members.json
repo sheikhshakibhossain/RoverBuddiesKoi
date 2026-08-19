@@ -1,0 +1,2845 @@
+[
+  {
+    "id": "8e421974-0652-48cc-9dfb-06df48572769",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "msifat2420073@bscse.uiu.ac.bd",
+    "passwordHash": "$2b$10$1jAnNT8MKQ6tV4VqE3h/tuHnG1LjhHRn6vDfyfzeJoAevrxme5CuG",
+    "name": "MD SABIK HOSSAIN SIFAT",
+    "initials": "MS",
+    "role": "MEMBER",
+    "requestedRole": null,
+    "batch": "2025",
+    "whatsapp": "01319112499",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T08:27:45.628Z",
+    "updatedAt": "2026-08-17T08:27:45.628Z",
+    "subteams": [
+      {
+        "userId": "8e421974-0652-48cc-9dfb-06df48572769",
+        "subteamId": "8bb11785-cf1c-4578-87a4-60955578e3f0"
+      }
+    ],
+    "skills": [
+      {
+        "id": "2ae89868-2855-4fbd-b9da-4245bda384eb",
+        "userId": "8e421974-0652-48cc-9dfb-06df48572769",
+        "skillId": "2c7d6511-10fe-44b5-bd1e-da154a2626e8",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T08:36:47.591Z",
+        "updatedAt": "2026-08-17T09:07:25.441Z"
+      },
+      {
+        "id": "d3c21903-f690-4d99-bc3c-e61e9cf92736",
+        "userId": "8e421974-0652-48cc-9dfb-06df48572769",
+        "skillId": "ab72a53f-b7f9-4471-bea2-2965d646b65b",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T08:35:41.381Z",
+        "updatedAt": "2026-08-17T09:07:38.518Z"
+      }
+    ],
+    "routines": [
+      {
+        "id": "b02286c5-b581-4ba9-bc1e-05f4a0bfb884",
+        "userId": "8e421974-0652-48cc-9dfb-06df48572769",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "08:30",
+        "endTime": "09:50",
+        "course": "Data Structure and Algorithms",
+        "room": "312 Permanent Campus",
+        "createdAt": "2026-08-17T13:08:54.363Z",
+        "updatedAt": "2026-08-17T13:08:54.363Z"
+      },
+      {
+        "id": "8bdffb08-6480-4e8e-8268-dc7be7a95616",
+        "userId": "8e421974-0652-48cc-9dfb-06df48572769",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "08:30",
+        "endTime": "09:50",
+        "course": "Data Structure and Algorithms",
+        "room": "312 Permanent Campus",
+        "createdAt": "2026-08-17T13:08:54.953Z",
+        "updatedAt": "2026-08-17T13:08:54.953Z"
+      },
+      {
+        "id": "3fd85cc6-8222-4f3b-a2a8-44d2352759dd",
+        "userId": "8e421974-0652-48cc-9dfb-06df48572769",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "10:00",
+        "endTime": "11:20",
+        "course": "Linear Algebra and Matrices",
+        "room": "415 Permanent Campus",
+        "createdAt": "2026-08-17T13:08:55.211Z",
+        "updatedAt": "2026-08-17T13:08:55.211Z"
+      },
+      {
+        "id": "a50a0c2a-239e-4b7b-b6b8-31567bf7df6d",
+        "userId": "8e421974-0652-48cc-9dfb-06df48572769",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "10:00",
+        "endTime": "11:20",
+        "course": "Linear Algebra and Matrices",
+        "room": "415 Permanent Campus",
+        "createdAt": "2026-08-17T13:08:55.568Z",
+        "updatedAt": "2026-08-17T13:08:55.568Z"
+      },
+      {
+        "id": "bf3b956e-34ef-479b-bea0-ce706cc994a2",
+        "userId": "8e421974-0652-48cc-9dfb-06df48572769",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Mon",
+        "startTime": "14:00",
+        "endTime": "16:30",
+        "course": "Data Structure and Algorithms Laboratory",
+        "room": "520 Permanent Campus",
+        "createdAt": "2026-08-17T13:08:55.874Z",
+        "updatedAt": "2026-08-17T13:08:55.874Z"
+      },
+      {
+        "id": "8fc63135-ddaf-4ac1-8808-f3bac857c58f",
+        "userId": "8e421974-0652-48cc-9dfb-06df48572769",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "11:11",
+        "endTime": "12:30",
+        "course": "Physics II",
+        "room": "610 Permanent Campus",
+        "createdAt": "2026-08-17T13:08:56.131Z",
+        "updatedAt": "2026-08-17T13:08:56.131Z"
+      },
+      {
+        "id": "fecceed4-1604-4ea5-a470-8596e76e85d6",
+        "userId": "8e421974-0652-48cc-9dfb-06df48572769",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "11:11",
+        "endTime": "12:30",
+        "course": "Physics II",
+        "room": "610 Permanent Campus",
+        "createdAt": "2026-08-17T13:08:56.533Z",
+        "updatedAt": "2026-08-17T13:08:56.533Z"
+      }
+    ]
+  },
+  {
+    "id": "296d04e1-507d-4bd9-b6e3-1597715b70dc",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "soikotmusfiqur@gmail.com",
+    "passwordHash": "$2b$10$i43sFRSb5ud8wMAzeldDDOEoTd0i01jj2q393kD8osJvyQptqutUW",
+    "name": "MD MOSFIQUR RAHMAN",
+    "initials": "MM",
+    "role": "TEAM_MANAGER",
+    "requestedRole": null,
+    "batch": "2024",
+    "whatsapp": "880123456789",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T08:35:54.690Z",
+    "updatedAt": "2026-08-17T08:35:54.690Z",
+    "subteams": [
+      {
+        "userId": "296d04e1-507d-4bd9-b6e3-1597715b70dc",
+        "subteamId": "8bb11785-cf1c-4578-87a4-60955578e3f0"
+      }
+    ],
+    "skills": [],
+    "routines": [
+      {
+        "id": "2f8a2936-6c92-41b2-bef9-c8d810585c93",
+        "userId": "296d04e1-507d-4bd9-b6e3-1597715b70dc",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "10:00",
+        "endTime": "11:20",
+        "course": "Web Programming",
+        "room": "428 Permanent Campus",
+        "createdAt": "2026-08-17T13:08:56.792Z",
+        "updatedAt": "2026-08-17T13:08:56.792Z"
+      },
+      {
+        "id": "0f83cc05-19ce-42c8-99c5-997472c478d8",
+        "userId": "296d04e1-507d-4bd9-b6e3-1597715b70dc",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "10:00",
+        "endTime": "11:20",
+        "course": "Web Programming",
+        "room": "428 Permanent Campus",
+        "createdAt": "2026-08-17T13:08:57.444Z",
+        "updatedAt": "2026-08-17T13:08:57.444Z"
+      },
+      {
+        "id": "2cf67923-16fa-45f4-8459-6c1dbe4118f9",
+        "userId": "296d04e1-507d-4bd9-b6e3-1597715b70dc",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "14:00",
+        "endTime": "16:30",
+        "course": "Web Programming Laboratory",
+        "room": "524 Permanent Campus",
+        "createdAt": "2026-08-17T13:08:57.705Z",
+        "updatedAt": "2026-08-17T13:08:57.705Z"
+      },
+      {
+        "id": "ab14b657-87e9-4b7f-872a-0eb76798e48f",
+        "userId": "296d04e1-507d-4bd9-b6e3-1597715b70dc",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Mon",
+        "startTime": "10:00",
+        "endTime": "11:20",
+        "course": "Machine Learning",
+        "room": "315 Permanent Campus",
+        "createdAt": "2026-08-17T13:08:58.067Z",
+        "updatedAt": "2026-08-17T13:08:58.067Z"
+      },
+      {
+        "id": "e9b8b59e-ff18-46ca-83ee-f52f2fcedf7b",
+        "userId": "296d04e1-507d-4bd9-b6e3-1597715b70dc",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "10:00",
+        "endTime": "11:20",
+        "course": "Machine Learning",
+        "room": "315 Permanent Campus",
+        "createdAt": "2026-08-17T13:08:58.325Z",
+        "updatedAt": "2026-08-17T13:08:58.325Z"
+      }
+    ]
+  },
+  {
+    "id": "4c9ab6ad-1550-4b28-959f-64ac2b97cc5b",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "mimtiagehemal2002@gmail.com",
+    "passwordHash": "$2b$10$Krl8dKuy/Dn/v9KJrmpw4eEyj/m/WeRRFQKQoWwX1oh.aDiaepi8G",
+    "name": "MD. MIMTIAGE ISLAM HEMAL",
+    "initials": "MM",
+    "role": "MEMBER",
+    "requestedRole": null,
+    "batch": "2025",
+    "whatsapp": "01707114578",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T08:38:58.432Z",
+    "updatedAt": "2026-08-17T08:38:58.432Z",
+    "subteams": [
+      {
+        "userId": "4c9ab6ad-1550-4b28-959f-64ac2b97cc5b",
+        "subteamId": "ae9a2d5e-9376-4a23-b61a-a29ead44e3f7"
+      }
+    ],
+    "skills": [
+      {
+        "id": "b5e5d4e7-3170-4a54-bfda-000bd694d7df",
+        "userId": "4c9ab6ad-1550-4b28-959f-64ac2b97cc5b",
+        "skillId": "0a22f350-7286-4354-8b0c-e91305a7faea",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T08:42:50.221Z",
+        "updatedAt": "2026-08-17T09:07:18.595Z"
+      }
+    ],
+    "routines": [
+      {
+        "id": "d3b5f086-601d-4391-8a4b-0548b426c658",
+        "userId": "4c9ab6ad-1550-4b28-959f-64ac2b97cc5b",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "11:30",
+        "endTime": "12:50",
+        "course": "Engineering Mechanics",
+        "room": "304 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:00.518Z",
+        "updatedAt": "2026-08-17T13:09:00.518Z"
+      },
+      {
+        "id": "a6dc2eba-29ca-4670-93e8-c5c37d865ba8",
+        "userId": "4c9ab6ad-1550-4b28-959f-64ac2b97cc5b",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "11:30",
+        "endTime": "12:50",
+        "course": "Engineering Mechanics",
+        "room": "304 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:00.774Z",
+        "updatedAt": "2026-08-17T13:09:00.774Z"
+      },
+      {
+        "id": "62856e8e-4f00-42c1-846f-dfcdecce2510",
+        "userId": "4c9ab6ad-1550-4b28-959f-64ac2b97cc5b",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "10:00",
+        "endTime": "11:20",
+        "course": "Thermodynamics",
+        "room": "308 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:01.031Z",
+        "updatedAt": "2026-08-17T13:09:01.031Z"
+      },
+      {
+        "id": "597a5d63-4f5b-4227-9032-4516360e18ed",
+        "userId": "4c9ab6ad-1550-4b28-959f-64ac2b97cc5b",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "10:00",
+        "endTime": "11:20",
+        "course": "Thermodynamics",
+        "room": "308 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:01.287Z",
+        "updatedAt": "2026-08-17T13:09:01.287Z"
+      },
+      {
+        "id": "1a9339c4-43d9-41ed-bfde-45567b5a66a3",
+        "userId": "4c9ab6ad-1550-4b28-959f-64ac2b97cc5b",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Mon",
+        "startTime": "14:00",
+        "endTime": "16:30",
+        "course": "CAD Drafting Laboratory",
+        "room": "410 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:01.544Z",
+        "updatedAt": "2026-08-17T13:09:01.544Z"
+      }
+    ]
+  },
+  {
+    "id": "a38d0fcf-3b34-4c24-9ad1-d020eedfbc09",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "asakib2330137@bseee.uiu.ac.bd",
+    "passwordHash": "$2b$10$6amL/VicxqejCUWBl3hqEu7RHc8fYPaKn734.UCH50MDnc2NxxgdW",
+    "name": "Al One Her MD Nazmuz Sakib",
+    "initials": "AO",
+    "role": "MEMBER",
+    "requestedRole": null,
+    "batch": "2025",
+    "whatsapp": "+8801778268369",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T08:42:21.533Z",
+    "updatedAt": "2026-08-17T08:42:21.533Z",
+    "subteams": [
+      {
+        "userId": "a38d0fcf-3b34-4c24-9ad1-d020eedfbc09",
+        "subteamId": "ae9a2d5e-9376-4a23-b61a-a29ead44e3f7"
+      }
+    ],
+    "skills": [],
+    "routines": [
+      {
+        "id": "74cb6d5e-0f11-4ff0-b62f-697bc0c0aab3",
+        "userId": "a38d0fcf-3b34-4c24-9ad1-d020eedfbc09",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "10:00",
+        "endTime": "11:20",
+        "course": "Electrical Circuits II",
+        "room": "702 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:01.800Z",
+        "updatedAt": "2026-08-17T13:09:01.800Z"
+      },
+      {
+        "id": "d3e29efa-8de7-4aa5-8906-9e0496fb68d9",
+        "userId": "a38d0fcf-3b34-4c24-9ad1-d020eedfbc09",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "10:00",
+        "endTime": "11:20",
+        "course": "Electrical Circuits II",
+        "room": "702 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:02.055Z",
+        "updatedAt": "2026-08-17T13:09:02.055Z"
+      },
+      {
+        "id": "cc247db8-aaf1-4351-a498-3335ab548704",
+        "userId": "a38d0fcf-3b34-4c24-9ad1-d020eedfbc09",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "08:30",
+        "endTime": "09:50",
+        "course": "Electronics I",
+        "room": "705 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:02.327Z",
+        "updatedAt": "2026-08-17T13:09:02.327Z"
+      },
+      {
+        "id": "45fbcdac-49d4-4911-9a88-9903858c060f",
+        "userId": "a38d0fcf-3b34-4c24-9ad1-d020eedfbc09",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "08:30",
+        "endTime": "09:50",
+        "course": "Electronics I",
+        "room": "705 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:02.632Z",
+        "updatedAt": "2026-08-17T13:09:02.632Z"
+      },
+      {
+        "id": "8c1ac861-0d62-44cd-bf1c-d51d75c90e0e",
+        "userId": "a38d0fcf-3b34-4c24-9ad1-d020eedfbc09",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Mon",
+        "startTime": "09:00",
+        "endTime": "11:30",
+        "course": "Electrical Circuits II Laboratory",
+        "room": "802 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:02.891Z",
+        "updatedAt": "2026-08-17T13:09:02.891Z"
+      },
+      {
+        "id": "4fc9ca64-925b-425c-bd83-507faf7188fa",
+        "userId": "a38d0fcf-3b34-4c24-9ad1-d020eedfbc09",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Thu",
+        "startTime": "11:30",
+        "endTime": "14:00",
+        "course": "Electronics I Laboratory",
+        "room": "805 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:03.247Z",
+        "updatedAt": "2026-08-17T13:09:03.247Z"
+      }
+    ]
+  },
+  {
+    "id": "d5c85517-791c-4869-b71e-56de15adc058",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "esara2330406@bscse.uiu.ac.bd",
+    "passwordHash": "$2b$10$JGe0PqCxojb3JNrAn99MUuHihIi3JfEw9i5nxexgeixcRt/Ym6dLi",
+    "name": "Epshita Solaiman Sara",
+    "initials": "ES",
+    "role": "MEMBER",
+    "requestedRole": null,
+    "batch": "2026",
+    "whatsapp": "01316021006",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T08:46:00.115Z",
+    "updatedAt": "2026-08-17T08:46:00.115Z",
+    "subteams": [
+      {
+        "userId": "d5c85517-791c-4869-b71e-56de15adc058",
+        "subteamId": "7c56f07b-f682-4c3c-acd8-f408910bde84"
+      }
+    ],
+    "skills": [],
+    "routines": [
+      {
+        "id": "759cf583-a76b-4d33-a52e-feae9b91a4dd",
+        "userId": "d5c85517-791c-4869-b71e-56de15adc058",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "12:31",
+        "endTime": "13:50",
+        "course": "Data Structure and Algorithms I",
+        "room": "322 Permanent Campus",
+        "createdAt": "2026-08-18T19:00:44.626Z",
+        "updatedAt": "2026-08-18T19:00:44.626Z"
+      },
+      {
+        "id": "8d35db44-cee1-4812-92d6-0013e895ffe7",
+        "userId": "d5c85517-791c-4869-b71e-56de15adc058",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "12:31",
+        "endTime": "13:50",
+        "course": "Data Structure and Algorithms I",
+        "room": "322 Permanent Campus",
+        "createdAt": "2026-08-18T19:00:44.668Z",
+        "updatedAt": "2026-08-18T19:00:44.668Z"
+      },
+      {
+        "id": "a5de3dbe-5f9b-4d20-9f60-133b7e95c0dd",
+        "userId": "d5c85517-791c-4869-b71e-56de15adc058",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "12:31",
+        "endTime": "13:50",
+        "course": "System Analysis and Design",
+        "room": "325 Permanent Campus",
+        "createdAt": "2026-08-18T19:00:44.684Z",
+        "updatedAt": "2026-08-18T19:00:44.684Z"
+      },
+      {
+        "id": "d5e226bd-cb15-419e-b25e-e28ab82f4526",
+        "userId": "d5c85517-791c-4869-b71e-56de15adc058",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "12:31",
+        "endTime": "13:50",
+        "course": "System Analysis and Design",
+        "room": "325 Permanent Campus",
+        "createdAt": "2026-08-18T19:00:44.701Z",
+        "updatedAt": "2026-08-18T19:00:44.701Z"
+      },
+      {
+        "id": "6bd188ed-0fe8-4b75-b737-a7459b284b14",
+        "userId": "d5c85517-791c-4869-b71e-56de15adc058",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "08:30",
+        "endTime": "11:00",
+        "course": "System Analysis and Design Laboratory",
+        "room": "528 Permanent Campus",
+        "createdAt": "2026-08-18T19:00:44.716Z",
+        "updatedAt": "2026-08-18T19:00:44.716Z"
+      },
+      {
+        "id": "0aafa4d8-c446-43f7-879a-27721889eacf",
+        "userId": "d5c85517-791c-4869-b71e-56de15adc058",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "08:30",
+        "endTime": "11:00",
+        "course": "Web Programming",
+        "room": "727 Permanent Campus",
+        "createdAt": "2026-08-18T19:00:44.734Z",
+        "updatedAt": "2026-08-18T19:00:44.734Z"
+      },
+      {
+        "id": "9ac45f41-d05c-43ac-978f-65cdf874b2fc",
+        "userId": "d5c85517-791c-4869-b71e-56de15adc058",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "11:11",
+        "endTime": "12:30",
+        "course": "Economics",
+        "room": "604 Permanent Campus",
+        "createdAt": "2026-08-18T19:00:44.750Z",
+        "updatedAt": "2026-08-18T19:00:44.750Z"
+      },
+      {
+        "id": "6df0475f-ee78-4646-8ec4-5af68d2308bd",
+        "userId": "d5c85517-791c-4869-b71e-56de15adc058",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "11:11",
+        "endTime": "12:30",
+        "course": "Economics",
+        "room": "604 Permanent Campus",
+        "createdAt": "2026-08-18T19:00:44.772Z",
+        "updatedAt": "2026-08-18T19:00:44.772Z"
+      }
+    ]
+  },
+  {
+    "id": "fc11161e-e569-49ab-bb43-09511ed1f697",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "shopnashanjida353@gmail.com",
+    "passwordHash": "$2b$10$TLmmqMsGkTnI0u7.X4n0qu2z9q9GP9P83mrJqXC.2267UjguKFEP6",
+    "name": "Shanjida Zahan Shopna",
+    "initials": "SZ",
+    "role": "MEMBER",
+    "requestedRole": null,
+    "batch": "2024",
+    "whatsapp": "01924025804",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T08:52:26.177Z",
+    "updatedAt": "2026-08-17T08:52:26.177Z",
+    "subteams": [
+      {
+        "userId": "fc11161e-e569-49ab-bb43-09511ed1f697",
+        "subteamId": "7c56f07b-f682-4c3c-acd8-f408910bde84"
+      }
+    ],
+    "skills": [],
+    "routines": [
+      {
+        "id": "0abd0c0e-0a5d-4495-8899-5ea6e9ceb2dd",
+        "userId": "fc11161e-e569-49ab-bb43-09511ed1f697",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "08:30",
+        "endTime": "09:50",
+        "course": "Data Structure and Algorithms II",
+        "room": "322 Permanent Campus",
+        "createdAt": "2026-08-18T10:45:40.494Z",
+        "updatedAt": "2026-08-18T10:45:40.494Z"
+      },
+      {
+        "id": "05ac3af1-87b5-4ac6-8557-16f43370a8ed",
+        "userId": "fc11161e-e569-49ab-bb43-09511ed1f697",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "08:30",
+        "endTime": "09:50",
+        "course": "Data Structure and Algorithms II",
+        "room": "322 Permanent Campus",
+        "createdAt": "2026-08-18T10:45:40.520Z",
+        "updatedAt": "2026-08-18T10:45:40.520Z"
+      },
+      {
+        "id": "677edc64-0aa3-4c33-9fa4-f6d9a8b0ed59",
+        "userId": "fc11161e-e569-49ab-bb43-09511ed1f697",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "11:11",
+        "endTime": "13:40",
+        "course": "Data Structure and Algorithms II Laboratory",
+        "room": "427 Permanent Campus",
+        "createdAt": "2026-08-18T10:45:40.535Z",
+        "updatedAt": "2026-08-18T10:45:40.535Z"
+      },
+      {
+        "id": "5121ba75-d2f4-4572-a0b0-abb23e207153",
+        "userId": "fc11161e-e569-49ab-bb43-09511ed1f697",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "15:11",
+        "endTime": "16:30",
+        "course": "Database Management Systems",
+        "room": "325 Permanent Campus",
+        "createdAt": "2026-08-18T10:45:40.549Z",
+        "updatedAt": "2026-08-18T10:45:40.549Z"
+      },
+      {
+        "id": "dfb39f36-6df3-422f-ab7c-a4b8dd8642c3",
+        "userId": "fc11161e-e569-49ab-bb43-09511ed1f697",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "15:11",
+        "endTime": "16:30",
+        "course": "Database Management Systems",
+        "room": "325 Permanent Campus",
+        "createdAt": "2026-08-18T10:45:40.563Z",
+        "updatedAt": "2026-08-18T10:45:40.563Z"
+      },
+      {
+        "id": "4700c590-6d2c-4811-9641-5a862e421a98",
+        "userId": "fc11161e-e569-49ab-bb43-09511ed1f697",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "11:11",
+        "endTime": "12:30",
+        "course": "Electronics",
+        "room": "630 Permanent Campus",
+        "createdAt": "2026-08-18T10:45:40.577Z",
+        "updatedAt": "2026-08-18T10:45:40.577Z"
+      },
+      {
+        "id": "deec7ea9-c77e-4580-a361-a394a5554d8d",
+        "userId": "fc11161e-e569-49ab-bb43-09511ed1f697",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "11:11",
+        "endTime": "12:30",
+        "course": "Electronics",
+        "room": "630 Permanent Campus",
+        "createdAt": "2026-08-18T10:45:40.592Z",
+        "updatedAt": "2026-08-18T10:45:40.592Z"
+      },
+      {
+        "id": "b4af73d0-f0f1-4af5-a5a1-3759def914e1",
+        "userId": "fc11161e-e569-49ab-bb43-09511ed1f697",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "11:11",
+        "endTime": "13:40",
+        "course": "Electronics Laboratory",
+        "room": "504 Permanent Campus",
+        "createdAt": "2026-08-18T10:45:40.605Z",
+        "updatedAt": "2026-08-18T10:45:40.605Z"
+      }
+    ]
+  },
+  {
+    "id": "31dc5435-1957-43bc-b1bb-5f10acc66845",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "mnebir2420135@gmail.com",
+    "passwordHash": "$2b$10$bxyyLG4jNunNm7Ttq8DpHusFpxx14ScR8qOB6bJZ6DUD/9sdT691u",
+    "name": "Md Alif Nebir",
+    "initials": "MA",
+    "role": "MEMBER",
+    "requestedRole": null,
+    "batch": "2026",
+    "whatsapp": "01403482456",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T09:26:38.558Z",
+    "updatedAt": "2026-08-17T09:26:38.558Z",
+    "subteams": [
+      {
+        "userId": "31dc5435-1957-43bc-b1bb-5f10acc66845",
+        "subteamId": "ae9a2d5e-9376-4a23-b61a-a29ead44e3f7"
+      }
+    ],
+    "skills": [
+      {
+        "id": "540acaf4-ec27-4ec1-a6c0-ad3ddb35036b",
+        "userId": "31dc5435-1957-43bc-b1bb-5f10acc66845",
+        "skillId": "0a22f350-7286-4354-8b0c-e91305a7faea",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T09:31:16.375Z",
+        "updatedAt": "2026-08-17T12:00:36.219Z"
+      }
+    ],
+    "routines": [
+      {
+        "id": "69e0155e-0cdc-4a76-801c-dc31a6962c87",
+        "userId": "31dc5435-1957-43bc-b1bb-5f10acc66845",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "14:30",
+        "endTime": "15:50",
+        "course": "Structured Programming",
+        "room": "302 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:06.095Z",
+        "updatedAt": "2026-08-17T13:09:06.095Z"
+      },
+      {
+        "id": "b0acffdb-1422-4392-aab2-38b7ef33302d",
+        "userId": "31dc5435-1957-43bc-b1bb-5f10acc66845",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "14:30",
+        "endTime": "15:50",
+        "course": "Structured Programming",
+        "room": "302 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:06.356Z",
+        "updatedAt": "2026-08-17T13:09:06.356Z"
+      },
+      {
+        "id": "516e8710-dbae-4a92-8725-f27d52907651",
+        "userId": "31dc5435-1957-43bc-b1bb-5f10acc66845",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "10:00",
+        "endTime": "12:30",
+        "course": "Structured Programming Laboratory",
+        "room": "522 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:06.613Z",
+        "updatedAt": "2026-08-17T13:09:06.613Z"
+      },
+      {
+        "id": "529f6ab3-e87e-4b62-aadf-8f9bbd189cef",
+        "userId": "31dc5435-1957-43bc-b1bb-5f10acc66845",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Mon",
+        "startTime": "10:00",
+        "endTime": "11:20",
+        "course": "English Reading and Writing",
+        "room": "408 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:06.869Z",
+        "updatedAt": "2026-08-17T13:09:06.869Z"
+      },
+      {
+        "id": "acc4987d-fb06-4ec0-a15d-cf479ad3d65a",
+        "userId": "31dc5435-1957-43bc-b1bb-5f10acc66845",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "10:00",
+        "endTime": "11:20",
+        "course": "English Reading and Writing",
+        "room": "408 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:07.127Z",
+        "updatedAt": "2026-08-17T13:09:07.127Z"
+      }
+    ]
+  },
+  {
+    "id": "36496b1e-15fa-4307-ab9a-b1b0ba737250",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "mmontaz2320091@bscse.uiu.ac.bd",
+    "passwordHash": "$2b$10$2HQfTiyo.s0pGbLr/0buiemMOcfzfbxvvrIoSn5V5.xY9QJ4t6AGm",
+    "name": "Marina Montaz",
+    "initials": "MM",
+    "role": "MEMBER",
+    "requestedRole": null,
+    "batch": "2023",
+    "whatsapp": "01628994810",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T09:45:09.079Z",
+    "updatedAt": "2026-08-17T09:45:09.079Z",
+    "subteams": [
+      {
+        "userId": "36496b1e-15fa-4307-ab9a-b1b0ba737250",
+        "subteamId": "e1bf6252-8ccc-44cd-8959-f94eed4ba66d"
+      }
+    ],
+    "skills": [],
+    "routines": [
+      {
+        "id": "75484039-d6ba-4f7a-8446-38009876f9b6",
+        "userId": "36496b1e-15fa-4307-ab9a-b1b0ba737250",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "10:00",
+        "endTime": "11:20",
+        "course": "Theory of Computation",
+        "room": "510 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:07.384Z",
+        "updatedAt": "2026-08-17T13:09:07.384Z"
+      },
+      {
+        "id": "0b16e016-c4d6-41be-a10c-0a758d1e0872",
+        "userId": "36496b1e-15fa-4307-ab9a-b1b0ba737250",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "10:00",
+        "endTime": "11:20",
+        "course": "Theory of Computation",
+        "room": "510 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:07.909Z",
+        "updatedAt": "2026-08-17T13:09:07.909Z"
+      },
+      {
+        "id": "c2e13890-5ee9-4d48-be4d-cb101584071a",
+        "userId": "36496b1e-15fa-4307-ab9a-b1b0ba737250",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "11:30",
+        "endTime": "12:50",
+        "course": "Software Design Patterns",
+        "room": "512 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:08.165Z",
+        "updatedAt": "2026-08-17T13:09:08.165Z"
+      },
+      {
+        "id": "8b9a4074-b9bc-4343-a565-573df9431a1b",
+        "userId": "36496b1e-15fa-4307-ab9a-b1b0ba737250",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "11:30",
+        "endTime": "12:50",
+        "course": "Software Design Patterns",
+        "room": "512 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:08.420Z",
+        "updatedAt": "2026-08-17T13:09:08.420Z"
+      },
+      {
+        "id": "06994df5-18c6-43c2-8b62-b793ab4c0038",
+        "userId": "36496b1e-15fa-4307-ab9a-b1b0ba737250",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Thu",
+        "startTime": "09:00",
+        "endTime": "11:30",
+        "course": "Design Patterns Laboratory",
+        "room": "922 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:08.679Z",
+        "updatedAt": "2026-08-17T13:09:08.679Z"
+      }
+    ]
+  },
+  {
+    "id": "533f90de-c719-431f-b773-b62d2e376eb7",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "mahinhasanupol@gmail.com",
+    "passwordHash": "$2b$10$zgsij3e8.HfcjSe9wWep.erkCLoVzWwZRKUAsIThrqM2U.Kv9iNTW",
+    "name": "Mahin Hasan upol",
+    "initials": "MU",
+    "role": "MEMBER",
+    "requestedRole": null,
+    "batch": "2025",
+    "whatsapp": "8801974093581",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T08:11:10.604Z",
+    "updatedAt": "2026-08-17T10:22:49.665Z",
+    "subteams": [
+      {
+        "userId": "533f90de-c719-431f-b773-b62d2e376eb7",
+        "subteamId": "62c5e28f-4b62-4e28-807f-d97d5087a86e"
+      }
+    ],
+    "skills": [
+      {
+        "id": "a084dd5b-56ee-4cf3-a789-54f0222bdc2a",
+        "userId": "533f90de-c719-431f-b773-b62d2e376eb7",
+        "skillId": "ab72a53f-b7f9-4471-bea2-2965d646b65b",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T08:36:52.578Z",
+        "updatedAt": "2026-08-17T09:07:20.989Z"
+      },
+      {
+        "id": "1594a3fd-bbb1-4c1a-99b7-019dcbf98c93",
+        "userId": "533f90de-c719-431f-b773-b62d2e376eb7",
+        "skillId": "4e4a44cc-c223-4ffe-8777-1ae13157dfa2",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T08:36:46.043Z",
+        "updatedAt": "2026-08-17T09:07:29.323Z"
+      },
+      {
+        "id": "ed2ea63a-7282-4db5-b7dd-e3cbb22100da",
+        "userId": "533f90de-c719-431f-b773-b62d2e376eb7",
+        "skillId": "cd01ca4f-46ee-4c41-8816-b32e059f3b8f",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T08:36:21.958Z",
+        "updatedAt": "2026-08-17T09:07:32.781Z"
+      },
+      {
+        "id": "f72e2c5c-9e0f-47ab-a979-2999b3c36aa2",
+        "userId": "533f90de-c719-431f-b773-b62d2e376eb7",
+        "skillId": "f88b0aac-80a6-4c22-825f-ae11901e8f03",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T08:35:57.258Z",
+        "updatedAt": "2026-08-17T09:07:35.349Z"
+      },
+      {
+        "id": "fba6ec2f-2616-4440-8086-fb1643edd454",
+        "userId": "533f90de-c719-431f-b773-b62d2e376eb7",
+        "skillId": "fd84ba80-a251-47cf-ba0c-9a58aa4b6266",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T08:36:08.499Z",
+        "updatedAt": "2026-08-17T09:07:41.087Z"
+      },
+      {
+        "id": "9b9513af-90cf-4abe-afdf-3bb8819ac7ee",
+        "userId": "533f90de-c719-431f-b773-b62d2e376eb7",
+        "skillId": "816d35da-f42f-4008-ac7a-04213de673a9",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T08:36:36.727Z",
+        "updatedAt": "2026-08-17T09:07:42.612Z"
+      }
+    ],
+    "routines": [
+      {
+        "id": "edb41ea4-419e-4ca5-93ba-aa420bb5eb37",
+        "userId": "533f90de-c719-431f-b773-b62d2e376eb7",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "11:11",
+        "endTime": "13:40",
+        "course": "Advanced Object Oriented Programming Laboratory",
+        "room": "427 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:08.936Z",
+        "updatedAt": "2026-08-17T13:09:08.936Z"
+      },
+      {
+        "id": "5941f510-4f79-45f3-a678-2acbaf80b294",
+        "userId": "533f90de-c719-431f-b773-b62d2e376eb7",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "11:11",
+        "endTime": "13:40",
+        "course": "Software Engineering Laboratory",
+        "room": "523 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:09.202Z",
+        "updatedAt": "2026-08-17T13:09:09.202Z"
+      },
+      {
+        "id": "4dfa3fc2-d08e-495a-a75f-038c3dcf3012",
+        "userId": "533f90de-c719-431f-b773-b62d2e376eb7",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Mon",
+        "startTime": "11:11",
+        "endTime": "13:40",
+        "course": "Operating Systems Laboratory",
+        "room": "926 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:09.495Z",
+        "updatedAt": "2026-08-17T13:09:09.495Z"
+      },
+      {
+        "id": "9045b336-3d1e-43f4-8738-af679a6702b1",
+        "userId": "533f90de-c719-431f-b773-b62d2e376eb7",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "11:11",
+        "endTime": "12:30",
+        "course": "Data Mining",
+        "room": "425 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:09.802Z",
+        "updatedAt": "2026-08-17T13:09:09.802Z"
+      },
+      {
+        "id": "224ed272-f60e-40d3-9991-3b77b984dab1",
+        "userId": "533f90de-c719-431f-b773-b62d2e376eb7",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "11:11",
+        "endTime": "12:30",
+        "course": "Data Mining",
+        "room": "425 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:10.108Z",
+        "updatedAt": "2026-08-17T13:09:10.108Z"
+      },
+      {
+        "id": "f6e3b327-6d91-4aa4-bc7e-6cf5b8d065eb",
+        "userId": "533f90de-c719-431f-b773-b62d2e376eb7",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "08:30",
+        "endTime": "09:50",
+        "course": "Industrial and Operational Management",
+        "room": "604 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:10.366Z",
+        "updatedAt": "2026-08-17T13:09:10.366Z"
+      },
+      {
+        "id": "e02d3f7d-b7a4-4cd2-9f12-a51980dd0751",
+        "userId": "533f90de-c719-431f-b773-b62d2e376eb7",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "08:30",
+        "endTime": "09:50",
+        "course": "Industrial and Operational Management",
+        "room": "604 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:10.645Z",
+        "updatedAt": "2026-08-17T13:09:10.645Z"
+      },
+      {
+        "id": "e61b2ee1-1724-4147-9d28-30c95a3605f6",
+        "userId": "533f90de-c719-431f-b773-b62d2e376eb7",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "15:11",
+        "endTime": "16:30",
+        "course": "Project Management",
+        "room": "802 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:10.908Z",
+        "updatedAt": "2026-08-17T13:09:10.908Z"
+      },
+      {
+        "id": "a2a5d55d-d836-4407-a117-8a8f7813220e",
+        "userId": "533f90de-c719-431f-b773-b62d2e376eb7",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "15:11",
+        "endTime": "16:30",
+        "course": "Project Management",
+        "room": "802 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:11.182Z",
+        "updatedAt": "2026-08-17T13:09:11.182Z"
+      }
+    ]
+  },
+  {
+    "id": "d4d5578f-e036-4294-afb5-378c3b338286",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "admin@gmail.com",
+    "passwordHash": "$2b$10$wOZT3kGiHTmASb1POs2S5eWVx4rjWH.UBs.fgkOGITrX.h/Ac4jiq",
+    "name": "Admin",
+    "initials": "AD",
+    "role": "ORG_OWNER",
+    "requestedRole": null,
+    "batch": "2024",
+    "whatsapp": "880123456789",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T09:44:34.217Z",
+    "updatedAt": "2026-08-17T10:24:23.286Z",
+    "subteams": [
+      {
+        "userId": "d4d5578f-e036-4294-afb5-378c3b338286",
+        "subteamId": "c1d8a1c7-3413-4d0b-907d-7297df1d6f7d"
+      }
+    ],
+    "skills": [],
+    "routines": [
+      {
+        "id": "423fd55c-aaab-4902-9a27-b9a25c540fd0",
+        "userId": "d4d5578f-e036-4294-afb5-378c3b338286",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "10:00",
+        "endTime": "11:20",
+        "course": "Cyber Security",
+        "room": "608 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:11.438Z",
+        "updatedAt": "2026-08-17T13:09:11.438Z"
+      },
+      {
+        "id": "53e394d7-42b2-456d-af6d-ef90790f2f8d",
+        "userId": "d4d5578f-e036-4294-afb5-378c3b338286",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "10:00",
+        "endTime": "11:20",
+        "course": "Cyber Security",
+        "room": "608 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:11.694Z",
+        "updatedAt": "2026-08-17T13:09:11.694Z"
+      },
+      {
+        "id": "25d8c633-5694-4669-8ec1-6f0a2110a84d",
+        "userId": "d4d5578f-e036-4294-afb5-378c3b338286",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "14:00",
+        "endTime": "16:30",
+        "course": "Cyber Security Laboratory",
+        "room": "930 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:11.957Z",
+        "updatedAt": "2026-08-17T13:09:11.957Z"
+      }
+    ]
+  },
+  {
+    "id": "a92d1672-7704-4655-b6a2-908795a605ff",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "siyamjaman72@gmail.com",
+    "passwordHash": "$2b$10$vqGWTXxZUoBHTbUwyBM3neJzVy2IH1RqzgT/XA0E45X5SQnaWQb2C",
+    "name": "Shahriar Jaman Siyam",
+    "initials": "SJ",
+    "role": "MEMBER",
+    "requestedRole": null,
+    "batch": "2023",
+    "whatsapp": "01551807570",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T10:28:27.415Z",
+    "updatedAt": "2026-08-17T10:28:27.415Z",
+    "subteams": [
+      {
+        "userId": "a92d1672-7704-4655-b6a2-908795a605ff",
+        "subteamId": "62c5e28f-4b62-4e28-807f-d97d5087a86e"
+      }
+    ],
+    "skills": [],
+    "routines": [
+      {
+        "id": "13b8942e-b55b-4038-a94d-38519166351e",
+        "userId": "a92d1672-7704-4655-b6a2-908795a605ff",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "11:11",
+        "endTime": "12:30",
+        "course": "Software Engineering",
+        "room": "403 Permanent Campus",
+        "createdAt": "2026-08-18T10:41:02.648Z",
+        "updatedAt": "2026-08-18T10:41:02.648Z"
+      },
+      {
+        "id": "c1c43608-4cf3-4fe9-9cb8-041e47987a85",
+        "userId": "a92d1672-7704-4655-b6a2-908795a605ff",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "11:11",
+        "endTime": "12:30",
+        "course": "Software Engineering",
+        "room": "403 Permanent Campus",
+        "createdAt": "2026-08-18T10:41:02.677Z",
+        "updatedAt": "2026-08-18T10:41:02.677Z"
+      },
+      {
+        "id": "a82d981d-a63a-46b0-88d8-eacc27dd78e3",
+        "userId": "a92d1672-7704-4655-b6a2-908795a605ff",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "08:30",
+        "endTime": "11:00",
+        "course": "Software Engineering Laboratory",
+        "room": "530 Permanent Campus",
+        "createdAt": "2026-08-18T10:41:02.692Z",
+        "updatedAt": "2026-08-18T10:41:02.692Z"
+      },
+      {
+        "id": "94948f5b-3b7e-46cd-82f8-619e5d84cc43",
+        "userId": "a92d1672-7704-4655-b6a2-908795a605ff",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "13:51",
+        "endTime": "15:10",
+        "course": "Artificial Intelligence",
+        "room": "325 Permanent Campus",
+        "createdAt": "2026-08-18T10:41:02.707Z",
+        "updatedAt": "2026-08-18T10:41:02.707Z"
+      },
+      {
+        "id": "e1106399-b6bb-4243-94de-7ce517030013",
+        "userId": "a92d1672-7704-4655-b6a2-908795a605ff",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "13:51",
+        "endTime": "15:10",
+        "course": "Artificial Intelligence",
+        "room": "325 Permanent Campus",
+        "createdAt": "2026-08-18T10:41:02.723Z",
+        "updatedAt": "2026-08-18T10:41:02.723Z"
+      },
+      {
+        "id": "7846e360-28d5-4b82-9a32-223da3640980",
+        "userId": "a92d1672-7704-4655-b6a2-908795a605ff",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Mon",
+        "startTime": "08:30",
+        "endTime": "11:00",
+        "course": "Artificial Intelligence Laboratory",
+        "room": "423 Permanent Campus",
+        "createdAt": "2026-08-18T10:41:02.739Z",
+        "updatedAt": "2026-08-18T10:41:02.739Z"
+      },
+      {
+        "id": "e06b72db-dabf-4ba5-a94f-1208adb50b10",
+        "userId": "a92d1672-7704-4655-b6a2-908795a605ff",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "08:30",
+        "endTime": "09:50",
+        "course": "Microprocessors and Microcontrollers",
+        "room": "404 Permanent Campus",
+        "createdAt": "2026-08-18T10:41:02.754Z",
+        "updatedAt": "2026-08-18T10:41:02.754Z"
+      },
+      {
+        "id": "e55d9d9c-f6d2-4a93-95ca-99401739edc2",
+        "userId": "a92d1672-7704-4655-b6a2-908795a605ff",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "08:30",
+        "endTime": "09:50",
+        "course": "Microprocessors and Microcontrollers",
+        "room": "404 Permanent Campus",
+        "createdAt": "2026-08-18T10:41:02.770Z",
+        "updatedAt": "2026-08-18T10:41:02.770Z"
+      },
+      {
+        "id": "610b3836-bb78-41b1-84f4-3dd3181d4f30",
+        "userId": "a92d1672-7704-4655-b6a2-908795a605ff",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "12:31",
+        "endTime": "13:50",
+        "course": "Operating Systems",
+        "room": "404 Permanent Campus",
+        "createdAt": "2026-08-18T10:41:02.785Z",
+        "updatedAt": "2026-08-18T10:41:02.785Z"
+      },
+      {
+        "id": "81f3d34b-2055-4592-b62e-da68649242d4",
+        "userId": "a92d1672-7704-4655-b6a2-908795a605ff",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "12:31",
+        "endTime": "13:50",
+        "course": "Operating Systems",
+        "room": "404 Permanent Campus",
+        "createdAt": "2026-08-18T10:41:02.801Z",
+        "updatedAt": "2026-08-18T10:41:02.801Z"
+      },
+      {
+        "id": "e9e8bc71-8caf-43b5-8b49-99cb5f461c41",
+        "userId": "a92d1672-7704-4655-b6a2-908795a605ff",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Mon",
+        "startTime": "14:00",
+        "endTime": "16:30",
+        "course": "Operating Systems Laboratory",
+        "room": "926 Permanent Campus",
+        "createdAt": "2026-08-18T10:41:02.816Z",
+        "updatedAt": "2026-08-18T10:41:02.816Z"
+      }
+    ]
+  },
+  {
+    "id": "05b298b3-0397-4504-b323-00e2eb206197",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "syed.hasan.thuha@gmail.com",
+    "passwordHash": "$2b$10$fopDS9dF09JQEkDRTBCnB.UO31zAxIkaPYxyPrDYvlW6oBYrpNQCS",
+    "name": "Syed Hasan Thuha",
+    "initials": "SH",
+    "role": "MEMBER",
+    "requestedRole": null,
+    "batch": "2026",
+    "whatsapp": "01637832551",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T13:44:39.812Z",
+    "updatedAt": "2026-08-17T13:44:39.812Z",
+    "subteams": [
+      {
+        "userId": "05b298b3-0397-4504-b323-00e2eb206197",
+        "subteamId": "8bb11785-cf1c-4578-87a4-60955578e3f0"
+      }
+    ],
+    "skills": [
+      {
+        "id": "35c33ca5-1f3a-4456-bbea-cfb496681cad",
+        "userId": "05b298b3-0397-4504-b323-00e2eb206197",
+        "skillId": "ab72a53f-b7f9-4471-bea2-2965d646b65b",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T13:45:29.558Z",
+        "updatedAt": "2026-08-17T20:11:14.690Z"
+      },
+      {
+        "id": "48159fb4-66bc-4810-b930-243f010cd87f",
+        "userId": "05b298b3-0397-4504-b323-00e2eb206197",
+        "skillId": "2c7d6511-10fe-44b5-bd1e-da154a2626e8",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T13:45:23.349Z",
+        "updatedAt": "2026-08-17T20:11:15.602Z"
+      }
+    ],
+    "routines": [
+      {
+        "id": "5ff79896-cb22-43d6-a340-0590ce54178f",
+        "userId": "05b298b3-0397-4504-b323-00e2eb206197",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "11:11",
+        "endTime": "13:40",
+        "course": "Web Programming",
+        "room": "426 Permanent Campus",
+        "createdAt": "2026-08-18T10:18:59.016Z",
+        "updatedAt": "2026-08-18T10:18:59.016Z"
+      },
+      {
+        "id": "651d4618-b3fe-43e3-886d-a4e0675352ff",
+        "userId": "05b298b3-0397-4504-b323-00e2eb206197",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "11:11",
+        "endTime": "12:30",
+        "course": "Digital Image Processing",
+        "room": "601 Permanent Campus",
+        "createdAt": "2026-08-18T10:18:59.054Z",
+        "updatedAt": "2026-08-18T10:18:59.054Z"
+      },
+      {
+        "id": "e7931678-d639-4f1d-8e8a-44e2ea390545",
+        "userId": "05b298b3-0397-4504-b323-00e2eb206197",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "11:11",
+        "endTime": "12:30",
+        "course": "Digital Image Processing",
+        "room": "601 Permanent Campus",
+        "createdAt": "2026-08-18T10:18:59.069Z",
+        "updatedAt": "2026-08-18T10:18:59.069Z"
+      },
+      {
+        "id": "ccf66a3b-adc6-48b0-a48f-42cbfae7f571",
+        "userId": "05b298b3-0397-4504-b323-00e2eb206197",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "13:51",
+        "endTime": "15:10",
+        "course": "Industrial and Operational Management",
+        "room": "631 Permanent Campus",
+        "createdAt": "2026-08-18T10:18:59.084Z",
+        "updatedAt": "2026-08-18T10:18:59.084Z"
+      },
+      {
+        "id": "316cb969-3982-4423-893e-de40e13755f4",
+        "userId": "05b298b3-0397-4504-b323-00e2eb206197",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "13:51",
+        "endTime": "15:10",
+        "course": "Industrial and Operational Management",
+        "room": "631 Permanent Campus",
+        "createdAt": "2026-08-18T10:18:59.099Z",
+        "updatedAt": "2026-08-18T10:18:59.099Z"
+      }
+    ]
+  },
+  {
+    "id": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "sheikhshakibpro@gmail.com",
+    "passwordHash": "$2b$10$3gBrNgavYKJW3qGtUl12tuRrgiiqgMO2khidPL64rcoCnepd2WO0W",
+    "name": "Sheikh Shakib Hossain",
+    "initials": "SH",
+    "role": "ORG_OWNER",
+    "requestedRole": null,
+    "batch": "2023",
+    "whatsapp": "+8801920589868",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T08:44:31.772Z",
+    "updatedAt": "2026-08-17T10:39:03.931Z",
+    "subteams": [
+      {
+        "userId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "subteamId": "62c5e28f-4b62-4e28-807f-d97d5087a86e"
+      }
+    ],
+    "skills": [],
+    "routines": [
+      {
+        "id": "2559509b-3ce6-4ba3-8843-e162d2618b43",
+        "userId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "09:00",
+        "endTime": "10:20",
+        "course": "Senior Design Project I",
+        "room": "602 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:12.217Z",
+        "updatedAt": "2026-08-17T13:09:12.217Z"
+      },
+      {
+        "id": "d5eaaf4d-5d64-4bdf-9214-27631a50cb51",
+        "userId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Mon",
+        "startTime": "14:00",
+        "endTime": "15:20",
+        "course": "Senior Design Project I",
+        "room": "602 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:12.491Z",
+        "updatedAt": "2026-08-17T13:09:12.491Z"
+      },
+      {
+        "id": "bd03bc36-3bd6-4cab-bc93-16c7e14c10ab",
+        "userId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "10:00",
+        "endTime": "11:20",
+        "course": "Cloud Computing",
+        "room": "516 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:12.759Z",
+        "updatedAt": "2026-08-17T13:09:12.759Z"
+      },
+      {
+        "id": "e3382a3d-3f51-45ba-a85b-5d0c7463f8e9",
+        "userId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "10:00",
+        "endTime": "11:20",
+        "course": "Cloud Computing",
+        "room": "516 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:13.028Z",
+        "updatedAt": "2026-08-17T13:09:13.028Z"
+      }
+    ]
+  },
+  {
+    "id": "c27452b4-4a1d-49ed-9a3a-f222b1b4ed27",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "hossain4arman@gmail.com",
+    "passwordHash": "$2b$10$E/iB3kLyjCukNV5HAw5Dzu44l1k.jz102o9b6lZIAm9pLlogDkzD.",
+    "name": "Arman Hossain",
+    "initials": "AH",
+    "role": "MEMBER",
+    "requestedRole": null,
+    "batch": "2025",
+    "whatsapp": "01762426703",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T10:46:57.433Z",
+    "updatedAt": "2026-08-17T10:52:25.776Z",
+    "subteams": [
+      {
+        "userId": "c27452b4-4a1d-49ed-9a3a-f222b1b4ed27",
+        "subteamId": "62c5e28f-4b62-4e28-807f-d97d5087a86e"
+      }
+    ],
+    "skills": [
+      {
+        "id": "d48fe1c3-45c1-442b-b022-cfc1dc0d5fb9",
+        "userId": "c27452b4-4a1d-49ed-9a3a-f222b1b4ed27",
+        "skillId": "cd01ca4f-46ee-4c41-8816-b32e059f3b8f",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T10:50:21.651Z",
+        "updatedAt": "2026-08-17T12:00:24.280Z"
+      },
+      {
+        "id": "cdc798c3-02f2-4045-ad44-72e0d29412c8",
+        "userId": "c27452b4-4a1d-49ed-9a3a-f222b1b4ed27",
+        "skillId": "816d35da-f42f-4008-ac7a-04213de673a9",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T10:50:15.413Z",
+        "updatedAt": "2026-08-17T12:00:26.050Z"
+      },
+      {
+        "id": "73b0c36d-f5cf-4216-a3f9-450d6d789de4",
+        "userId": "c27452b4-4a1d-49ed-9a3a-f222b1b4ed27",
+        "skillId": "51c8fbb7-6bc6-47ed-8d7d-70359d42dc90",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T10:50:09.809Z",
+        "updatedAt": "2026-08-17T12:00:28.180Z"
+      },
+      {
+        "id": "123ec2bd-8568-43f6-8e1b-7af803c10f75",
+        "userId": "c27452b4-4a1d-49ed-9a3a-f222b1b4ed27",
+        "skillId": "ab72a53f-b7f9-4471-bea2-2965d646b65b",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T10:50:03.867Z",
+        "updatedAt": "2026-08-17T12:00:29.477Z"
+      },
+      {
+        "id": "9f594ca4-33df-446a-9d3b-dc9ff52e82b3",
+        "userId": "c27452b4-4a1d-49ed-9a3a-f222b1b4ed27",
+        "skillId": "fd84ba80-a251-47cf-ba0c-9a58aa4b6266",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T10:49:43.354Z",
+        "updatedAt": "2026-08-17T12:00:34.143Z"
+      }
+    ],
+    "routines": [
+      {
+        "id": "f7bdb74a-e4dd-45f9-920b-0a3f8e3dfd2c",
+        "userId": "c27452b4-4a1d-49ed-9a3a-f222b1b4ed27",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "08:30",
+        "endTime": "09:50",
+        "course": "Signals and Systems",
+        "room": "706 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:13.385Z",
+        "updatedAt": "2026-08-17T13:09:13.385Z"
+      },
+      {
+        "id": "9b242fd1-e80a-4305-92d1-23df5f839c90",
+        "userId": "c27452b4-4a1d-49ed-9a3a-f222b1b4ed27",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "08:30",
+        "endTime": "09:50",
+        "course": "Signals and Systems",
+        "room": "706 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:13.702Z",
+        "updatedAt": "2026-08-17T13:09:13.702Z"
+      },
+      {
+        "id": "07878eb6-cbe5-426b-9ccd-29023f6b6ddf",
+        "userId": "c27452b4-4a1d-49ed-9a3a-f222b1b4ed27",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "13:00",
+        "endTime": "15:30",
+        "course": "Signals and Systems Laboratory",
+        "room": "810 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:14.010Z",
+        "updatedAt": "2026-08-17T13:09:14.010Z"
+      },
+      {
+        "id": "33117cd9-3fa0-4f0b-96e3-b2274def6f79",
+        "userId": "c27452b4-4a1d-49ed-9a3a-f222b1b4ed27",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Mon",
+        "startTime": "11:30",
+        "endTime": "12:50",
+        "course": "Complex Variables & Fourier Analysis",
+        "room": "414 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:14.316Z",
+        "updatedAt": "2026-08-17T13:09:14.316Z"
+      },
+      {
+        "id": "9d22abbb-00c4-416c-af7e-d0074619a9d6",
+        "userId": "c27452b4-4a1d-49ed-9a3a-f222b1b4ed27",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "11:30",
+        "endTime": "12:50",
+        "course": "Complex Variables & Fourier Analysis",
+        "room": "414 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:14.588Z",
+        "updatedAt": "2026-08-17T13:09:14.588Z"
+      }
+    ]
+  },
+  {
+    "id": "1dca2e74-ccf2-4168-a9e6-31bfcf874abd",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "anindatalukder318@gmail.com",
+    "passwordHash": "$2b$10$1YQpat45CuA7uyvjHp9dYOWjySwCi9jOGqzy/t0WTU9MJ6eVFJOTe",
+    "name": "Aninda Talukdar",
+    "initials": "AT",
+    "role": "MEMBER",
+    "requestedRole": null,
+    "batch": "2026",
+    "whatsapp": "+8801734299784",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T11:04:47.793Z",
+    "updatedAt": "2026-08-17T11:04:47.793Z",
+    "subteams": [
+      {
+        "userId": "1dca2e74-ccf2-4168-a9e6-31bfcf874abd",
+        "subteamId": "65fb77fd-8dfa-497f-8086-ee75f9bc45eb"
+      }
+    ],
+    "skills": [
+      {
+        "id": "c47baf57-2954-4dff-be15-5e10ead9d79f",
+        "userId": "1dca2e74-ccf2-4168-a9e6-31bfcf874abd",
+        "skillId": "2c7d6511-10fe-44b5-bd1e-da154a2626e8",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T15:42:59.021Z",
+        "updatedAt": "2026-08-17T20:11:12.337Z"
+      }
+    ],
+    "routines": [
+      {
+        "id": "5067141d-2671-4274-b32a-8fac4c511a1e",
+        "userId": "1dca2e74-ccf2-4168-a9e6-31bfcf874abd",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "13:00",
+        "endTime": "14:20",
+        "course": "Human Computer Interaction",
+        "room": "508 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:14.844Z",
+        "updatedAt": "2026-08-17T13:09:14.844Z"
+      },
+      {
+        "id": "e378d70b-36cc-46d1-9acb-2bba0ee7eede",
+        "userId": "1dca2e74-ccf2-4168-a9e6-31bfcf874abd",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "13:00",
+        "endTime": "14:20",
+        "course": "Human Computer Interaction",
+        "room": "508 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:15.126Z",
+        "updatedAt": "2026-08-17T13:09:15.126Z"
+      },
+      {
+        "id": "f3edb7c2-a2c4-41e7-8b98-7893dfde5091",
+        "userId": "1dca2e74-ccf2-4168-a9e6-31bfcf874abd",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Mon",
+        "startTime": "10:00",
+        "endTime": "12:30",
+        "course": "UI/UX Design Studio",
+        "room": "918 Permanent Campus",
+        "createdAt": "2026-08-17T13:09:15.385Z",
+        "updatedAt": "2026-08-17T13:09:15.385Z"
+      }
+    ]
+  },
+  {
+    "id": "1e678604-4318-4547-9177-7e9fa78dd32d",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "mhyder2510030@bscse.uiu.ac.bd",
+    "passwordHash": "$2b$10$sAeSKPpROU9T2GJoEewXteqT9EyDbjv0kBgvilzmPtsNYPoQAu.g6",
+    "name": "Miraz al hyder",
+    "initials": "MH",
+    "role": "MEMBER",
+    "requestedRole": null,
+    "batch": "2026",
+    "whatsapp": "+8801841672668",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T08:44:17.959Z",
+    "updatedAt": "2026-08-17T17:25:50.888Z",
+    "subteams": [
+      {
+        "userId": "1e678604-4318-4547-9177-7e9fa78dd32d",
+        "subteamId": "ae9a2d5e-9376-4a23-b61a-a29ead44e3f7"
+      }
+    ],
+    "skills": [
+      {
+        "id": "f673ebf8-1077-44b3-8b83-f17b04778a12",
+        "userId": "1e678604-4318-4547-9177-7e9fa78dd32d",
+        "skillId": "0a22f350-7286-4354-8b0c-e91305a7faea",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T17:23:53.588Z",
+        "updatedAt": "2026-08-17T20:11:10.571Z"
+      }
+    ],
+    "routines": []
+  },
+  {
+    "id": "6a329a7c-b452-4b7b-8281-081879488870",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "mzihad2330577@bscse.uiu.ac.bd",
+    "passwordHash": "$2b$10$rq7zHtDrcRT.fuM8.SaSy.r6OxJEGxOhD3XKpBW2a9uR7tX5Hpibq",
+    "name": "Zihad",
+    "initials": "Z",
+    "role": "MEMBER",
+    "requestedRole": null,
+    "batch": "2023",
+    "whatsapp": "01627739268",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T18:07:01.618Z",
+    "updatedAt": "2026-08-17T18:07:01.618Z",
+    "subteams": [
+      {
+        "userId": "6a329a7c-b452-4b7b-8281-081879488870",
+        "subteamId": "e1bf6252-8ccc-44cd-8959-f94eed4ba66d"
+      }
+    ],
+    "skills": [
+      {
+        "id": "5b9ed029-57fd-416a-8d96-611be9b47fe9",
+        "userId": "6a329a7c-b452-4b7b-8281-081879488870",
+        "skillId": "f88b0aac-80a6-4c22-825f-ae11901e8f03",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T18:07:59.064Z",
+        "updatedAt": "2026-08-17T20:10:52.441Z"
+      }
+    ],
+    "routines": []
+  },
+  {
+    "id": "fd776d92-e427-4e93-9e7c-1cc4235c7acf",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "mtonmoy223703@bscse.uiu.ac.bd",
+    "passwordHash": "$2b$10$8kltX9z6b1OJH7QFtkLJ/uYVsbsByIcm0YaJfG2ZD2LChga7OXOC.",
+    "name": "Md Nadim Hossain Tonmoy",
+    "initials": "MT",
+    "role": "SUBTEAM_MANAGER",
+    "requestedRole": null,
+    "batch": "2025",
+    "whatsapp": "01749951814",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T08:37:37.035Z",
+    "updatedAt": "2026-08-17T16:40:23.799Z",
+    "subteams": [
+      {
+        "userId": "fd776d92-e427-4e93-9e7c-1cc4235c7acf",
+        "subteamId": "e1bf6252-8ccc-44cd-8959-f94eed4ba66d"
+      }
+    ],
+    "skills": [],
+    "routines": [
+      {
+        "id": "6a99dfad-4030-4876-935d-f0fca33a17c7",
+        "userId": "fd776d92-e427-4e93-9e7c-1cc4235c7acf",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "12:31",
+        "endTime": "13:50",
+        "course": "Database Management Systems",
+        "room": "401 Permanent Campus",
+        "createdAt": "2026-08-17T16:42:39.373Z",
+        "updatedAt": "2026-08-17T16:42:39.373Z"
+      },
+      {
+        "id": "bcb01a10-e369-423c-9f31-c900f739a029",
+        "userId": "fd776d92-e427-4e93-9e7c-1cc4235c7acf",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "12:31",
+        "endTime": "13:50",
+        "course": "Database Management Systems",
+        "room": "401 Permanent Campus",
+        "createdAt": "2026-08-17T16:42:39.464Z",
+        "updatedAt": "2026-08-17T16:42:39.464Z"
+      },
+      {
+        "id": "9a654c69-46e2-4cd3-b01a-06f05c2f28ac",
+        "userId": "fd776d92-e427-4e93-9e7c-1cc4235c7acf",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "14:00",
+        "endTime": "16:30",
+        "course": "Database Management Systems Laboratory",
+        "room": "423 Permanent Campus",
+        "createdAt": "2026-08-17T16:42:39.479Z",
+        "updatedAt": "2026-08-17T16:42:39.479Z"
+      },
+      {
+        "id": "8bf85931-1c50-4fbf-8431-8f88ddfcd103",
+        "userId": "fd776d92-e427-4e93-9e7c-1cc4235c7acf",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "12:31",
+        "endTime": "13:50",
+        "course": "Artificial Intelligence",
+        "room": "404 Permanent Campus",
+        "createdAt": "2026-08-17T16:42:39.493Z",
+        "updatedAt": "2026-08-17T16:42:39.493Z"
+      },
+      {
+        "id": "472aeba4-a54e-413a-9e1d-0c293edbf1cd",
+        "userId": "fd776d92-e427-4e93-9e7c-1cc4235c7acf",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "12:31",
+        "endTime": "13:50",
+        "course": "Artificial Intelligence",
+        "room": "404 Permanent Campus",
+        "createdAt": "2026-08-17T16:42:39.507Z",
+        "updatedAt": "2026-08-17T16:42:39.507Z"
+      },
+      {
+        "id": "1a7fe7ae-8e68-4cd3-a9b2-3b3fbb4765a6",
+        "userId": "fd776d92-e427-4e93-9e7c-1cc4235c7acf",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "15:11",
+        "endTime": "16:30",
+        "course": "Operating Systems",
+        "room": "409 Permanent Campus",
+        "createdAt": "2026-08-17T16:42:39.522Z",
+        "updatedAt": "2026-08-17T16:42:39.522Z"
+      },
+      {
+        "id": "77f911ba-2c89-42d6-b25d-057dfff8c666",
+        "userId": "fd776d92-e427-4e93-9e7c-1cc4235c7acf",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "15:11",
+        "endTime": "16:30",
+        "course": "Operating Systems",
+        "room": "409 Permanent Campus",
+        "createdAt": "2026-08-17T16:42:39.536Z",
+        "updatedAt": "2026-08-17T16:42:39.536Z"
+      },
+      {
+        "id": "ca06ad13-701b-4319-a8ff-18f755cac994",
+        "userId": "fd776d92-e427-4e93-9e7c-1cc4235c7acf",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "11:11",
+        "endTime": "12:30",
+        "course": "Green Computing",
+        "room": "902 Permanent Campus",
+        "createdAt": "2026-08-17T16:42:39.550Z",
+        "updatedAt": "2026-08-17T16:42:39.550Z"
+      },
+      {
+        "id": "ac995358-619a-43f0-ad42-69f114ee38f2",
+        "userId": "fd776d92-e427-4e93-9e7c-1cc4235c7acf",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "11:11",
+        "endTime": "12:30",
+        "course": "Green Computing",
+        "room": "902 Permanent Campus",
+        "createdAt": "2026-08-17T16:42:39.564Z",
+        "updatedAt": "2026-08-17T16:42:39.564Z"
+      }
+    ]
+  },
+  {
+    "id": "bb8464fb-4523-45d9-ad11-598eef92b2ac",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "abiralsabs@gmail.com",
+    "passwordHash": "$2b$10$3esrSNZQGgIeEEJ0ePnO8.3OQARGgeY/D6Xt11Q9YMEvTilrZYow.",
+    "name": "MD Abir Al Saba",
+    "initials": "MA",
+    "role": "MEMBER",
+    "requestedRole": null,
+    "batch": "2026",
+    "whatsapp": "01869216355",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T17:17:23.041Z",
+    "updatedAt": "2026-08-17T17:17:23.041Z",
+    "subteams": [
+      {
+        "userId": "bb8464fb-4523-45d9-ad11-598eef92b2ac",
+        "subteamId": "62c5e28f-4b62-4e28-807f-d97d5087a86e"
+      }
+    ],
+    "skills": [
+      {
+        "id": "3c892bee-97b6-463e-ad4d-7449c46b0e70",
+        "userId": "bb8464fb-4523-45d9-ad11-598eef92b2ac",
+        "skillId": "816d35da-f42f-4008-ac7a-04213de673a9",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T17:33:14.494Z",
+        "updatedAt": "2026-08-17T20:10:54.389Z"
+      },
+      {
+        "id": "f40088c2-cf24-46a2-9c7b-2b6ecff35a56",
+        "userId": "bb8464fb-4523-45d9-ad11-598eef92b2ac",
+        "skillId": "ab72a53f-b7f9-4471-bea2-2965d646b65b",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T17:32:58.945Z",
+        "updatedAt": "2026-08-17T20:10:56.745Z"
+      },
+      {
+        "id": "1529ac95-335b-48c6-a865-0923b525620b",
+        "userId": "bb8464fb-4523-45d9-ad11-598eef92b2ac",
+        "skillId": "51c8fbb7-6bc6-47ed-8d7d-70359d42dc90",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T17:32:28.155Z",
+        "updatedAt": "2026-08-17T20:10:59.370Z"
+      },
+      {
+        "id": "e452e831-798f-413f-a556-0599e66ae9c7",
+        "userId": "bb8464fb-4523-45d9-ad11-598eef92b2ac",
+        "skillId": "cd01ca4f-46ee-4c41-8816-b32e059f3b8f",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T17:32:21.208Z",
+        "updatedAt": "2026-08-17T20:11:00.500Z"
+      },
+      {
+        "id": "8843d229-53c5-4130-b9a9-9eb81d3dad05",
+        "userId": "bb8464fb-4523-45d9-ad11-598eef92b2ac",
+        "skillId": "fd84ba80-a251-47cf-ba0c-9a58aa4b6266",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T17:32:14.159Z",
+        "updatedAt": "2026-08-17T20:11:02.188Z"
+      },
+      {
+        "id": "f211806f-5c7e-493b-b6fa-c1300701d9c7",
+        "userId": "bb8464fb-4523-45d9-ad11-598eef92b2ac",
+        "skillId": "f88b0aac-80a6-4c22-825f-ae11901e8f03",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T17:32:09.056Z",
+        "updatedAt": "2026-08-17T20:11:05.718Z"
+      },
+      {
+        "id": "a8e150c9-f07e-4e6b-a817-c16caa25d356",
+        "userId": "bb8464fb-4523-45d9-ad11-598eef92b2ac",
+        "skillId": "3c90fba4-9a3c-4d7b-bb6b-2447f5f77d43",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T17:32:01.865Z",
+        "updatedAt": "2026-08-17T20:11:08.346Z"
+      }
+    ],
+    "routines": [
+      {
+        "id": "c8877b46-5d3a-4086-b407-4d7ab643ae18",
+        "userId": "bb8464fb-4523-45d9-ad11-598eef92b2ac",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "11:11",
+        "endTime": "12:30",
+        "course": "Financial and Managerial Accounting",
+        "room": "302 Permanent Campus",
+        "createdAt": "2026-08-17T17:27:52.408Z",
+        "updatedAt": "2026-08-17T17:27:52.408Z"
+      },
+      {
+        "id": "b197903e-1fb2-438a-b10a-0c9752755e7f",
+        "userId": "bb8464fb-4523-45d9-ad11-598eef92b2ac",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "11:11",
+        "endTime": "12:30",
+        "course": "Financial and Managerial Accounting",
+        "room": "302 Permanent Campus",
+        "createdAt": "2026-08-17T17:27:52.440Z",
+        "updatedAt": "2026-08-17T17:27:52.440Z"
+      },
+      {
+        "id": "91c47ef9-c43b-473b-b2b6-1e717fd450b7",
+        "userId": "bb8464fb-4523-45d9-ad11-598eef92b2ac",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "12:31",
+        "endTime": "13:50",
+        "course": "Software Engineering",
+        "room": "401 Permanent Campus",
+        "createdAt": "2026-08-17T17:27:52.455Z",
+        "updatedAt": "2026-08-17T17:27:52.455Z"
+      },
+      {
+        "id": "124907e5-eb44-4767-a632-e886e52a851f",
+        "userId": "bb8464fb-4523-45d9-ad11-598eef92b2ac",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "12:31",
+        "endTime": "13:50",
+        "course": "Software Engineering",
+        "room": "401 Permanent Campus",
+        "createdAt": "2026-08-17T17:27:52.471Z",
+        "updatedAt": "2026-08-17T17:27:52.471Z"
+      },
+      {
+        "id": "8d777c4c-9a34-495b-924d-4d3ebfbdd121",
+        "userId": "bb8464fb-4523-45d9-ad11-598eef92b2ac",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "08:30",
+        "endTime": "11:00",
+        "course": "Software Engineering Laboratory",
+        "room": "529 Permanent Campus",
+        "createdAt": "2026-08-17T17:27:52.486Z",
+        "updatedAt": "2026-08-17T17:27:52.486Z"
+      },
+      {
+        "id": "48f593e3-be39-43dd-a5d7-ee71d5010ba4",
+        "userId": "bb8464fb-4523-45d9-ad11-598eef92b2ac",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "13:51",
+        "endTime": "15:10",
+        "course": "Artificial Intelligence",
+        "room": "402 Permanent Campus",
+        "createdAt": "2026-08-17T17:27:52.502Z",
+        "updatedAt": "2026-08-17T17:27:52.502Z"
+      },
+      {
+        "id": "11a7aafc-2ecd-405b-9a94-3298c93d2d1c",
+        "userId": "bb8464fb-4523-45d9-ad11-598eef92b2ac",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "13:51",
+        "endTime": "15:10",
+        "course": "Artificial Intelligence",
+        "room": "402 Permanent Campus",
+        "createdAt": "2026-08-17T17:27:52.518Z",
+        "updatedAt": "2026-08-17T17:27:52.518Z"
+      },
+      {
+        "id": "b2a246fe-bd71-44a1-be2b-a70d3353c6b6",
+        "userId": "bb8464fb-4523-45d9-ad11-598eef92b2ac",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Mon",
+        "startTime": "11:11",
+        "endTime": "13:40",
+        "course": "Artificial Intelligence Laboratory",
+        "room": "422 Permanent Campus",
+        "createdAt": "2026-08-17T17:27:52.534Z",
+        "updatedAt": "2026-08-17T17:27:52.534Z"
+      },
+      {
+        "id": "be1904ab-de45-4503-bd30-5b107694b3a9",
+        "userId": "bb8464fb-4523-45d9-ad11-598eef92b2ac",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "08:30",
+        "endTime": "11:00",
+        "course": "Microprocessors and Microcontrollers Laboratory",
+        "room": "511 Permanent Campus",
+        "createdAt": "2026-08-17T17:27:52.549Z",
+        "updatedAt": "2026-08-17T17:27:52.549Z"
+      },
+      {
+        "id": "c06ecab2-7dbb-4f4a-97a7-251ce99e436b",
+        "userId": "bb8464fb-4523-45d9-ad11-598eef92b2ac",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "08:30",
+        "endTime": "11:00",
+        "course": "Microprocessors and Microcontrollers Laboratory",
+        "room": "427",
+        "createdAt": "2026-08-17T17:27:52.565Z",
+        "updatedAt": "2026-08-17T17:27:52.565Z"
+      }
+    ]
+  },
+  {
+    "id": "f321df02-ceb0-470a-a5ca-53d963c25549",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "ashaha2420571@bscse.uiu.ac.bd",
+    "passwordHash": "$2b$10$KU4XE1m.62QjIA.oG/qyROyvwRj4cg5dq4i6kZx4JB3vLeAxen7C6",
+    "name": "ADIPTA SHAHA",
+    "initials": "AS",
+    "role": "MEMBER",
+    "requestedRole": null,
+    "batch": "2024",
+    "whatsapp": "01319348101",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T17:22:18.666Z",
+    "updatedAt": "2026-08-17T17:22:18.666Z",
+    "subteams": [
+      {
+        "userId": "f321df02-ceb0-470a-a5ca-53d963c25549",
+        "subteamId": "ae9a2d5e-9376-4a23-b61a-a29ead44e3f7"
+      }
+    ],
+    "skills": [
+      {
+        "id": "6d2e53b6-f377-4e12-8cd5-22176d38e92a",
+        "userId": "f321df02-ceb0-470a-a5ca-53d963c25549",
+        "skillId": "0a22f350-7286-4354-8b0c-e91305a7faea",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T17:26:27.509Z",
+        "updatedAt": "2026-08-17T20:11:09.643Z"
+      }
+    ],
+    "routines": [
+      {
+        "id": "5592909b-467c-4aee-91ce-674e66a726f1",
+        "userId": "f321df02-ceb0-470a-a5ca-53d963c25549",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "11:11",
+        "endTime": "12:30",
+        "course": "Object Oriented Programming",
+        "room": "307 Permanent Campus",
+        "createdAt": "2026-08-17T17:24:38.172Z",
+        "updatedAt": "2026-08-17T17:24:38.172Z"
+      },
+      {
+        "id": "4964fba9-f13f-4c4e-bc1a-39ca2568bee4",
+        "userId": "f321df02-ceb0-470a-a5ca-53d963c25549",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "11:11",
+        "endTime": "12:30",
+        "course": "Object Oriented Programming",
+        "room": "307 Permanent Campus",
+        "createdAt": "2026-08-17T17:24:38.200Z",
+        "updatedAt": "2026-08-17T17:24:38.200Z"
+      },
+      {
+        "id": "11a3a5ae-abd3-493f-a727-072d6aabe9b1",
+        "userId": "f321df02-ceb0-470a-a5ca-53d963c25549",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "08:30",
+        "endTime": "11:00",
+        "course": "Data Structure and Algorithms I Laboratory",
+        "room": "522 Permanent Campus",
+        "createdAt": "2026-08-17T17:24:38.214Z",
+        "updatedAt": "2026-08-17T17:24:38.214Z"
+      },
+      {
+        "id": "153dcf88-1249-4d23-967a-765564e1e714",
+        "userId": "f321df02-ceb0-470a-a5ca-53d963c25549",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "15:11",
+        "endTime": "16:30",
+        "course": "Fundamental Calculus",
+        "room": "410 Permanent Campus",
+        "createdAt": "2026-08-17T17:24:38.229Z",
+        "updatedAt": "2026-08-17T17:24:38.229Z"
+      },
+      {
+        "id": "24cf9e73-48d7-41eb-9df5-1ab547ecbefc",
+        "userId": "f321df02-ceb0-470a-a5ca-53d963c25549",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "15:11",
+        "endTime": "16:30",
+        "course": "Fundamental Calculus",
+        "room": "410 Permanent Campus",
+        "createdAt": "2026-08-17T17:24:38.244Z",
+        "updatedAt": "2026-08-17T17:24:38.244Z"
+      }
+    ]
+  },
+  {
+    "id": "f8f2428f-d078-4dc6-a6a3-803efcb2df45",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "mhossen2330065@bseee.uiu.ac.bd",
+    "passwordHash": "$2b$10$e7pDKh1VCa9p4/Jyrp2LmugFwXkLrc6GPQ1Qii1lkFp0F2MdlSJfa",
+    "name": "MD RIAD HOSSEN",
+    "initials": "MH",
+    "role": "MEMBER",
+    "requestedRole": null,
+    "batch": "2026",
+    "whatsapp": "01782917049",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T18:41:47.543Z",
+    "updatedAt": "2026-08-17T18:49:09.468Z",
+    "subteams": [
+      {
+        "userId": "f8f2428f-d078-4dc6-a6a3-803efcb2df45",
+        "subteamId": "ae9a2d5e-9376-4a23-b61a-a29ead44e3f7"
+      }
+    ],
+    "skills": [],
+    "routines": [
+      {
+        "id": "07140762-92fc-4859-a746-af9682638198",
+        "userId": "f8f2428f-d078-4dc6-a6a3-803efcb2df45",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "11:11",
+        "endTime": "12:30",
+        "course": "Power System",
+        "room": "708 Permanent Campus",
+        "createdAt": "2026-08-17T18:43:41.674Z",
+        "updatedAt": "2026-08-17T18:43:41.674Z"
+      },
+      {
+        "id": "3a8ccd2c-6400-4663-a250-f7e6d441d924",
+        "userId": "f8f2428f-d078-4dc6-a6a3-803efcb2df45",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "11:11",
+        "endTime": "12:30",
+        "course": "Power System",
+        "room": "708 Permanent Campus",
+        "createdAt": "2026-08-17T18:43:41.709Z",
+        "updatedAt": "2026-08-17T18:43:41.709Z"
+      },
+      {
+        "id": "c4a8f7ba-a59b-4a7d-9d7d-66fc32c1864a",
+        "userId": "f8f2428f-d078-4dc6-a6a3-803efcb2df45",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "08:30",
+        "endTime": "11:00",
+        "course": "Power System Laboratory",
+        "room": "532 Permanent Campus",
+        "createdAt": "2026-08-17T18:43:41.725Z",
+        "updatedAt": "2026-08-17T18:43:41.725Z"
+      },
+      {
+        "id": "8cfd3964-1be5-4dca-af72-01da3af8eb5c",
+        "userId": "f8f2428f-d078-4dc6-a6a3-803efcb2df45",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "09:51",
+        "endTime": "11:10",
+        "course": "Power Electronics",
+        "room": "722 Permanent Campus",
+        "createdAt": "2026-08-17T18:43:41.742Z",
+        "updatedAt": "2026-08-17T18:43:41.742Z"
+      },
+      {
+        "id": "c68d9b87-6dea-447b-95c4-47756a88bf81",
+        "userId": "f8f2428f-d078-4dc6-a6a3-803efcb2df45",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "09:51",
+        "endTime": "11:10",
+        "course": "Power Electronics",
+        "room": "722 Permanent Campus",
+        "createdAt": "2026-08-17T18:43:41.758Z",
+        "updatedAt": "2026-08-17T18:43:41.758Z"
+      },
+      {
+        "id": "1de8b50e-df5e-47dd-8d47-7a866d504c2e",
+        "userId": "f8f2428f-d078-4dc6-a6a3-803efcb2df45",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "14:00",
+        "endTime": "16:30",
+        "course": "Power Electronics Laboratory",
+        "room": "503 Permanent Campus",
+        "createdAt": "2026-08-17T18:43:41.774Z",
+        "updatedAt": "2026-08-17T18:43:41.774Z"
+      },
+      {
+        "id": "b6bcacf8-3af6-4ea1-9fbc-056705e7c476",
+        "userId": "f8f2428f-d078-4dc6-a6a3-803efcb2df45",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "12:31",
+        "endTime": "13:50",
+        "course": "Microprocessor and Interfacing",
+        "room": "722 Permanent Campus",
+        "createdAt": "2026-08-17T18:43:41.796Z",
+        "updatedAt": "2026-08-17T18:43:41.796Z"
+      },
+      {
+        "id": "d1cc57ce-21f6-4c04-9072-752a7653a559",
+        "userId": "f8f2428f-d078-4dc6-a6a3-803efcb2df45",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "12:31",
+        "endTime": "13:50",
+        "course": "Microprocessor and Interfacing",
+        "room": "722 Permanent Campus",
+        "createdAt": "2026-08-17T18:43:41.813Z",
+        "updatedAt": "2026-08-17T18:43:41.813Z"
+      },
+      {
+        "id": "9aa3b38a-db16-4554-a9bd-664b7ee47edc",
+        "userId": "f8f2428f-d078-4dc6-a6a3-803efcb2df45",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "08:30",
+        "endTime": "11:00",
+        "course": "Microprocessor and Interfacing Laboratory",
+        "room": "531 Permanent Campus",
+        "createdAt": "2026-08-17T18:43:41.835Z",
+        "updatedAt": "2026-08-17T18:43:41.835Z"
+      }
+    ]
+  },
+  {
+    "id": "34aa97d4-6d77-4e0b-b342-dc24e3563cd8",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "mchowdhury2230999@bscse.uiu.ac.bd",
+    "passwordHash": "$2b$10$i/i8tXsxqn.5MI9THkokMOtoEViCSyarrbYCOeOYhTzZSOQFttEl6",
+    "name": "MD Salman Kabir Chowhhury",
+    "initials": "MC",
+    "role": "SUBTEAM_MANAGER",
+    "requestedRole": null,
+    "batch": "2023",
+    "whatsapp": "880123456789",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T09:22:23.361Z",
+    "updatedAt": "2026-08-17T19:19:41.869Z",
+    "subteams": [
+      {
+        "userId": "34aa97d4-6d77-4e0b-b342-dc24e3563cd8",
+        "subteamId": "62c5e28f-4b62-4e28-807f-d97d5087a86e"
+      }
+    ],
+    "skills": [],
+    "routines": [
+      {
+        "id": "34cc5e4f-c3f2-467b-95de-c2e49c3e417b",
+        "userId": "34aa97d4-6d77-4e0b-b342-dc24e3563cd8",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "14:00",
+        "endTime": "16:30",
+        "course": "Advanced Object Oriented Programming Laboratory",
+        "room": "522 Permanent Campus",
+        "createdAt": "2026-08-17T19:17:29.843Z",
+        "updatedAt": "2026-08-17T19:17:29.843Z"
+      },
+      {
+        "id": "e65302bc-4256-4b83-baaf-52d44f5b606c",
+        "userId": "34aa97d4-6d77-4e0b-b342-dc24e3563cd8",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "12:31",
+        "endTime": "13:50",
+        "course": "Software Engineering",
+        "room": "330 Permanent Campus",
+        "createdAt": "2026-08-17T19:17:29.878Z",
+        "updatedAt": "2026-08-17T19:17:29.878Z"
+      },
+      {
+        "id": "fe94cc5f-3e42-4acc-a470-28480bcfcfd7",
+        "userId": "34aa97d4-6d77-4e0b-b342-dc24e3563cd8",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "12:31",
+        "endTime": "13:50",
+        "course": "Software Engineering",
+        "room": "330 Permanent Campus",
+        "createdAt": "2026-08-17T19:17:29.892Z",
+        "updatedAt": "2026-08-17T19:17:29.892Z"
+      },
+      {
+        "id": "e2038c6f-0ea0-4f4d-839f-a2e551cd983f",
+        "userId": "34aa97d4-6d77-4e0b-b342-dc24e3563cd8",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "08:30",
+        "endTime": "11:00",
+        "course": "Software Engineering Laboratory",
+        "room": "529 Permanent Campus",
+        "createdAt": "2026-08-17T19:17:29.906Z",
+        "updatedAt": "2026-08-17T19:17:29.906Z"
+      },
+      {
+        "id": "6c3155b5-12c6-45a9-b8a2-072a11a737ae",
+        "userId": "34aa97d4-6d77-4e0b-b342-dc24e3563cd8",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "13:51",
+        "endTime": "15:10",
+        "course": "Artificial Intelligence",
+        "room": "402 Permanent Campus",
+        "createdAt": "2026-08-17T19:17:29.920Z",
+        "updatedAt": "2026-08-17T19:17:29.920Z"
+      },
+      {
+        "id": "5b752687-2b45-4946-bde8-88944e5d6d0a",
+        "userId": "34aa97d4-6d77-4e0b-b342-dc24e3563cd8",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "13:51",
+        "endTime": "15:10",
+        "course": "Artificial Intelligence",
+        "room": "402 Permanent Campus",
+        "createdAt": "2026-08-17T19:17:29.933Z",
+        "updatedAt": "2026-08-17T19:17:29.933Z"
+      },
+      {
+        "id": "88f4b2f8-ac4b-48e3-a4c6-9f38b2f56a51",
+        "userId": "34aa97d4-6d77-4e0b-b342-dc24e3563cd8",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Mon",
+        "startTime": "08:30",
+        "endTime": "11:00",
+        "course": "Artificial Intelligence Laboratory",
+        "room": "423 Permanent Campus",
+        "createdAt": "2026-08-17T19:17:29.947Z",
+        "updatedAt": "2026-08-17T19:17:29.947Z"
+      },
+      {
+        "id": "d1dd500a-caff-4ed7-9a27-2fc08a7034ad",
+        "userId": "34aa97d4-6d77-4e0b-b342-dc24e3563cd8",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "08:30",
+        "endTime": "11:00",
+        "course": "Microprocessors and Microcontrollers Laboratory",
+        "room": "511 Permanent Campus",
+        "createdAt": "2026-08-17T19:17:29.961Z",
+        "updatedAt": "2026-08-17T19:17:29.961Z"
+      },
+      {
+        "id": "31cf61df-a6c6-4ea8-83cb-d077978571da",
+        "userId": "34aa97d4-6d77-4e0b-b342-dc24e3563cd8",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "15:11",
+        "endTime": "16:30",
+        "course": "Operating Systems",
+        "room": "409 Permanent Campus",
+        "createdAt": "2026-08-17T19:17:29.974Z",
+        "updatedAt": "2026-08-17T19:17:29.974Z"
+      },
+      {
+        "id": "a1de3a8a-596e-41a3-8e2f-a7711248f3a1",
+        "userId": "34aa97d4-6d77-4e0b-b342-dc24e3563cd8",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "15:11",
+        "endTime": "16:30",
+        "course": "Operating Systems",
+        "room": "409 Permanent Campus",
+        "createdAt": "2026-08-17T19:17:29.988Z",
+        "updatedAt": "2026-08-17T19:17:29.988Z"
+      }
+    ]
+  },
+  {
+    "id": "b2fe5310-a686-4b2d-b6e2-b2e644219e76",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "alnahianniloy1@gmail.com",
+    "passwordHash": "$2b$10$hqWKYjmVQOrQeNN9JWU0ZO8gb/n7W1HZtl2zDsBjVuUKYNT.HQKza",
+    "name": "Al Nahian Niloy",
+    "initials": "AN",
+    "role": "ORG_OWNER",
+    "requestedRole": null,
+    "batch": "2024",
+    "whatsapp": "880123456789",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T20:11:41.551Z",
+    "updatedAt": "2026-08-17T20:11:41.551Z",
+    "subteams": [
+      {
+        "userId": "b2fe5310-a686-4b2d-b6e2-b2e644219e76",
+        "subteamId": "62c5e28f-4b62-4e28-807f-d97d5087a86e"
+      }
+    ],
+    "skills": [],
+    "routines": []
+  },
+  {
+    "id": "b4423253-a03d-40a8-9ee6-df8fbb58eb43",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "alnahian1234567890@gmail.com",
+    "passwordHash": "$2b$10$j1nAXoSJVwN/ha/v6Maw5OEyXzDtvCcT9YCRY6rx/ivKT6b.4NaY2",
+    "name": "Al Nahian",
+    "initials": "AN",
+    "role": "TEAM_MANAGER",
+    "requestedRole": null,
+    "batch": "2024",
+    "whatsapp": "880123456789",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T20:21:42.800Z",
+    "updatedAt": "2026-08-17T20:21:42.800Z",
+    "subteams": [
+      {
+        "userId": "b4423253-a03d-40a8-9ee6-df8fbb58eb43",
+        "subteamId": "62c5e28f-4b62-4e28-807f-d97d5087a86e"
+      }
+    ],
+    "skills": [],
+    "routines": []
+  },
+  {
+    "id": "d7abe4a5-cd2f-4bdf-aec4-2389bc1e18e9",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "bfahim2310275@bscse.uiu.ac.bd",
+    "passwordHash": "$2b$10$uOu51FrecQYWx/JelL8/Kuf5tEYmYia9bqLhdMR.6h/K7DzV0F4Ta",
+    "name": "Bakhtiar Ahamed Fahim",
+    "initials": "BA",
+    "role": "MEMBER",
+    "requestedRole": null,
+    "batch": "2025",
+    "whatsapp": "01981788524",
+    "avatarUrl": null,
+    "createdAt": "2026-08-18T00:57:53.596Z",
+    "updatedAt": "2026-08-18T00:57:53.596Z",
+    "subteams": [
+      {
+        "userId": "d7abe4a5-cd2f-4bdf-aec4-2389bc1e18e9",
+        "subteamId": "62c5e28f-4b62-4e28-807f-d97d5087a86e"
+      }
+    ],
+    "skills": [
+      {
+        "id": "d449a22e-0b53-4ae7-b57d-d7d11da449be",
+        "userId": "d7abe4a5-cd2f-4bdf-aec4-2389bc1e18e9",
+        "skillId": "f88b0aac-80a6-4c22-825f-ae11901e8f03",
+        "status": "APPROVED",
+        "approvedByUserId": "7cda5075-a5f6-49a7-93b4-f25bde06f289",
+        "createdAt": "2026-08-18T00:58:30.128Z",
+        "updatedAt": "2026-08-18T08:16:02.393Z"
+      },
+      {
+        "id": "a1ac23c1-8fe7-44c0-8ebd-86b37051728b",
+        "userId": "d7abe4a5-cd2f-4bdf-aec4-2389bc1e18e9",
+        "skillId": "fd84ba80-a251-47cf-ba0c-9a58aa4b6266",
+        "status": "APPROVED",
+        "approvedByUserId": "7cda5075-a5f6-49a7-93b4-f25bde06f289",
+        "createdAt": "2026-08-18T00:58:35.361Z",
+        "updatedAt": "2026-08-18T08:16:03.761Z"
+      },
+      {
+        "id": "a681fdf8-de4a-4237-a048-d05856f75627",
+        "userId": "d7abe4a5-cd2f-4bdf-aec4-2389bc1e18e9",
+        "skillId": "ab72a53f-b7f9-4471-bea2-2965d646b65b",
+        "status": "APPROVED",
+        "approvedByUserId": "7cda5075-a5f6-49a7-93b4-f25bde06f289",
+        "createdAt": "2026-08-18T00:59:23.200Z",
+        "updatedAt": "2026-08-18T08:16:04.690Z"
+      },
+      {
+        "id": "64f03c85-bfa0-4daa-97f0-d767c83e8abd",
+        "userId": "d7abe4a5-cd2f-4bdf-aec4-2389bc1e18e9",
+        "skillId": "3c90fba4-9a3c-4d7b-bb6b-2447f5f77d43",
+        "status": "APPROVED",
+        "approvedByUserId": "7cda5075-a5f6-49a7-93b4-f25bde06f289",
+        "createdAt": "2026-08-18T00:59:49.100Z",
+        "updatedAt": "2026-08-18T08:16:05.780Z"
+      },
+      {
+        "id": "072b9263-7ab8-45b1-b30c-733f53e03c48",
+        "userId": "d7abe4a5-cd2f-4bdf-aec4-2389bc1e18e9",
+        "skillId": "816d35da-f42f-4008-ac7a-04213de673a9",
+        "status": "APPROVED",
+        "approvedByUserId": "7cda5075-a5f6-49a7-93b4-f25bde06f289",
+        "createdAt": "2026-08-18T01:10:47.334Z",
+        "updatedAt": "2026-08-18T08:16:07.436Z"
+      }
+    ],
+    "routines": [
+      {
+        "id": "b63ea885-2a10-47d9-9b8c-dc39af9f4761",
+        "userId": "d7abe4a5-cd2f-4bdf-aec4-2389bc1e18e9",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "08:30",
+        "endTime": "11:00",
+        "course": "Software Engineering Laboratory",
+        "room": "530 Permanent Campus",
+        "createdAt": "2026-08-18T01:07:28.382Z",
+        "updatedAt": "2026-08-18T01:07:28.382Z"
+      },
+      {
+        "id": "4f35c692-077b-4a9f-9dac-8e36d3d8b986",
+        "userId": "d7abe4a5-cd2f-4bdf-aec4-2389bc1e18e9",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "08:30",
+        "endTime": "09:50",
+        "course": "Microprocessors and Microcontrollers",
+        "room": "404 Permanent Campus",
+        "createdAt": "2026-08-18T01:07:28.424Z",
+        "updatedAt": "2026-08-18T01:07:28.424Z"
+      },
+      {
+        "id": "732aaced-cd4a-4221-aff4-358cbd60b773",
+        "userId": "d7abe4a5-cd2f-4bdf-aec4-2389bc1e18e9",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "08:30",
+        "endTime": "09:50",
+        "course": "Microprocessors and Microcontrollers",
+        "room": "404 Permanent Campus",
+        "createdAt": "2026-08-18T01:07:28.440Z",
+        "updatedAt": "2026-08-18T01:07:28.440Z"
+      },
+      {
+        "id": "6107aa87-d8ab-4d20-a7b3-bcfe11c2e6cb",
+        "userId": "d7abe4a5-cd2f-4bdf-aec4-2389bc1e18e9",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "13:51",
+        "endTime": "15:10",
+        "course": "Electronics",
+        "room": "428 Permanent Campus",
+        "createdAt": "2026-08-18T01:07:28.454Z",
+        "updatedAt": "2026-08-18T01:07:28.454Z"
+      },
+      {
+        "id": "5384fddf-9237-4724-9808-63b74e315702",
+        "userId": "d7abe4a5-cd2f-4bdf-aec4-2389bc1e18e9",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "13:51",
+        "endTime": "15:10",
+        "course": "Electronics",
+        "room": "428 Permanent Campus",
+        "createdAt": "2026-08-18T01:07:28.468Z",
+        "updatedAt": "2026-08-18T01:07:28.468Z"
+      },
+      {
+        "id": "1a159c57-a96a-42cc-9f86-8194e3eb0cb1",
+        "userId": "d7abe4a5-cd2f-4bdf-aec4-2389bc1e18e9",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "12:31",
+        "endTime": "13:50",
+        "course": "Coordinate Geometry and Vector Analysis",
+        "room": "701 Permanent Campus",
+        "createdAt": "2026-08-18T01:07:28.483Z",
+        "updatedAt": "2026-08-18T01:07:28.483Z"
+      },
+      {
+        "id": "1350dd2e-8686-4073-965f-8c38ff3c39ba",
+        "userId": "d7abe4a5-cd2f-4bdf-aec4-2389bc1e18e9",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "12:31",
+        "endTime": "13:50",
+        "course": "Coordinate Geometry and Vector Analysis",
+        "room": "701 Permanent Campus",
+        "createdAt": "2026-08-18T01:07:28.497Z",
+        "updatedAt": "2026-08-18T01:07:28.497Z"
+      },
+      {
+        "id": "70212757-80d4-49c8-8a7c-3f4c255f4ad4",
+        "userId": "d7abe4a5-cd2f-4bdf-aec4-2389bc1e18e9",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "09:51",
+        "endTime": "11:10",
+        "course": "Probability and Statistics",
+        "room": "632 Permanent Campus",
+        "createdAt": "2026-08-18T01:07:28.511Z",
+        "updatedAt": "2026-08-18T01:07:28.511Z"
+      },
+      {
+        "id": "fdecf185-d48f-4bb8-9c76-f079f5bdbc57",
+        "userId": "d7abe4a5-cd2f-4bdf-aec4-2389bc1e18e9",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "09:51",
+        "endTime": "11:10",
+        "course": "Probability and Statistics",
+        "room": "632 Permanent Campus",
+        "createdAt": "2026-08-18T01:07:28.526Z",
+        "updatedAt": "2026-08-18T01:07:28.526Z"
+      }
+    ]
+  },
+  {
+    "id": "7cda5075-a5f6-49a7-93b4-f25bde06f289",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "alnahian@gmail.com",
+    "passwordHash": "$2b$10$JI8apUV8HB5c2byjHNVpGu2r.CRpeCimMU8UtvrX5E/xm2BhWCbi.",
+    "name": "Nahian",
+    "initials": "N",
+    "role": "ORG_OWNER",
+    "requestedRole": null,
+    "batch": "2024",
+    "whatsapp": "880123456789",
+    "avatarUrl": null,
+    "createdAt": "2026-08-18T08:15:07.070Z",
+    "updatedAt": "2026-08-18T08:15:07.070Z",
+    "subteams": [
+      {
+        "userId": "7cda5075-a5f6-49a7-93b4-f25bde06f289",
+        "subteamId": "62c5e28f-4b62-4e28-807f-d97d5087a86e"
+      }
+    ],
+    "skills": [],
+    "routines": []
+  },
+  {
+    "id": "ce20755f-d270-4735-b762-a9f338333a14",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "tjubayer2410062@bscse.uiu.ac.bd",
+    "passwordHash": "$2b$10$0xlcio4VeW4rXRje6AEMwuwdKDb8v.pVv7ZFW/EVJ2J2wIrXhoWV2",
+    "name": "Talha Jubayer",
+    "initials": "TJ",
+    "role": "MEMBER",
+    "requestedRole": null,
+    "batch": "2025",
+    "whatsapp": "01768969936",
+    "avatarUrl": null,
+    "createdAt": "2026-08-17T12:43:13.572Z",
+    "updatedAt": "2026-08-18T10:43:54.365Z",
+    "subteams": [
+      {
+        "userId": "ce20755f-d270-4735-b762-a9f338333a14",
+        "subteamId": "62c5e28f-4b62-4e28-807f-d97d5087a86e"
+      }
+    ],
+    "skills": [
+      {
+        "id": "698fd715-664d-4a2b-9877-d553b253b125",
+        "userId": "ce20755f-d270-4735-b762-a9f338333a14",
+        "skillId": "f88b0aac-80a6-4c22-825f-ae11901e8f03",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T12:45:01.158Z",
+        "updatedAt": "2026-08-17T20:11:17.530Z"
+      },
+      {
+        "id": "a8493b1b-f859-4449-9540-af6e5661850b",
+        "userId": "ce20755f-d270-4735-b762-a9f338333a14",
+        "skillId": "4e4a44cc-c223-4ffe-8777-1ae13157dfa2",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T12:44:53.166Z",
+        "updatedAt": "2026-08-17T20:11:19.204Z"
+      },
+      {
+        "id": "2a89e698-ece8-4d91-ba14-e385c1b30a2e",
+        "userId": "ce20755f-d270-4735-b762-a9f338333a14",
+        "skillId": "fd84ba80-a251-47cf-ba0c-9a58aa4b6266",
+        "status": "APPROVED",
+        "approvedByUserId": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+        "createdAt": "2026-08-17T12:44:43.797Z",
+        "updatedAt": "2026-08-17T20:11:20.484Z"
+      }
+    ],
+    "routines": [
+      {
+        "id": "db791421-ec5d-471d-9ebb-32ed79e68804",
+        "userId": "ce20755f-d270-4735-b762-a9f338333a14",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "09:51",
+        "endTime": "11:10",
+        "course": "Biology for Engineers",
+        "room": "305 Permanent Campus",
+        "createdAt": "2026-08-18T10:49:14.082Z",
+        "updatedAt": "2026-08-18T10:49:14.082Z"
+      },
+      {
+        "id": "e70fc0b1-15c1-4670-95b6-75e5eb19a2de",
+        "userId": "ce20755f-d270-4735-b762-a9f338333a14",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "09:51",
+        "endTime": "11:10",
+        "course": "Biology for Engineers",
+        "room": "305 Permanent Campus",
+        "createdAt": "2026-08-18T10:49:14.109Z",
+        "updatedAt": "2026-08-18T10:49:14.109Z"
+      },
+      {
+        "id": "e104a146-3b17-4f4d-8f5b-557e5efc9ce3",
+        "userId": "ce20755f-d270-4735-b762-a9f338333a14",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "08:30",
+        "endTime": "11:00",
+        "course": "Advanced Object Oriented Programming Laboratory",
+        "room": "427 Permanent Campus",
+        "createdAt": "2026-08-18T10:49:14.124Z",
+        "updatedAt": "2026-08-18T10:49:14.124Z"
+      },
+      {
+        "id": "4eda1216-f024-48bd-bdfd-46dd39970b6a",
+        "userId": "ce20755f-d270-4735-b762-a9f338333a14",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sat",
+        "startTime": "11:11",
+        "endTime": "12:30",
+        "course": "Software Engineering",
+        "room": "403 Permanent Campus",
+        "createdAt": "2026-08-18T10:49:14.138Z",
+        "updatedAt": "2026-08-18T10:49:14.138Z"
+      },
+      {
+        "id": "a63c5c22-8179-4a80-8a23-bae241659852",
+        "userId": "ce20755f-d270-4735-b762-a9f338333a14",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "11:11",
+        "endTime": "12:30",
+        "course": "Software Engineering",
+        "room": "403 Permanent Campus",
+        "createdAt": "2026-08-18T10:49:14.153Z",
+        "updatedAt": "2026-08-18T10:49:14.153Z"
+      },
+      {
+        "id": "8ba0e2e1-06b2-4467-988f-b59d8c7bac6e",
+        "userId": "ce20755f-d270-4735-b762-a9f338333a14",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Tue",
+        "startTime": "08:30",
+        "endTime": "11:00",
+        "course": "Software Engineering Laboratory",
+        "room": "529 Permanent Campus",
+        "createdAt": "2026-08-18T10:49:14.167Z",
+        "updatedAt": "2026-08-18T10:49:14.167Z"
+      },
+      {
+        "id": "85be7e5d-9a09-4448-aa62-d12c8d7767f6",
+        "userId": "ce20755f-d270-4735-b762-a9f338333a14",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "14:00",
+        "endTime": "16:30",
+        "course": "Computer Networks Laboratory",
+        "room": "530 Permanent Campus",
+        "createdAt": "2026-08-18T10:49:14.182Z",
+        "updatedAt": "2026-08-18T10:49:14.182Z"
+      },
+      {
+        "id": "be59d69c-80c1-45ed-bd48-258158dedc47",
+        "userId": "ce20755f-d270-4735-b762-a9f338333a14",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Wed",
+        "startTime": "08:30",
+        "endTime": "09:50",
+        "course": "Microprocessors and Microcontrollers",
+        "room": "404 Permanent Campus",
+        "createdAt": "2026-08-18T10:49:14.196Z",
+        "updatedAt": "2026-08-18T10:49:14.196Z"
+      },
+      {
+        "id": "cdc60249-8e85-49f3-b1ce-b07685c937fd",
+        "userId": "ce20755f-d270-4735-b762-a9f338333a14",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "08:30",
+        "endTime": "09:50",
+        "course": "Microprocessors and Microcontrollers",
+        "room": "404 Permanent Campus",
+        "createdAt": "2026-08-18T10:49:14.211Z",
+        "updatedAt": "2026-08-18T10:49:14.211Z"
+      },
+      {
+        "id": "7b04fd88-2769-4417-928e-41807e03115c",
+        "userId": "ce20755f-d270-4735-b762-a9f338333a14",
+        "semesterId": "ff447f26-970d-4ba2-83f5-065236e3dbde",
+        "day": "Sun",
+        "startTime": "14:00",
+        "endTime": "16:30",
+        "course": "Microprocessors and Microcontrollers Laboratory",
+        "room": "511 Permanent Campus",
+        "createdAt": "2026-08-18T10:49:14.225Z",
+        "updatedAt": "2026-08-18T10:49:14.225Z"
+      }
+    ]
+  },
+  {
+    "id": "114b72b7-a43f-49ee-8af5-a40407818c54",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "email": "arman4hn@gmail.com",
+    "passwordHash": "$2b$10$KWdvyrNZSLXSKUePmKgIlucZh2hHO4pWIuJUFw/t50Gj44wIAxyFm",
+    "name": "Arman Hossain",
+    "initials": "AH",
+    "role": "MEMBER",
+    "requestedRole": null,
+    "batch": "2025",
+    "whatsapp": "01762426703",
+    "avatarUrl": null,
+    "createdAt": "2026-08-18T17:12:05.811Z",
+    "updatedAt": "2026-08-18T17:12:05.811Z",
+    "subteams": [
+      {
+        "userId": "114b72b7-a43f-49ee-8af5-a40407818c54",
+        "subteamId": "62c5e28f-4b62-4e28-807f-d97d5087a86e"
+      }
+    ],
+    "skills": [],
+    "routines": []
+  }
+]

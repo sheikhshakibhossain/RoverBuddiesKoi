@@ -1,0 +1,38 @@
+[
+  {
+    "id": "958ba996-ac2f-4520-a74b-ff1f006d771f",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "name": "Rover Control System",
+    "description": "Core telemetry, obstacle avoidance, and navigation modules",
+    "color": "#6366f1",
+    "createdById": "533f90de-c719-431f-b773-b62d2e376eb7",
+    "createdAt": "2026-08-17T08:24:26.978Z",
+    "updatedAt": "2026-08-17T08:24:26.978Z",
+    "tasks": []
+  },
+  {
+    "id": "ccc45326-c6c6-43ea-91e8-7997281f79d5",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "name": "Hardware Integration",
+    "description": "PCB design, power distribution, and mechanical assembly",
+    "color": "#f59e0b",
+    "createdById": "533f90de-c719-431f-b773-b62d2e376eb7",
+    "createdAt": "2026-08-17T08:24:27.005Z",
+    "updatedAt": "2026-08-17T08:24:27.005Z",
+    "tasks": []
+  },
+  {
+    "id": "eeb90f4f-9e5a-4d1b-b323-7f25287e68bd",
+    "organizationId": "87b504f1-4b63-4068-ae9f-7fbb9dab62f3",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "name": "RoverBuddiesKoi",
+    "description": "",
+    "color": "#34d399",
+    "createdById": "862b3c08-2ebf-4060-a844-79ac378bdf19",
+    "createdAt": "2026-08-17T12:02:08.641Z",
+    "updatedAt": "2026-08-17T12:02:08.641Z",
+    "tasks": []
+  }
+]

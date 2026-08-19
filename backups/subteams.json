@@ -1,0 +1,114 @@
+[
+  {
+    "id": "62c5e28f-4b62-4e28-807f-d97d5087a86e",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "name": "Software",
+    "description": null,
+    "createdAt": "2026-08-06T12:35:44.955Z",
+    "updatedAt": "2026-08-06T12:35:44.955Z"
+  },
+  {
+    "id": "8bb11785-cf1c-4578-87a4-60955578e3f0",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "name": "Electrical",
+    "description": null,
+    "createdAt": "2026-08-06T12:35:46.182Z",
+    "updatedAt": "2026-08-06T12:35:46.182Z"
+  },
+  {
+    "id": "ae9a2d5e-9376-4a23-b61a-a29ead44e3f7",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "name": "Mechanical",
+    "description": null,
+    "createdAt": "2026-08-06T12:35:46.433Z",
+    "updatedAt": "2026-08-06T12:35:46.433Z"
+  },
+  {
+    "id": "c0caf949-45f2-4eae-bcee-cd4792baed88",
+    "teamId": "14d9bc59-4cb0-4daf-94b9-34cdde8626bf",
+    "name": "Software",
+    "description": null,
+    "createdAt": "2026-08-06T12:35:46.704Z",
+    "updatedAt": "2026-08-06T12:35:46.704Z"
+  },
+  {
+    "id": "439cc1dd-12b7-4cea-8e9b-5e26df6609eb",
+    "teamId": "14d9bc59-4cb0-4daf-94b9-34cdde8626bf",
+    "name": "Electrical",
+    "description": null,
+    "createdAt": "2026-08-06T12:35:47.010Z",
+    "updatedAt": "2026-08-06T12:35:47.010Z"
+  },
+  {
+    "id": "fd2402dd-2694-421c-91e1-10e74538b1a7",
+    "teamId": "14d9bc59-4cb0-4daf-94b9-34cdde8626bf",
+    "name": "Mechanical",
+    "description": null,
+    "createdAt": "2026-08-06T12:35:47.317Z",
+    "updatedAt": "2026-08-06T12:35:47.317Z"
+  },
+  {
+    "id": "eedab648-e50d-4cb5-9f58-42edafcbadb0",
+    "teamId": "900cff3d-07c3-40c9-8157-3a4ea71ad8f2",
+    "name": "UI/UX",
+    "description": null,
+    "createdAt": "2026-08-06T12:35:47.624Z",
+    "updatedAt": "2026-08-06T12:35:47.624Z"
+  },
+  {
+    "id": "871b8b2e-2cfb-43c7-9b7b-788c43e9dc1e",
+    "teamId": "900cff3d-07c3-40c9-8157-3a4ea71ad8f2",
+    "name": "Software",
+    "description": null,
+    "createdAt": "2026-08-06T12:35:47.932Z",
+    "updatedAt": "2026-08-06T12:35:47.932Z"
+  },
+  {
+    "id": "e1bf6252-8ccc-44cd-8959-f94eed4ba66d",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "name": "Media",
+    "description": null,
+    "createdAt": "2026-08-17T08:37:37.064Z",
+    "updatedAt": "2026-08-17T08:37:37.064Z"
+  },
+  {
+    "id": "7c56f07b-f682-4c3c-acd8-f408910bde84",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "name": "Science",
+    "description": null,
+    "createdAt": "2026-08-17T08:46:00.277Z",
+    "updatedAt": "2026-08-17T08:46:00.277Z"
+  },
+  {
+    "id": "65fb77fd-8dfa-497f-8086-ee75f9bc45eb",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "name": "Communication",
+    "description": null,
+    "createdAt": "2026-08-17T08:59:13.846Z",
+    "updatedAt": "2026-08-17T08:59:13.846Z"
+  },
+  {
+    "id": "60085987-0938-454e-935d-210320cc2195",
+    "teamId": "14d9bc59-4cb0-4daf-94b9-34cdde8626bf",
+    "name": "Communication",
+    "description": null,
+    "createdAt": "2026-08-17T08:59:14.773Z",
+    "updatedAt": "2026-08-17T08:59:14.773Z"
+  },
+  {
+    "id": "343492e4-7acc-4f67-811a-53bdc6b77729",
+    "teamId": "900cff3d-07c3-40c9-8157-3a4ea71ad8f2",
+    "name": "Communication",
+    "description": null,
+    "createdAt": "2026-08-17T08:59:15.320Z",
+    "updatedAt": "2026-08-17T08:59:15.320Z"
+  },
+  {
+    "id": "c1d8a1c7-3413-4d0b-907d-7297df1d6f7d",
+    "teamId": "0be930fd-9bcd-4c40-b69d-b1d51c9328c9",
+    "name": "UI/UX",
+    "description": null,
+    "createdAt": "2026-08-17T10:24:23.376Z",
+    "updatedAt": "2026-08-17T10:24:23.376Z"
+  }
+]
