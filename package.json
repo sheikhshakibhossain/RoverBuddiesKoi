@@ -8,9 +8,33 @@
     "dev:backend": "npm --prefix backend run dev",
     "dev:frontend": "npm --prefix frontend run dev",
     "build": "npm --prefix backend run build && npm --prefix frontend run build",
-    "install:all": "npm --prefix backend install && npm --prefix frontend install",
-    "prisma:generate": "npm --prefix backend run prisma:generate",
-    "prisma:push": "npm --prefix backend exec prisma db push",
-    "prisma:seed": "npm --prefix backend run prisma:seed"
+    "postinstall": "prisma generate --schema=backend/prisma/schema.prisma",
+    "prisma:generate": "prisma generate --schema=backend/prisma/schema.prisma",
+    "prisma:push": "prisma db push --schema=backend/prisma/schema.prisma",
+    "prisma:seed": "tsx backend/prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.3.1",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "xlsx": "^0.18.5",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.8",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.13.1",
+    "prisma": "^6.3.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
   }
 }
