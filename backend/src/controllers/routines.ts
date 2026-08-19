@@ -84,3 +84,105 @@ export async function getMyRoutine(req: Request, res: Response, next: NextFuncti
     next(error)
   }
 }
+
+export async function addCustomSlot(req: Request, res: Response, next: NextFunction) {
+  try {
+    const userId = req.user!.id
+    const { day, startTime, endTime, course, room } = req.body
+
+    if (!day || !startTime || !endTime || !course) {
+      throw new ValidationError("Day, start time, end time, and title/course are required.")
+    }
+
+    // Find or create active semester
+    let activeSemester = await prisma.semester.findFirst({
+      where: { organizationId: req.user!.organizationId, isActive: true },
+    })
+
+    if (!activeSemester) {
+      const now = new Date()
+      const end = new Date(now)
+      end.setMonth(end.getMonth() + 6)
+      activeSemester = await prisma.semester.create({
+        data: {
+          organizationId: req.user!.organizationId,
+          name: "Current Semester",
+          startDate: now,
+          endDate: end,
+          routineDeadline: end,
+          isActive: true,
+        },
+      })
+    }
+
+    const newSlot = await prisma.classRoutine.create({
+      data: {
+        userId,
+        semesterId: activeSemester.id,
+        day,
+        startTime: startTime.trim(),
+        endTime: endTime.trim(),
+        course: course.trim(),
+        room: room && typeof room === "string" ? room.trim() : null,
+      },
+    })
+
+    res.status(201).json({
+      message: "Custom time slot added successfully!",
+      slot: newSlot,
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function deleteSlot(req: Request, res: Response, next: NextFunction) {
+  try {
+    const userId = req.user!.id
+    const id = String(req.params.id)
+
+    const existing = await prisma.classRoutine.findUnique({ where: { id } })
+    if (!existing) {
+      throw new ValidationError("Time slot not found.")
+    }
+    if (existing.userId !== userId && req.user!.role !== "ORG_OWNER") {
+      throw new ValidationError("You do not have permission to delete this slot.")
+    }
+
+    await prisma.classRoutine.delete({ where: { id } })
+    res.json({ message: "Time slot deleted successfully." })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function updateSlot(req: Request, res: Response, next: NextFunction) {
+  try {
+    const userId = req.user!.id
+    const id = String(req.params.id)
+    const { day, startTime, endTime, course, room } = req.body
+
+    const existing = await prisma.classRoutine.findUnique({ where: { id } })
+    if (!existing) {
+      throw new ValidationError("Time slot not found.")
+    }
+    if (existing.userId !== userId && req.user!.role !== "ORG_OWNER") {
+      throw new ValidationError("You do not have permission to update this slot.")
+    }
+
+    const updated = await prisma.classRoutine.update({
+      where: { id },
+      data: {
+        ...(day && { day }),
+        ...(startTime && { startTime: startTime.trim() }),
+        ...(endTime && { endTime: endTime.trim() }),
+        ...(course && { course: course.trim() }),
+        ...(room !== undefined && { room: room ? room.trim() : null }),
+      },
+    })
+
+    res.json({ message: "Time slot updated successfully.", slot: updated })
+  } catch (error) {
+    next(error)
+  }
+}

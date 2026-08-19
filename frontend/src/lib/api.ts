@@ -239,6 +239,23 @@ export const routinesApi = {
   getMyRoutine: async () => {
     return fetchApi<any[]>("/api/routines/me")
   },
+  addCustomSlot: async (slot: { day: string; startTime: string; endTime: string; course: string; room?: string }) => {
+    return fetchApi<any>("/api/routines/custom-slot", {
+      method: "POST",
+      body: JSON.stringify(slot),
+    })
+  },
+  deleteSlot: async (id: string) => {
+    return fetchApi<any>(`/api/routines/slot/${id}`, {
+      method: "DELETE",
+    })
+  },
+  updateSlot: async (id: string, data: { day?: string; startTime?: string; endTime?: string; course?: string; room?: string }) => {
+    return fetchApi<any>(`/api/routines/slot/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    })
+  },
 }
 
 export const skillsApi = {
@@ -246,10 +263,17 @@ export const skillsApi = {
     return fetchApi<{ catalog: any[]; mySkills: any[] }>("/api/skills")
   },
 
-  requestSkill: async (skillName: string) => {
+  requestSkill: async (skillName: string, category?: string) => {
     return fetchApi("/api/skills/request", {
       method: "POST",
-      body: JSON.stringify({ skillName }),
+      body: JSON.stringify({ skillName, category }),
+    })
+  },
+
+  createSkill: async (name: string, category: string = "General") => {
+    return fetchApi<{ message: string; skill: any }>("/api/skills/create", {
+      method: "POST",
+      body: JSON.stringify({ name, category }),
     })
   },
 
@@ -284,7 +308,7 @@ export const heatmapApi = {
 
 export const aiApi = {
   sendChatMessage: async (message: string) => {
-    return fetchApi<{ reply: string }>("/api/ai/chat", {
+    return fetchApi<{ reply: string; members?: any[]; meta?: string }>("/api/ai/chat", {
       method: "POST",
       body: JSON.stringify({ message }),
     })

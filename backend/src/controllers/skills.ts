@@ -42,15 +42,26 @@ export async function getSkillsCatalog(req: Request, res: Response, next: NextFu
 export async function requestSkill(req: Request, res: Response, next: NextFunction) {
   try {
     const userId = req.user!.id
-    const { skillName } = req.body
+    const { skillName, category } = req.body
 
-    if (!skillName || typeof skillName !== "string") {
+    if (!skillName || typeof skillName !== "string" || skillName.trim() === "") {
       throw new ValidationError("skillName is required")
     }
 
-    let skill = await prisma.skill.findUnique({ where: { name: skillName } })
+    const cleanName = skillName.trim()
+
+    // Find existing skill case-insensitively
+    let skill = await prisma.skill.findFirst({
+      where: { name: { equals: cleanName, mode: "insensitive" } },
+    })
+
     if (!skill) {
-      skill = await prisma.skill.create({ data: { name: skillName } })
+      skill = await prisma.skill.create({
+        data: {
+          name: cleanName,
+          category: category && typeof category === "string" ? category.trim() : "General",
+        },
+      })
     }
 
     const existing = await prisma.userSkill.findUnique({
@@ -69,7 +80,7 @@ export async function requestSkill(req: Request, res: Response, next: NextFuncti
         where: { id: existing.id },
         data: { status: "PENDING" },
       })
-      return res.json({ message: "Skill request resubmitted", userSkill: updated })
+      return res.json({ message: "Skill request resubmitted", userSkill: updated, skill })
     }
 
     const userSkill = await prisma.userSkill.create({
@@ -80,7 +91,36 @@ export async function requestSkill(req: Request, res: Response, next: NextFuncti
       },
     })
 
-    res.status(201).json({ message: "Skill request submitted for manager approval", userSkill })
+    res.status(201).json({ message: "Skill request submitted for manager approval", userSkill, skill })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function createSkill(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { name, category } = req.body
+    if (!name || typeof name !== "string" || name.trim() === "") {
+      throw new ValidationError("Skill name is required")
+    }
+
+    const cleanName = name.trim()
+    const existing = await prisma.skill.findFirst({
+      where: { name: { equals: cleanName, mode: "insensitive" } },
+    })
+
+    if (existing) {
+      return res.json({ message: "Skill already exists in catalog", skill: existing })
+    }
+
+    const created = await prisma.skill.create({
+      data: {
+        name: cleanName,
+        category: category && typeof category === "string" ? category.trim() : "General",
+      },
+    })
+
+    res.status(201).json({ message: "Skill added to catalog successfully", skill: created })
   } catch (error) {
     next(error)
   }

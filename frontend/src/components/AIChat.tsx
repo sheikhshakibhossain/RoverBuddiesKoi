@@ -635,7 +635,8 @@ export function AIChat({ members, user, onMemberClick }: AIChatProps) {
         id: (Date.now() + 1).toString(),
         role: "bot",
         text: res.reply,
-        members: [],
+        members: res.members || [],
+        meta: res.meta,
         timestamp: new Date(),
       }
       setMessages(prev => [...prev, botMsg])

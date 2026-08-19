@@ -197,3 +197,31 @@ export function calculateAvailability(
     nextChange: "Free rest of the day",
   }
 }
+
+/**
+ * Checks if a member's schedule has any class conflict during [startMins, endMins) on targetDay.
+ */
+export function isFreeDuringInterval(
+  schedule: ClassSlot[],
+  targetDay: DayOfWeek,
+  startTimeStr: string,
+  endTimeStr: string
+): { isFree: boolean; conflict?: ClassSlot } {
+  if (!schedule || schedule.length === 0) return { isFree: false }
+
+  const startMins = timeToMinutes(startTimeStr)
+  const endMins = timeToMinutes(endTimeStr)
+
+  for (const slot of schedule) {
+    if (slot.day !== targetDay) continue
+    const slotStart = timeToMinutes(slot.startTime)
+    const slotEnd = timeToMinutes(slot.endTime)
+
+    // Overlap condition: startA < endB && endA > startB
+    if (startMins < slotEnd && endMins > slotStart) {
+      return { isFree: false, conflict: slot }
+    }
+  }
+
+  return { isFree: true }
+}

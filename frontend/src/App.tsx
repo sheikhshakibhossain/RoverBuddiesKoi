@@ -374,6 +374,28 @@ function isFreeAt(member: Member, day: DayOfWeek, time: string): boolean {
   })
 }
 
+function isFreeDuringInterval(
+  schedule: ClassSlot[],
+  day: DayOfWeek,
+  startTimeStr: string,
+  endTimeStr: string
+): { isFree: boolean; conflictCourse?: string } {
+  if (!schedule || schedule.length === 0) return { isFree: false }
+  const startMins = timeToMinutes(startTimeStr)
+  const endMins = timeToMinutes(endTimeStr)
+
+  for (const slot of schedule) {
+    if (slot.day !== day) continue
+    const slotStart = timeToMinutes(slot.startTime)
+    const slotEnd = timeToMinutes(slot.endTime)
+
+    if (startMins < slotEnd && endMins > slotStart) {
+      return { isFree: false, conflictCourse: slot.course }
+    }
+  }
+  return { isFree: true }
+}
+
 // ─── Status helpers ────────────────────────────────────────────────────────────
 
 type BadgeVariant = "success" | "destructive" | "warning" | "muted"
@@ -1204,6 +1226,70 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
 
         {/* Right column */}
         <div className="flex flex-col gap-4">
+          {/* AI Time-Availability Prediction Card */}
+          {pool.length > 0 && (() => {
+            const today = getTodayDayOfWeek()
+            const daysArr: DayOfWeek[] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+            const tomIdx = (daysArr.indexOf(today) + 1) % 7
+            const tomDay = daysArr[tomIdx]
+
+            // Find today's peak hour
+            let todayPeak = { hour: "14:00", free: 0 }
+            HOURS.forEach(h => {
+              const freeCount = pool.filter(m => isFreeAt(m, today, h)).length
+              if (freeCount > todayPeak.free) todayPeak = { hour: h, free: freeCount }
+            })
+
+            // Find tomorrow's peak hour
+            let tomPeak = { hour: "11:00", free: 0 }
+            HOURS.forEach(h => {
+              const freeCount = pool.filter(m => isFreeAt(m, tomDay, h)).length
+              if (freeCount > tomPeak.free) tomPeak = { hour: h, free: freeCount }
+            })
+
+            const todayPct = Math.round((todayPeak.free / Math.max(pool.length, 1)) * 100)
+            const tomPct = Math.round((tomPeak.free / Math.max(pool.length, 1)) * 100)
+
+            return (
+              <Card className="border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 shadow-xs">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm flex items-center gap-1.5 font-bold">
+                      <Zap size={14} className="text-primary animate-pulse"/> AI Availability Prediction
+                    </CardTitle>
+                    <Badge variant="outline" className="text-[10px] font-mono border-primary/30 text-primary">
+                      Dhaka BST
+                    </Badge>
+                  </div>
+                  <CardDescription className="text-xs">Predictive attendance windows from class routines</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0 space-y-2.5">
+                  <div className="p-2.5 rounded-xl bg-success/10 border border-success/20 flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-success">Today&#39;s Peak Window ({today})</p>
+                      <p className="text-sm font-bold text-foreground mt-0.5">{format12Hour(todayPeak.hour)}</p>
+                    </div>
+                    <div className="text-right">
+                      <Badge variant="success" className="font-mono text-xs">{todayPct}% Free</Badge>
+                      <p className="text-[10px] text-muted-foreground mt-0.5 font-mono">{todayPeak.free}/{pool.length} members</p>
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-muted/60 border border-border flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Tomorrow&#39;s Peak ({tomDay})</p>
+                      <p className="text-sm font-bold text-foreground mt-0.5">{format12Hour(tomPeak.hour)}</p>
+                    </div>
+                    <div className="text-right">
+                      <Badge variant="secondary" className="font-mono text-xs">{tomPct}% Free</Badge>
+                      <p className="text-[10px] text-muted-foreground mt-0.5 font-mono">{tomPeak.free}/{pool.length} members</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })()}
+
           {/* Becoming free next */}
           {becomingFree.length > 0 && (
             <Card>
@@ -1268,7 +1354,7 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
                               </span>
                             </div>
                           </TooltipTrigger>
-                          <TooltipContent>{s.v}/{pool.length} free at {s.t}</TooltipContent>
+                          <TooltipContent>{s.v}/{pool.length} free at {format12Hour(s.t)}</TooltipContent>
                         </Tooltip>
                       )
                     })}
@@ -1796,6 +1882,7 @@ function SearchPage() {
   useEffect(() => {
     setLoading(true)
     const filters: Record<string, string> = {}
+    if (query.trim()) filters.search = query.trim()
     if (!tScope  && team   !== "all") filters.team    = team
     if (!stScope && sub    !== "all") filters.subteam = sub
     if (status !== "all") filters.status = status
@@ -1841,28 +1928,25 @@ function SearchPage() {
     return () => clearInterval(timer)
   }, [day, time])
 
-  // Client-side day/time filter for members WITH routines
-  const filteredResults = (day !== "all" && time !== "all")
-    ? results.filter(m => isFreeAt(m, day as DayOfWeek, time))
-    : results
-
-  const dayTimeActive = day !== "all" && time !== "all"
-  const dirty = !!(query || (!tScope && team !== "all") || (!stScope && sub !== "all")
-    || status !== "all" || skill !== "all" || batch !== "all" || dayTimeActive)
-
-  function reset() {
-    setQuery(""); setTeam(tScope ?? "all"); setSub(stScope ?? "all")
-    setStatus("all"); setSkill("all"); setDay("all"); setTime("all"); setBatch("all")
-  }
-
-  // Unused — kept for TypeScript reference to original filter shape
-  const _unusedFilter = (m: Member) => {
-    if (tScope  && m.team !== tScope)                  return false
-    if (stScope && !m.subteams.includes(stScope))      return false
-    if (!tScope  && team  !== "all" && m.team !== team) return false
-    if (!stScope && sub   !== "all" && !m.subteams.includes(sub)) return false
+  // Client-side day/time & instantaneous text filter for smooth UX
+  const filteredResults = results.filter(m => {
+    if (day !== "all" && time !== "all" && !isFreeAt(m, day as DayOfWeek, time)) {
+      return false
+    }
+    if (query.trim()) {
+      const q = query.toLowerCase().trim()
+      const matchName = m.name.toLowerCase().includes(q)
+      const matchInitials = m.initials.toLowerCase().includes(q)
+      const matchTeam = m.team.toLowerCase().includes(q)
+      const matchSub = m.subteams.some(s => s.toLowerCase().includes(q))
+      const matchSkill = m.skills.some(s => s.toLowerCase().includes(q))
+      const matchBatch = m.batch.includes(q)
+      if (!matchName && !matchInitials && !matchTeam && !matchSub && !matchSkill && !matchBatch) {
+        return false
+      }
+    }
     return true
-  }
+  })
 
   const [dhakaNow, setDhakaNow] = useState<Date>(new Date())
 
@@ -2196,13 +2280,20 @@ function HeatmapPage() {
             {snapshots.length > 0 && (
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground">Source:</span>
-                <Select value={activeTab} onValueChange={v => { setActiveTab(v); setSelectedSnap(snapshots[0]) }}>
-                  <SelectTrigger className="w-32 h-8 text-xs"><SelectValue/></SelectTrigger>
+                <Select value={activeTab} onValueChange={v => {
+                  setActiveTab(v)
+                  if (v === "live") {
+                    setSelectedSnap(null)
+                  } else {
+                    const found = snapshots.find(s => s.id === v)
+                    if (found) setSelectedSnap(found)
+                  }
+                }}>
+                  <SelectTrigger className="w-36 h-8 text-xs"><SelectValue placeholder="Live Now"/></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="live">Live Now</SelectItem>
+                    <SelectItem value="live">Live Now (Real-time)</SelectItem>
                     {snapshots.map((s, i) => (
-                      <SelectItem key={s.id} value={s.id}
-                        onClick={() => setSelectedSnap(s)}>
+                      <SelectItem key={s.id} value={s.id}>
                         Snap {i+1} · {formatDhakaDate(new Date(s.computedAt))}
                       </SelectItem>
                     ))}
@@ -2423,14 +2514,22 @@ function SkillsPage() {
   const stScope = subteamScope(user)
   const isMember = user.role === "member"
 
-  const [pending,    setPending]   = useState<any[]>([])
-  const [catalog,    setCatalog]   = useState<any[]>([])
-  const [mySkills,   setMySkills]  = useState<string[]>([])
-  const [myPending,  setMyPending] = useState<string[]>([])
-  const [requesting, setRequesting] = useState(false)
-  const [requested,  setRequested] = useState("")
+  const [pending,        setPending]        = useState<any[]>([])
+  const [catalog,        setCatalog]        = useState<any[]>([])
+  const [mySkills,       setMySkills]       = useState<string[]>([])
+  const [myPending,      setMyPending]      = useState<string[]>([])
+  const [requesting,     setRequesting]     = useState(false)
+  const [requestMode,    setRequestMode]    = useState<"catalog" | "custom">("catalog")
+  const [requested,      setRequested]      = useState("")
+  const [customSkillName, setCustomSkillName] = useState("")
+  const [customCategory, setCustomCategory] = useState("General")
+  const [addCatalogOpen, setAddCatalogOpen] = useState(false)
+  const [newCatSkill,    setNewCatSkill]    = useState("")
+  const [newCatCategory, setNewCatCategory] = useState("Software")
+  const [catError,       setCatError]       = useState<string | null>(null)
+  const [reqError,       setReqError]       = useState<string | null>(null)
 
-  useEffect(() => {
+  const reloadSkills = () => {
     skillsApi.getPendingSkills()
       .then(res => {
         const filtered = (res || []).filter((r: any) => {
@@ -2449,22 +2548,71 @@ function SkillsPage() {
         setMyPending(res.mySkills?.filter((s: any) => s.status === "PENDING").map((s: any) => s.name) || [])
       })
       .catch(() => {})
+  }
+
+  useEffect(() => {
+    reloadSkills()
   }, [tScope, stScope])
 
   function approve(id: string) { 
-    skillsApi.approveSkill(id).then(() => setPending(p => p.filter(x => x.id !== id))) 
+    skillsApi.approveSkill(id).then(() => {
+      setPending(p => p.filter(x => x.id !== id))
+      reloadSkills()
+    }) 
   }
   function reject(id: string)  { 
-    skillsApi.rejectSkill(id).then(() => setPending(p => p.filter(x => x.id !== id))) 
+    skillsApi.rejectSkill(id).then(() => {
+      setPending(p => p.filter(x => x.id !== id))
+      reloadSkills()
+    }) 
   }
 
   function handleRequestSkill() {
-    if (!requested || mySkills.includes(requested) || myPending.includes(requested)) return
-    skillsApi.requestSkill(requested).then(() => {
-      setMyPending(p => [...p, requested])
-      setRequested("")
-      setRequesting(false)
-    })
+    setReqError(null)
+    const targetName = (requestMode === "catalog" ? requested : customSkillName).trim()
+    if (!targetName) {
+      setReqError("Please enter or select a skill name.")
+      return
+    }
+    if (mySkills.some(s => s.toLowerCase() === targetName.toLowerCase())) {
+      setReqError("This skill is already approved on your profile.")
+      return
+    }
+    if (myPending.some(s => s.toLowerCase() === targetName.toLowerCase())) {
+      setReqError("A request for this skill is already pending manager approval.")
+      return
+    }
+
+    skillsApi.requestSkill(targetName, customCategory)
+      .then(() => {
+        setMyPending(p => [...p, targetName])
+        setRequested("")
+        setCustomSkillName("")
+        setRequesting(false)
+        reloadSkills()
+      })
+      .catch((err: any) => {
+        setReqError(err.message || "Failed to submit skill request.")
+      })
+  }
+
+  function handleAddCatalogSkill() {
+    setCatError(null)
+    const name = newCatSkill.trim()
+    if (!name) {
+      setCatError("Please enter a skill name.")
+      return
+    }
+
+    skillsApi.createSkill(name, newCatCategory)
+      .then(() => {
+        setNewCatSkill("")
+        setAddCatalogOpen(false)
+        reloadSkills()
+      })
+      .catch((err: any) => {
+        setCatError(err.message || "Failed to create skill.")
+      })
   }
 
   return (
@@ -2477,7 +2625,7 @@ function SkillsPage() {
           </p>
         </div>
         {isMember && (
-          <Button size="sm" className="gap-1.5" onClick={() => setRequesting(true)}>
+          <Button size="sm" className="gap-1.5" onClick={() => { setReqError(null); setRequesting(true) }}>
             <Plus size={13}/> Request Skill
           </Button>
         )}
@@ -2492,13 +2640,17 @@ function SkillsPage() {
               <CardDescription className="text-xs">Skills verified by your manager — appear in search results</CardDescription>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="flex flex-wrap gap-2">
-                {mySkills.map(s => (
-                  <Badge key={s} variant="success" className="gap-1.5 text-xs py-1 px-2.5">
-                    <CheckCircle2 size={11}/> {s}
-                  </Badge>
-                ))}
-              </div>
+              {mySkills.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No approved skills yet. Click &quot;Request Skill&quot; to add.</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {mySkills.map(s => (
+                    <Badge key={s} variant="success" className="gap-1.5 text-xs py-1 px-2.5">
+                      <CheckCircle2 size={11}/> {s}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
           <Card>
@@ -2593,8 +2745,15 @@ function SkillsPage() {
 
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm">Skill Catalog</CardTitle>
-              <CardDescription className="text-xs">Approved members per skill (searchable)</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-sm">Skill Catalog</CardTitle>
+                  <CardDescription className="text-xs">Approved members per skill</CardDescription>
+                </div>
+                <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => { setCatError(null); setAddCatalogOpen(true) }}>
+                  <Plus size={11}/> Add Skill
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="pt-0 space-y-2.5">
               {catalog.map(s => {
@@ -2614,24 +2773,128 @@ function SkillsPage() {
 
       {/* Skill request dialog */}
       <Dialog open={requesting} onOpenChange={setRequesting}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Request a New Skill</DialogTitle>
-            <DialogDescription>Your Subteam Manager will review and approve. Only approved skills appear in search results.</DialogDescription>
+            <DialogDescription>Select an existing skill or add an open/custom skill not in the catalog.</DialogDescription>
           </DialogHeader>
-          <div className="space-y-3 py-2">
-            <Select value={requested} onValueChange={setRequested}>
-              <SelectTrigger><SelectValue placeholder="Select skill to request"/></SelectTrigger>
-              <SelectContent>
-                {catalog.map(s => (
-                  <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+
+          <div className="space-y-4 py-2">
+            <div className="flex gap-2 p-1 bg-muted rounded-lg">
+              <Button
+                type="button"
+                size="sm"
+                variant={requestMode === "catalog" ? "default" : "ghost"}
+                className="flex-1 h-7 text-xs"
+                onClick={() => setRequestMode("catalog")}
+              >
+                From Catalog
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant={requestMode === "custom" ? "default" : "ghost"}
+                className="flex-1 h-7 text-xs"
+                onClick={() => setRequestMode("custom")}
+              >
+                + Add / Open Skill
+              </Button>
+            </div>
+
+            {requestMode === "catalog" ? (
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">Select Predefined Skill</label>
+                <Select value={requested} onValueChange={setRequested}>
+                  <SelectTrigger><SelectValue placeholder="Choose a skill"/></SelectTrigger>
+                  <SelectContent>
+                    {catalog.map(s => (
+                      <SelectItem key={s.id} value={s.name}>{s.name} ({s.category || "General"})</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground">Open / Custom Skill Name</label>
+                  <Input
+                    placeholder="e.g. ROS2 Humble, SolidWorks, PyTorch"
+                    value={customSkillName}
+                    onChange={e => setCustomSkillName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground">Category</label>
+                  <Select value={customCategory} onValueChange={setCustomCategory}>
+                    <SelectTrigger><SelectValue/></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Software">Software</SelectItem>
+                      <SelectItem value="Hardware">Hardware / Embedded</SelectItem>
+                      <SelectItem value="Robotics">Robotics / Autonomous</SelectItem>
+                      <SelectItem value="Design">Mechanical / Design</SelectItem>
+                      <SelectItem value="Media">Media & PR</SelectItem>
+                      <SelectItem value="General">General</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+
+            {reqError && (
+              <p className="text-xs font-medium text-destructive bg-destructive/10 p-2.5 rounded-lg">
+                {reqError}
+              </p>
+            )}
           </div>
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setRequesting(false)}>Cancel</Button>
-            <Button onClick={handleRequestSkill} disabled={!requested}>Submit Request</Button>
+            <Button onClick={handleRequestSkill}>Submit Request</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add to Catalog Dialog (Manager/Owner) */}
+      <Dialog open={addCatalogOpen} onOpenChange={setAddCatalogOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Add Skill to Catalog</DialogTitle>
+            <DialogDescription>Register a new skill in the organization catalog so members can select and verify it.</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 py-2">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Skill Name</label>
+              <Input
+                placeholder="e.g. Next.js, Altium Designer, OpenCV"
+                value={newCatSkill}
+                onChange={e => setNewCatSkill(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Category</label>
+              <Select value={newCatCategory} onValueChange={setNewCatCategory}>
+                <SelectTrigger><SelectValue/></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Software">Software</SelectItem>
+                  <SelectItem value="Hardware">Hardware / Embedded</SelectItem>
+                  <SelectItem value="Robotics">Robotics / Autonomous</SelectItem>
+                  <SelectItem value="Design">Mechanical / Design</SelectItem>
+                  <SelectItem value="Media">Media & PR</SelectItem>
+                  <SelectItem value="General">General</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {catError && (
+              <p className="text-xs font-medium text-destructive bg-destructive/10 p-2.5 rounded-lg">
+                {catError}
+              </p>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddCatalogOpen(false)}>Cancel</Button>
+            <Button onClick={handleAddCatalogSkill}>Add to Catalog</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -4494,85 +4757,520 @@ function ProjectModal({ open, project, canEdit, onSave, onDelete, onClose }: {
 
 function MeetingPlannerPage() {
   const user = useUser()
+  const tScope = teamScope(user)
+  const stScope = subteamScope(user)
+
+  const [title, setTitle] = useState("Team Sync & Project Alignment")
   const [duration, setDuration] = useState("60")
-  const [team, setTeam] = useState(user.team || "UMRT")
-  const [skill, setSkill] = useState("all")
-  const [scheduled, setScheduled] = useState(false)
+  const [team, setTeam] = useState<string>(tScope || "all")
+  const [subteam, setSubteam] = useState<string>(stScope || "all")
+  const [skill, setSkill] = useState<string>("all")
+  const [targetDay, setTargetDay] = useState<string>("all")
+  const [windowFilter, setWindowFilter] = useState<"all" | "morning" | "afternoon" | "evening">("all")
+  const [selectedSlotIndex, setSelectedSlotIndex] = useState<number>(0)
+  const [scheduleModalOpen, setScheduleModalOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [syncStatus, setSyncStatus] = useState<string | null>(null)
+
+  const [membersList, setMembersList] = useState<Member[]>([])
+  const [teamsList, setTeamsList] = useState<{ name: string; subteams: { name: string }[] }[]>([])
+  const [skillsList, setSkillsList] = useState<string[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    setLoading(true)
+    Promise.all([
+      membersApi.getMembers(),
+      teamsApi.getTeams(),
+      skillsApi.getSkillsCatalog(),
+    ])
+      .then(([mems, teams, skillsRes]) => {
+        setMembersList(mems || [])
+        setTeamsList(teams || [])
+        setSkillsList((skillsRes?.catalog || []).map((s: any) => s.name))
+        if (!tScope && teams && teams.length > 0 && team === "all") {
+          // Keep all or first team
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  // Filter available subteams based on chosen team
+  const availableSubteams = team === "all"
+    ? [...new Set(teamsList.flatMap(t => (t.subteams || []).map(s => s.name)))]
+    : (teamsList.find(t => t.name === team)?.subteams || []).map(s => s.name)
+
+  // Filter pool of candidate members
+  const candidatePool = membersList.filter(m => {
+    if (tScope && m.team !== tScope) return false
+    if (stScope && !m.subteams.includes(stScope)) return false
+    if (team !== "all" && m.team !== team) return false
+    if (subteam !== "all" && !m.subteams.includes(subteam)) return false
+    if (skill !== "all" && !m.skills.some(s => s.toLowerCase() === skill.toLowerCase())) return false
+    return true
+  })
+
+  // ─── Slot Evaluation Algorithm ───────────────────────────────────────────────
+  const durationMins = parseInt(duration, 10) || 60
+  const candidateDays: DayOfWeek[] = targetDay !== "all"
+    ? [targetDay as DayOfWeek]
+    : ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"]
+
+  // Generate candidate start times in 30-min increments
+  const startTimes: string[] = []
+  for (let h = 8; h <= 18; h++) {
+    const hStr = h.toString().padStart(2, "0")
+    startTimes.push(`${hStr}:00`)
+    if (h < 18) startTimes.push(`${hStr}:30`)
+  }
+
+  // Filter by preferred window
+  const filteredStartTimes = startTimes.filter(t => {
+    const mins = timeToMinutes(t)
+    if (windowFilter === "morning") return mins >= 8 * 60 && mins < 12 * 60
+    if (windowFilter === "afternoon") return mins >= 12 * 60 && mins < 16 * 60
+    if (windowFilter === "evening") return mins >= 16 * 60 && mins <= 19 * 60
+    return true
+  })
+
+  interface SlotRecommendation {
+    day: DayOfWeek
+    startTime: string
+    endTime: string
+    freeMembers: Member[]
+    conflictingMembers: { member: Member; conflictCourse?: string }[]
+    missingRoutineMembers: Member[]
+    score: number
+  }
+
+  const evaluatedSlots: SlotRecommendation[] = []
+
+  for (const day of candidateDays) {
+    for (const st of filteredStartTimes) {
+      const startMins = timeToMinutes(st)
+      const endMins = startMins + durationMins
+      if (endMins > 20 * 60) continue // Skip if goes past 8:00 PM
+
+      const endH = Math.floor(endMins / 60)
+      const endM = endMins % 60
+      const endStr = `${endH.toString().padStart(2, "0")}:${endM.toString().padStart(2, "0")}`
+
+      const freeMembers: Member[] = []
+      const conflictingMembers: { member: Member; conflictCourse?: string }[] = []
+      const missingRoutineMembers: Member[] = []
+
+      for (const m of candidatePool) {
+        if (!m.schedule || m.schedule.length === 0) {
+          missingRoutineMembers.push(m)
+          continue
+        }
+
+        const check = isFreeDuringInterval(m.schedule, day, st, endStr)
+        if (check.isFree) {
+          freeMembers.push(m)
+        } else {
+          conflictingMembers.push({ member: m, conflictCourse: check.conflictCourse })
+        }
+      }
+
+      const totalValid = candidatePool.length
+      const score = totalValid > 0 ? Math.round((freeMembers.length / totalValid) * 100) : 0
+
+      evaluatedSlots.push({
+        day,
+        startTime: st,
+        endTime: endStr,
+        freeMembers,
+        conflictingMembers,
+        missingRoutineMembers,
+        score,
+      })
+    }
+  }
+
+  // Sort by score descending, then by freeMembers count
+  evaluatedSlots.sort((a, b) => b.score - a.score || b.freeMembers.length - a.freeMembers.length)
+
+  const topRecommendations = evaluatedSlots.slice(0, 4)
+  const currentSlot = topRecommendations[selectedSlotIndex] || topRecommendations[0]
+
+  // ICS & Calendar Sync generator
+  const downloadIcsFile = () => {
+    if (!currentSlot) return
+    const now = new Date()
+    const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//RoverBuddies//MeetingScheduler//EN
+CALSCALE:GREGORIAN
+METHOD:REQUEST
+BEGIN:VEVENT
+UID:rb-meeting-${Date.now()}@roverbuddies.local
+DTSTAMP:${now.toISOString().replace(/[-:]/g, "").split(".")[0]}Z
+SUMMARY:${title} - RoverBuddies
+DESCRIPTION:AI Scheduled Meeting\\nTarget: ${team !== "all" ? team : "All Teams"} (${subteam !== "all" ? subteam : "All Subteams"})\\nAttendance: ${currentSlot.freeMembers.length}/${candidatePool.length} free\\nAttendees: ${currentSlot.freeMembers.map(m => m.name).join(", ")}
+LOCATION:CAIR Lab / Rover Lab
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR`
+
+    const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.setAttribute("download", `RoverBuddies_Meeting_${currentSlot.day}.ics`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    setSyncStatus("Downloaded iCalendar (.ics) file!")
+    setTimeout(() => setSyncStatus(null), 3000)
+  }
+
+  const copyInviteText = () => {
+    if (!currentSlot) return
+    const text = `📅 **RoverBuddies Meeting Invitation**
+📌 **Topic:** ${title}
+🕒 **Time:** ${currentSlot.day} · ${format12Hour(currentSlot.startTime)} – ${format12Hour(currentSlot.endTime)} (Dhaka Time / BST)
+👥 **Scope:** ${team !== "all" ? team : "All Teams"}${subteam !== "all" ? ` · ${subteam}` : ""}
+✨ **Expected Attendees (${currentSlot.freeMembers.length}/${candidatePool.length}):**
+${currentSlot.freeMembers.map(m => `• ${m.name} (${m.subteams.join(", ")})`).join("\n")}
+${currentSlot.conflictingMembers.length > 0 ? `\n⚠️ **Conflicts:**\n${currentSlot.conflictingMembers.map(c => `• ${c.member.name} (${c.conflictCourse || "In Class"})`).join("\n")}` : ""}`
+
+    navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">AI Intelligent Meeting Scheduler</h1>
-        <p className="text-muted-foreground text-sm mt-0.5">Find optimal meeting slots based on live routines, skills, and member availability</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">AI Intelligent Meeting Scheduler</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">
+            Optimal meeting recommendations computed across live university routines and team schedules
+          </p>
+        </div>
+        <Badge variant="outline" className="text-xs px-3 py-1 font-mono border-primary/30 text-primary w-fit">
+          <Sparkles size={13} className="mr-1.5 inline"/> Dhaka Time (BST / UTC+6)
+        </Badge>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2"><Zap size={16} className="text-primary"/> Meeting Criteria</CardTitle>
+        {/* ── Left Column: Meeting Criteria ── */}
+        <Card className="col-span-1 border-border shadow-xs">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Zap size={16} className="text-primary"/> Meeting Criteria
+            </CardTitle>
+            <CardDescription className="text-xs">Configure meeting scope and duration</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Target Team</label>
-              <Select value={team} onValueChange={setTeam}>
+              <label className="text-xs font-medium text-muted-foreground">Meeting Title</label>
+              <Input
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="e.g. Weekly Robotics Review"
+                className="text-sm"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-2.5">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">Target Team</label>
+                <Select value={team} onValueChange={v => { setTeam(v); setSubteam("all"); setSelectedSlotIndex(0) }}>
+                  <SelectTrigger><SelectValue/></SelectTrigger>
+                  <SelectContent>
+                    {!tScope && <SelectItem value="all">All Teams</SelectItem>}
+                    {teamsList.map(t => <SelectItem key={t.name} value={t.name}>{t.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">Subteam</label>
+                <Select value={subteam} onValueChange={v => { setSubteam(v); setSelectedSlotIndex(0) }}>
+                  <SelectTrigger><SelectValue/></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Subteams</SelectItem>
+                    {availableSubteams.map(st => <SelectItem key={st} value={st}>{st}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2.5">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">Meeting Duration</label>
+                <Select value={duration} onValueChange={v => { setDuration(v); setSelectedSlotIndex(0) }}>
+                  <SelectTrigger><SelectValue/></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15">15 Minutes</SelectItem>
+                    <SelectItem value="30">30 Minutes</SelectItem>
+                    <SelectItem value="45">45 Minutes</SelectItem>
+                    <SelectItem value="60">1 Hour</SelectItem>
+                    <SelectItem value="90">1.5 Hours</SelectItem>
+                    <SelectItem value="120">2 Hours</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">Target Day</label>
+                <Select value={targetDay} onValueChange={v => { setTargetDay(v); setSelectedSlotIndex(0) }}>
+                  <SelectTrigger><SelectValue/></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Any Day (Sat–Fri)</SelectItem>
+                    <SelectItem value="Sat">Saturday</SelectItem>
+                    <SelectItem value="Sun">Sunday</SelectItem>
+                    <SelectItem value="Mon">Monday</SelectItem>
+                    <SelectItem value="Tue">Tuesday</SelectItem>
+                    <SelectItem value="Wed">Wednesday</SelectItem>
+                    <SelectItem value="Thu">Thursday</SelectItem>
+                    <SelectItem value="Fri">Friday</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Preferred Time Window</label>
+              <Select value={windowFilter} onValueChange={(v: any) => { setWindowFilter(v); setSelectedSlotIndex(0) }}>
                 <SelectTrigger><SelectValue/></SelectTrigger>
                 <SelectContent>
-                  {/* Teams loaded dynamically once registered */}
-                  {team && <SelectItem value={team}>{team}</SelectItem>}
+                  <SelectItem value="all">Full Day (08:00 AM – 06:00 PM)</SelectItem>
+                  <SelectItem value="morning">Morning (08:00 AM – 12:00 PM)</SelectItem>
+                  <SelectItem value="afternoon">Afternoon (12:00 PM – 04:00 PM)</SelectItem>
+                  <SelectItem value="evening">Evening (04:00 PM – 07:00 PM)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Meeting Duration</label>
-              <Select value={duration} onValueChange={setDuration}>
-                <SelectTrigger><SelectValue/></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="30">30 Minutes</SelectItem>
-                  <SelectItem value="60">1 Hour</SelectItem>
-                  <SelectItem value="90">1.5 Hours</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Required Skill Filter</label>
-              <Select value={skill} onValueChange={setSkill}>
-                <SelectTrigger><SelectValue/></SelectTrigger>
+              <label className="text-xs font-medium text-muted-foreground">Skill Requirement Filter</label>
+              <Select value={skill} onValueChange={v => { setSkill(v); setSelectedSlotIndex(0) }}>
+                <SelectTrigger><SelectValue placeholder="Any Skill"/></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Any Skill</SelectItem>
+                  {skillsList.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
-          </CardContent>
-        </Card>
 
-        <Card className="col-span-1 lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2"><TrendingUp size={16} className="text-success"/> Recommended Meeting Slot</CardTitle>
-            <CardDescription className="text-xs">Highest expected attendance based on parsed class routines</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="p-4 rounded-xl bg-success/10 border border-success/30 flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-widest text-success font-semibold">Top Recommendation</p>
-                <p className="text-lg font-bold text-foreground mt-0.5">Wednesday · 4:00 PM – 5:00 PM</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Target Team: {team} · Duration: {duration} min</p>
-              </div>
-              <Badge variant="success" className="text-sm px-3 py-1 font-mono">96% Match Score</Badge>
-            </div>
-
-            <div className="p-4 rounded-lg bg-muted space-y-2">
-              <p className="text-xs font-semibold text-foreground">AI Availability Insights</p>
-              <p className="text-xs text-muted-foreground">
-                All team members are free of class conflicts during this hour. Maximum collaboration window detected.
+            <div className="p-3 rounded-lg bg-muted/60 text-xs text-muted-foreground space-y-1">
+              <p className="font-semibold text-foreground flex items-center gap-1.5">
+                <Users size={13} className="text-primary"/> Target Audience
               </p>
+              <p>{candidatePool.length} member(s) matching selected criteria.</p>
             </div>
-
-            <Button className="w-full gap-2" disabled={scheduled} onClick={() => { setScheduled(true); setTimeout(() => setScheduled(false), 2000) }}>
-              {scheduled ? <><CheckCircle2 size={16}/> Meeting Scheduled & Calendar Synced</> : <><Calendar size={16}/> Schedule This Meeting</>}
-            </Button>
           </CardContent>
         </Card>
+
+        {/* ── Right Column: AI Slot Recommendations ── */}
+        <div className="col-span-1 lg:col-span-2 space-y-4">
+          {loading ? (
+            <Card><CardContent className="py-20 text-center text-muted-foreground">
+              <RefreshCw size={24} className="mx-auto mb-2 animate-spin text-primary"/>
+              <p className="text-sm">Calculating optimal meeting slots...</p>
+            </CardContent></Card>
+          ) : candidatePool.length === 0 ? (
+            <Card><CardContent className="py-20 text-center text-muted-foreground">
+              <Users size={32} className="mx-auto mb-2 text-muted-foreground/40"/>
+              <p className="text-sm font-semibold text-foreground">No members match this filter</p>
+              <p className="text-xs mt-1">Try selecting &quot;All Teams&quot; or resetting the skill filter.</p>
+            </CardContent></Card>
+          ) : !currentSlot ? (
+            <Card><CardContent className="py-20 text-center text-muted-foreground">
+              <AlertCircle size={32} className="mx-auto mb-2 text-warning"/>
+              <p className="text-sm font-semibold text-foreground">No matching time window found</p>
+              <p className="text-xs mt-1">Try selecting a shorter duration or &quot;Full Day&quot; window.</p>
+            </CardContent></Card>
+          ) : (
+            <>
+              {/* Primary Selected Recommendation Banner */}
+              <Card className="border-success/30 bg-gradient-to-r from-success/5 via-card to-card shadow-xs overflow-hidden">
+                <CardHeader className="pb-3 border-b border-border/40">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-success flex items-center gap-1">
+                        <TrendingUp size={12}/> Top Recommended Meeting Window
+                      </span>
+                      <h2 className="text-xl sm:text-2xl font-black text-foreground mt-0.5 tracking-tight">
+                        {currentSlot.day} · {format12Hour(currentSlot.startTime)} – {format12Hour(currentSlot.endTime)}
+                      </h2>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Duration: {duration} min · Dhaka Time (BST)
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={currentSlot.score >= 75 ? "success" : currentSlot.score >= 50 ? "warning" : "destructive"} className="text-sm px-3.5 py-1 font-mono">
+                        {currentSlot.score}% Match Score
+                      </Badge>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-4 space-y-4">
+                  {/* Availability breakdown metrics */}
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="p-2.5 rounded-lg bg-success/10 border border-success/20">
+                      <p className="text-lg font-black text-success">{currentSlot.freeMembers.length}</p>
+                      <p className="text-[11px] font-semibold text-success uppercase tracking-wider">Free to Attend</p>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-destructive/10 border border-destructive/20">
+                      <p className="text-lg font-black text-destructive">{currentSlot.conflictingMembers.length}</p>
+                      <p className="text-[11px] font-semibold text-destructive uppercase tracking-wider">In Class Conflict</p>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-muted border border-border">
+                      <p className="text-lg font-black text-muted-foreground">{currentSlot.missingRoutineMembers.length}</p>
+                      <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">No Routine</p>
+                    </div>
+                  </div>
+
+                  {/* Available attendees preview */}
+                  <div>
+                    <p className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
+                      <CheckCircle2 size={13} className="text-success"/> Confirmed Free Members ({currentSlot.freeMembers.length})
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto pr-1">
+                      {currentSlot.freeMembers.map(m => (
+                        <Badge key={m.id} variant="secondary" className="gap-1.5 text-xs py-1 px-2.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-success"/>
+                          {m.name} <span className="text-muted-foreground text-[10px]">({m.subteams[0] || m.team})</span>
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Conflicts breakdown if any */}
+                  {currentSlot.conflictingMembers.length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
+                        <XCircle size={13} className="text-destructive"/> Members with Class Conflicts ({currentSlot.conflictingMembers.length})
+                      </p>
+                      <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1">
+                        {currentSlot.conflictingMembers.map(c => (
+                          <Badge key={c.member.id} variant="outline" className="gap-1.5 text-xs py-1 px-2.5 border-destructive/30 text-muted-foreground">
+                            <span className="w-1.5 h-1.5 rounded-full bg-destructive"/>
+                            {c.member.name}
+                            {c.conflictCourse && <span className="text-destructive text-[10px]">({c.conflictCourse})</span>}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action buttons */}
+                  <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-border">
+                    <Button className="flex-1 gap-2" onClick={() => setScheduleModalOpen(true)}>
+                      <Calendar size={15}/> Schedule & Sync Calendar
+                    </Button>
+                    <Button variant="outline" className="gap-1.5" onClick={copyInviteText}>
+                      {copied ? <><CheckCircle2 size={14} className="text-success"/> Copied!</> : <>Copy Invite</>}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Alternative Recommended Slots */}
+              {topRecommendations.length > 1 && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
+                      <Clock size={14} className="text-primary"/> Alternative Optimal Windows
+                    </CardTitle>
+                    <CardDescription className="text-xs">Click any slot to switch and view attendee breakdown</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0 space-y-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {topRecommendations.slice(1).map((slot, idx) => {
+                        const actualIdx = idx + 1
+                        const isSelected = selectedSlotIndex === actualIdx
+                        return (
+                          <button
+                            key={`${slot.day}-${slot.startTime}`}
+                            type="button"
+                            onClick={() => setSelectedSlotIndex(actualIdx)}
+                            className={cn(
+                              "p-3 rounded-xl border text-left transition-all cursor-pointer hover:border-primary/50",
+                              isSelected ? "bg-primary/10 border-primary shadow-xs" : "bg-card border-border"
+                            )}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold text-foreground">{slot.day}</span>
+                              <Badge variant={slot.score >= 75 ? "success" : "warning"} className="text-[10px] font-mono">
+                                {slot.score}%
+                              </Badge>
+                            </div>
+                            <p className="text-xs font-medium text-muted-foreground mt-1">
+                              {format12Hour(slot.startTime)} – {format12Hour(slot.endTime)}
+                            </p>
+                            <p className="text-[10px] text-muted-foreground/70 mt-0.5">
+                              {slot.freeMembers.length}/{candidatePool.length} free
+                            </p>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </>
+          )}
+        </div>
       </div>
+
+      {/* ── Schedule / Calendar Sync Dialog ── */}
+      <Dialog open={scheduleModalOpen} onOpenChange={setScheduleModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar size={18} className="text-primary"/> Meeting Confirmation & Sync
+            </DialogTitle>
+            <DialogDescription>
+              Sync this meeting with Google Calendar or export an iCalendar (.ics) invite.
+            </DialogDescription>
+          </DialogHeader>
+
+          {currentSlot && (
+            <div className="space-y-4 py-2">
+              <div className="p-3.5 rounded-xl bg-muted/60 border border-border space-y-2">
+                <p className="text-sm font-bold text-foreground">{title}</p>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <p>📅 <strong>When:</strong> {currentSlot.day} · {format12Hour(currentSlot.startTime)} – {format12Hour(currentSlot.endTime)} (BST)</p>
+                  <p>👥 <strong>Audience:</strong> {team !== "all" ? team : "All Teams"} ({subteam !== "all" ? subteam : "All Subteams"})</p>
+                  <p>✨ <strong>Expected Attendance:</strong> {currentSlot.freeMembers.length} of {candidatePool.length} members ({currentSlot.score}%)</p>
+                </div>
+              </div>
+
+              {syncStatus && (
+                <p className="text-xs font-medium text-success bg-success/10 p-2.5 rounded-lg flex items-center gap-1.5">
+                  <CheckCircle2 size={14}/> {syncStatus}
+                </p>
+              )}
+
+              <div className="space-y-2">
+                <Button className="w-full gap-2 justify-center" onClick={downloadIcsFile}>
+                  <Upload size={14} className="rotate-180"/> Download iCalendar (.ics) File
+                </Button>
+
+                <Button variant="outline" className="w-full gap-2 justify-center" asChild>
+                  <a
+                    href={`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title + " - RoverBuddies")}&details=${encodeURIComponent("Meeting scheduled via RoverBuddies AI Scheduler\nAttendees: " + currentSlot.freeMembers.map(m => m.name).join(", "))}&location=CAIR+Lab`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <ArrowUpRight size={14}/> Open in Google Calendar
+                  </a>
+                </Button>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setScheduleModalOpen(false)}>Done</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
@@ -4645,10 +5343,37 @@ function RoutineUploadDialog({ open, onOpenChange, onSuccess }: {
   onSuccess?: () => void
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [activeTab, setActiveTab] = useState<"upload" | "custom">("upload")
   const [file, setFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+
+  // Custom Slot Form
+  const [customDay, setCustomDay] = useState<DayOfWeek>("Sun")
+  const [customStart, setCustomStart] = useState("09:00")
+  const [customEnd, setCustomEnd] = useState("10:30")
+  const [customTitle, setCustomTitle] = useState("")
+  const [customRoom, setCustomRoom] = useState("")
+  const [addingSlot, setAddingSlot] = useState(false)
+  const [mySlots, setMySlots] = useState<any[]>([])
+  const [loadingSlots, setLoadingSlots] = useState(false)
+
+  const loadMyRoutine = () => {
+    setLoadingSlots(true)
+    routinesApi.getMyRoutine()
+      .then(res => setMySlots(res || []))
+      .catch(() => setMySlots([]))
+      .finally(() => setLoadingSlots(false))
+  }
+
+  useEffect(() => {
+    if (open) {
+      loadMyRoutine()
+      setError(null)
+      setSuccess(null)
+    }
+  }, [open])
 
   const handleSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -4677,6 +5402,7 @@ function RoutineUploadDialog({ open, onOpenChange, onSuccess }: {
       setError(null)
       const res = await routinesApi.uploadRoutine(file)
       setSuccess(res.message || "Routine uploaded and availability updated successfully!")
+      loadMyRoutine()
       setTimeout(() => {
         setFile(null)
         setSuccess(null)
@@ -4690,8 +5416,51 @@ function RoutineUploadDialog({ open, onOpenChange, onSuccess }: {
     }
   }
 
+  const handleAddCustomSlot = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!customTitle.trim()) {
+      setError("Please specify a course name or occasion title.")
+      return
+    }
+
+    try {
+      setAddingSlot(true)
+      setError(null)
+      const res = await routinesApi.addCustomSlot({
+        day: customDay,
+        startTime: customStart,
+        endTime: customEnd,
+        course: customTitle.trim(),
+        room: customRoom.trim() || undefined,
+      })
+      setSuccess(res.message || "Custom time slot added successfully!")
+      setCustomTitle("")
+      setCustomRoom("")
+      loadMyRoutine()
+      if (onSuccess) onSuccess()
+      setTimeout(() => setSuccess(null), 2500)
+    } catch (err: any) {
+      setError(err.message || "Failed to add custom slot.")
+    } finally {
+      setAddingSlot(false)
+    }
+  }
+
+  const handleDeleteSlot = async (id: string) => {
+    try {
+      setError(null)
+      await routinesApi.deleteSlot(id)
+      setMySlots(prev => prev.filter(s => s.id !== id))
+      setSuccess("Time slot removed.")
+      if (onSuccess) onSuccess()
+      setTimeout(() => setSuccess(null), 2000)
+    } catch (err: any) {
+      setError(err.message || "Failed to delete slot.")
+    }
+  }
+
   const handleClose = (o: boolean) => {
-    if (!uploading) {
+    if (!uploading && !addingSlot) {
       setFile(null)
       setError(null)
       setSuccess(null)
@@ -4701,70 +5470,209 @@ function RoutineUploadDialog({ open, onOpenChange, onSuccess }: {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[460px]">
+      <DialogContent className="sm:max-w-[560px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Upload Class Routine</DialogTitle>
+          <DialogTitle>Routine & Availability Management</DialogTitle>
           <DialogDescription>
-            Upload your UCAM XLSX to sync availability. Required before the semester deadline.
+            Upload your UCAM class routine or add custom busy time slots for urgent work and special occasions.
           </DialogDescription>
         </DialogHeader>
-        <div className="py-3 space-y-3">
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleSelectFile}
-            accept=".xlsx, .xls, .csv"
-            className="hidden"
-          />
-          <div
-            className={cn(
-              "rounded-xl border-2 border-dashed border-border bg-muted/30 p-8 text-center cursor-pointer hover:bg-muted/50 transition-colors",
-              file && "border-primary/50 bg-primary/5"
-            )}
-            onClick={() => fileInputRef.current?.click()}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={handleDrop}
+
+        {/* Tab switch */}
+        <div className="flex gap-2 p-1 bg-muted rounded-lg mt-1">
+          <Button
+            type="button"
+            size="sm"
+            variant={activeTab === "upload" ? "default" : "ghost"}
+            className="flex-1 h-8 text-xs gap-1.5"
+            onClick={() => { setActiveTab("upload"); setError(null); setSuccess(null) }}
           >
-            <Upload size={28} className="mx-auto mb-2 text-muted-foreground"/>
-            {file ? (
-              <div>
-                <p className="text-sm font-semibold text-primary">{file.name}</p>
-                <p className="text-xs text-muted-foreground mt-0.5 font-mono">
-                  {(file.size / 1024).toFixed(1)} KB
-                </p>
-                <Button variant="outline" size="sm" className="mt-3 text-xs" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>
-                  Change File
-                </Button>
-              </div>
-            ) : (
-              <div>
-                <p className="text-sm font-medium text-foreground mb-1">Click or drag your UCAM XLSX here</p>
-                <p className="text-xs text-muted-foreground">Courses, days, and times are parsed automatically</p>
-                <Button variant="outline" size="sm" className="mt-4" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>
-                  Browse File
-                </Button>
-              </div>
-            )}
-          </div>
-
-          {error && (
-            <p className="text-xs font-medium text-destructive bg-destructive/10 p-2.5 rounded-lg">
-              {error}
-            </p>
-          )}
-
-          {success && (
-            <p className="text-xs font-medium text-success bg-success/10 p-2.5 rounded-lg flex items-center gap-1.5">
-              <CheckCircle2 size={14}/> {success}
-            </p>
-          )}
-        </div>
-        <DialogFooter>
-          <Button variant="ghost" disabled={uploading} onClick={() => handleClose(false)}>Cancel</Button>
-          <Button disabled={!file || uploading} onClick={handleUpload}>
-            {uploading ? "Uploading..." : "Upload & Sync"}
+            <Upload size={13}/> Upload UCAM XLSX
           </Button>
-        </DialogFooter>
+          <Button
+            type="button"
+            size="sm"
+            variant={activeTab === "custom" ? "default" : "ghost"}
+            className="flex-1 h-8 text-xs gap-1.5"
+            onClick={() => { setActiveTab("custom"); setError(null); setSuccess(null) }}
+          >
+            <Clock size={13}/> Custom Slots & Exceptions ({mySlots.length})
+          </Button>
+        </div>
+
+        {error && (
+          <p className="text-xs font-medium text-destructive bg-destructive/10 p-2.5 rounded-lg">
+            {error}
+          </p>
+        )}
+
+        {success && (
+          <p className="text-xs font-medium text-success bg-success/10 p-2.5 rounded-lg flex items-center gap-1.5">
+            <CheckCircle2 size={14}/> {success}
+          </p>
+        )}
+
+        {activeTab === "upload" ? (
+          <div className="py-3 space-y-3">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleSelectFile}
+              accept=".xlsx, .xls, .csv"
+              className="hidden"
+            />
+            <div
+              className={cn(
+                "rounded-xl border-2 border-dashed border-border bg-muted/30 p-8 text-center cursor-pointer hover:bg-muted/50 transition-colors",
+                file && "border-primary/50 bg-primary/5"
+              )}
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={handleDrop}
+            >
+              <Upload size={28} className="mx-auto mb-2 text-muted-foreground"/>
+              {file ? (
+                <div>
+                  <p className="text-sm font-semibold text-primary">{file.name}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 font-mono">
+                    {(file.size / 1024).toFixed(1)} KB
+                  </p>
+                  <Button variant="outline" size="sm" className="mt-3 text-xs" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>
+                    Change File
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-sm font-medium text-foreground mb-1">Click or drag your UCAM XLSX here</p>
+                  <p className="text-xs text-muted-foreground">Courses, days, and times are parsed automatically</p>
+                  <Button variant="outline" size="sm" className="mt-4" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>
+                    Browse File
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button variant="ghost" disabled={uploading} onClick={() => handleClose(false)}>Cancel</Button>
+              <Button disabled={!file || uploading} onClick={handleUpload}>
+                {uploading ? "Uploading..." : "Upload & Sync"}
+              </Button>
+            </DialogFooter>
+          </div>
+        ) : (
+          <div className="py-2 space-y-4">
+            {/* Add custom slot form */}
+            <form onSubmit={handleAddCustomSlot} className="p-3.5 rounded-xl bg-muted/40 border border-border space-y-3">
+              <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <Plus size={13} className="text-primary"/> Add Custom Busy Slot / Occasion
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-medium text-muted-foreground">Day</label>
+                  <Select value={customDay} onValueChange={(v: any) => setCustomDay(v)}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue/></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Sat">Saturday</SelectItem>
+                      <SelectItem value="Sun">Sunday</SelectItem>
+                      <SelectItem value="Mon">Monday</SelectItem>
+                      <SelectItem value="Tue">Tuesday</SelectItem>
+                      <SelectItem value="Wed">Wednesday</SelectItem>
+                      <SelectItem value="Thu">Thursday</SelectItem>
+                      <SelectItem value="Fri">Friday</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-medium text-muted-foreground">Start Time</label>
+                  <Input
+                    type="time"
+                    value={customStart}
+                    onChange={e => setCustomStart(e.target.value)}
+                    className="h-8 text-xs font-mono"
+                    required
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-medium text-muted-foreground">End Time</label>
+                  <Input
+                    type="time"
+                    value={customEnd}
+                    onChange={e => setCustomEnd(e.target.value)}
+                    className="h-8 text-xs font-mono"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-medium text-muted-foreground">Course / Reason Title</label>
+                  <Input
+                    placeholder="e.g. Robotics Lab / Thesis Work"
+                    value={customTitle}
+                    onChange={e => setCustomTitle(e.target.value)}
+                    className="h-8 text-xs"
+                    required
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-medium text-muted-foreground">Room / Note (Optional)</label>
+                  <Input
+                    placeholder="e.g. Lab 402 / Online"
+                    value={customRoom}
+                    onChange={e => setCustomRoom(e.target.value)}
+                    className="h-8 text-xs"
+                  />
+                </div>
+              </div>
+
+              <Button type="submit" size="sm" className="w-full h-8 text-xs gap-1.5" disabled={addingSlot || !customTitle.trim()}>
+                <Plus size={13}/> {addingSlot ? "Adding Slot..." : "Add Custom Slot"}
+              </Button>
+            </form>
+
+            {/* List of current slots */}
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-foreground">Current Routine & Commitments ({mySlots.length})</p>
+              {loadingSlots ? (
+                <p className="text-xs text-muted-foreground text-center py-4">Loading routine...</p>
+              ) : mySlots.length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center py-4 border border-dashed rounded-lg">
+                  No routine slots found. Upload your XLSX or add custom slots above.
+                </p>
+              ) : (
+                <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
+                  {mySlots.map(s => (
+                    <div key={s.id} className="flex items-center justify-between p-2 rounded-lg bg-card border border-border text-xs">
+                      <div>
+                        <span className="font-bold text-primary mr-1.5">[{s.day}]</span>
+                        <span className="font-medium text-foreground">{s.course}</span>
+                        {s.room && <span className="text-muted-foreground ml-1.5">({s.room})</span>}
+                        <p className="text-[10px] text-muted-foreground font-mono mt-0.5">
+                          {format12Hour(s.startTime)} – {format12Hour(s.endTime)}
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => handleDeleteSlot(s.id)}
+                        title="Delete slot"
+                      >
+                        <Trash2 size={13}/>
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => handleClose(false)}>Done</Button>
+            </DialogFooter>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   )

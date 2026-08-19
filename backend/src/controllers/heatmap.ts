@@ -12,6 +12,12 @@ const HOURS = [
 // ─── Core computation ────────────────────────────────────────────────────────
 
 async function computeHeatmapMatrix(organizationId: string) {
+  // Pre-fetch all teams and subteams in the organization so empty teams/subteams are fully structured
+  const allTeams = await prisma.team.findMany({
+    where: { organizationId },
+    include: { subteams: true },
+  })
+
   const users = await prisma.user.findMany({
     where: { organizationId },
     include: {
@@ -29,11 +35,37 @@ async function computeHeatmapMatrix(organizationId: string) {
   const teamTotals: Record<string, number> = {}
   const subteamTotals: Record<string, Record<string, number>> = {}
 
+  // Initialize for all known teams & subteams
+  for (const t of allTeams) {
+    teamMatrix[t.name] = {}
+    teamTotals[t.name] = 0
+    subteamMatrix[t.name] = {}
+    subteamTotals[t.name] = {}
+
+    for (const d of DAYS) {
+      teamMatrix[t.name][d] = {}
+      for (const h of HOURS) {
+        teamMatrix[t.name][d][h] = { free: 0, total: 0, pct: 0 }
+      }
+    }
+
+    for (const st of t.subteams) {
+      subteamMatrix[t.name][st.name] = {}
+      subteamTotals[t.name][st.name] = 0
+      for (const d of DAYS) {
+        subteamMatrix[t.name][st.name][d] = {}
+        for (const h of HOURS) {
+          subteamMatrix[t.name][st.name][d][h] = { free: 0, total: 0, pct: 0 }
+        }
+      }
+    }
+  }
+
   for (const u of users) {
     const teamName = u.team?.name
     if (!teamName) continue
 
-    // Init team matrix
+    // If team wasn't initialized
     if (!teamMatrix[teamName]) {
       teamMatrix[teamName] = {}
       teamTotals[teamName] = 0
@@ -119,7 +151,7 @@ export async function getHeatmap(req: Request, res: Response, next: NextFunction
     const currentUser = req.user!
     const data = await computeHeatmapMatrix(currentUser.organizationId)
 
-    // RBAC scoping: only return what this user should see
+    // RBAC scoping
     let filteredTeamMatrix = data.teamMatrix
     let filteredSubteamMatrix = data.subteamMatrix
     let filteredTeamTotals = data.teamTotals
@@ -140,36 +172,34 @@ export async function getHeatmap(req: Request, res: Response, next: NextFunction
       filteredSubteamTotals = Object.fromEntries(
         Object.entries(data.subteamTotals).filter(([k]) => allowedTeams.includes(k))
       )
-    } else if (
-      (currentUser.role === "SUBTEAM_MANAGER" || currentUser.role === "MEMBER") &&
-      currentUser.subteamIds.length > 0
-    ) {
+    } else if (currentUser.role === "SUBTEAM_MANAGER" && currentUser.subteamIds.length > 0) {
       const subteams = await prisma.subteam.findMany({
         where: { id: { in: currentUser.subteamIds } },
         include: { team: true },
       })
-      // Only show the teams/subteams they belong to
       const teamSubMap: Record<string, string[]> = {}
       for (const st of subteams) {
         if (!teamSubMap[st.team.name]) teamSubMap[st.team.name] = []
         teamSubMap[st.team.name].push(st.name)
       }
-      filteredTeamMatrix = Object.fromEntries(
-        Object.entries(data.teamMatrix).filter(([k]) => k in teamSubMap)
-      )
-      filteredTeamTotals = Object.fromEntries(
-        Object.entries(data.teamTotals).filter(([k]) => k in teamSubMap)
-      )
-      filteredSubteamMatrix = {}
-      filteredSubteamTotals = {}
-      for (const [teamName, subs] of Object.entries(teamSubMap)) {
-        if (data.subteamMatrix[teamName]) {
-          filteredSubteamMatrix[teamName] = Object.fromEntries(
-            Object.entries(data.subteamMatrix[teamName]).filter(([k]) => subs.includes(k))
-          )
-          filteredSubteamTotals[teamName] = Object.fromEntries(
-            Object.entries(data.subteamTotals[teamName] || {}).filter(([k]) => subs.includes(k))
-          )
+      if (Object.keys(teamSubMap).length > 0) {
+        filteredTeamMatrix = Object.fromEntries(
+          Object.entries(data.teamMatrix).filter(([k]) => k in teamSubMap)
+        )
+        filteredTeamTotals = Object.fromEntries(
+          Object.entries(data.teamTotals).filter(([k]) => k in teamSubMap)
+        )
+        filteredSubteamMatrix = {}
+        filteredSubteamTotals = {}
+        for (const [teamName, subs] of Object.entries(teamSubMap)) {
+          if (data.subteamMatrix[teamName]) {
+            filteredSubteamMatrix[teamName] = Object.fromEntries(
+              Object.entries(data.subteamMatrix[teamName]).filter(([k]) => subs.includes(k))
+            )
+            filteredSubteamTotals[teamName] = Object.fromEntries(
+              Object.entries(data.subteamTotals[teamName] || {}).filter(([k]) => subs.includes(k))
+            )
+          }
         }
       }
     }
