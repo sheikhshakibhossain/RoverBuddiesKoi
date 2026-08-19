@@ -1,11 +1,12 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import {
   LayoutDashboard, Users, Search, BarChart3, Zap, Settings,
   ChevronRight, Bell, MessageCircle, Filter, TrendingUp,
   Shield, Calendar, LogOut, User, HelpCircle, RefreshCw,
   CheckCircle2, XCircle, AlertCircle, Minus, ArrowUpRight,
   Upload, Building2, ChevronDown, Lock, Layers, Plus, Pencil,
-  Clock, AlertTriangle, Save, ArrowLeft, Menu, X, Eye, Loader2
+  Clock, AlertTriangle, Save, ArrowLeft, Menu, X, Eye, Loader2,
+  Sparkles
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
