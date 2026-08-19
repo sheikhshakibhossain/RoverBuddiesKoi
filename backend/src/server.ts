@@ -96,10 +96,12 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
   })
 })
 
-// 8. Export app for Vercel serverless / Local start
-if (process.env.NODE_ENV !== "test" && !process.env.VERCEL) {
-  app.listen(config.PORT, () => {
-    console.log(`RoverBuddiesKoi API running at http://localhost:${config.PORT}`)
+// 8. Start server listener
+const PORT = process.env.PORT || config.PORT || 5000
+
+if (process.env.NODE_ENV !== "test") {
+  app.listen(PORT, () => {
+    console.log(`RoverBuddiesKoi API running at http://localhost:${PORT}`)
   })
 }
 
