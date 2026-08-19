@@ -474,6 +474,140 @@ function RoutineRestrictionBanner({ onUpload }: { onUpload: () => void }) {
   )
 }
 
+// ─── WhatsApp missing banner and popup modal ───────────────────────────────────
+
+function WhatsAppMissingBanner({ onOpenModal }: { onOpenModal: () => void }) {
+  return (
+    <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-r from-emerald-500/15 via-emerald-500/5 to-card p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+      <div className="flex items-start sm:items-center gap-3.5">
+        <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-500 flex items-center justify-center shrink-0">
+          <MessageCircle size={22} className="animate-bounce" />
+        </div>
+        <div>
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-bold text-foreground">Action Required: Add Your WhatsApp Number</p>
+            <Badge variant="outline" className="text-[10px] border-emerald-500/40 text-emerald-500 font-mono">Missing</Badge>
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5 max-w-xl">
+            Teammates in CAIR Lab need your WhatsApp contact for one-click quick messaging, task coordination, and meeting alerts.
+          </p>
+        </div>
+      </div>
+      <Button size="sm" className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shrink-0 font-semibold shadow-sm" onClick={onOpenModal}>
+        <MessageCircle size={14} /> Add WhatsApp Number
+      </Button>
+    </div>
+  )
+}
+
+function WhatsAppPromptDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}) {
+  const { user, updateUser } = useUserCtx()
+  const [number, setNumber] = useState(user.whatsapp === "880123456789" ? "" : user.whatsapp || "")
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (open) {
+      setNumber(user.whatsapp === "880123456789" ? "" : user.whatsapp || "")
+      setError(null)
+      setSuccess(null)
+    }
+  }, [open, user.whatsapp])
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const clean = number.trim().replace(/\s+/g, "")
+    if (!clean || clean.length < 8) {
+      setError("Please enter a valid WhatsApp phone number (e.g. 01712345678 or +8801712345678)")
+      return
+    }
+
+    setSaving(true)
+    setError(null)
+    try {
+      const updated = await authApi.updateProfile({ whatsapp: clean })
+      updateUser({ whatsapp: updated.whatsapp || clean })
+      setSuccess("WhatsApp number saved successfully!")
+      setTimeout(() => {
+        onOpenChange(false)
+      }, 1000)
+    } catch (err: any) {
+      setError(err?.message || "Failed to update WhatsApp number. Please try again.")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center mb-1">
+            <MessageCircle size={26} />
+          </div>
+          <DialogTitle className="text-lg font-bold">Add Your WhatsApp Number</DialogTitle>
+          <DialogDescription className="text-xs">
+            Connect your active WhatsApp number so teammates in CAIR Lab can contact you directly for project tasks, updates, and schedule sync.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSave} className="space-y-4 pt-2">
+          {error && (
+            <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs font-medium">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-medium flex items-center gap-1.5">
+              <CheckCircle2 size={14} /> {success}
+            </div>
+          )}
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-foreground">WhatsApp Number</label>
+            <div className="relative">
+              <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="e.g. 01712345678 or +8801712345678"
+                value={number}
+                onChange={e => setNumber(e.target.value)}
+                className="pl-9 font-mono text-sm"
+                autoFocus
+              />
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Used strictly within CAIR Lab member cards for direct 1-click WhatsApp messaging.
+            </p>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                sessionStorage.setItem("dismissed_whatsapp_prompt", "true")
+                onOpenChange(false)
+              }}
+            >
+              Remind Me Later
+            </Button>
+            <Button type="submit" disabled={saving} className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 font-medium">
+              {saving ? "Saving..." : "Save WhatsApp"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 // ─── Nav ──────────────────────────────────────────────────────────────────────
 
 const ALL_NAV: { id: NavPage; label: string; icon: React.ReactNode }[] = [
@@ -1084,9 +1218,30 @@ function DashboardPage({ onUploadRoutine }: { onUploadRoutine: () => void }) {
     .sort((a,b) => (a.remainingMin ?? 99) - (b.remainingMin ?? 99))
 
   const isMemberMissing = user.role === "member" && pool.find(m => m.name === user.name)?.status === "missing"
+  const isWhatsAppMissing = !user.whatsapp || !user.whatsapp.trim() || user.whatsapp === "880123456789" || user.whatsapp === "0123456789" || user.whatsapp.length < 9
+  const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false)
+
+  // Auto popup on dashboard mount if WhatsApp is missing and not dismissed in this session
+  useEffect(() => {
+    if (isWhatsAppMissing) {
+      const dismissed = sessionStorage.getItem("dismissed_whatsapp_prompt")
+      if (!dismissed) {
+        const t = setTimeout(() => {
+          setWhatsAppModalOpen(true)
+        }, 500)
+        return () => clearTimeout(t)
+      }
+    }
+  }, [isWhatsAppMissing])
 
   return (
     <div className="space-y-5">
+      {/* Top Banner & Auto-Popup if WhatsApp Number is Missing */}
+      {isWhatsAppMissing && (
+        <WhatsAppMissingBanner onOpenModal={() => setWhatsAppModalOpen(true)} />
+      )}
+      <WhatsAppPromptDialog open={whatsAppModalOpen} onOpenChange={setWhatsAppModalOpen} />
+
       {isMemberMissing && <RoutineRestrictionBanner onUpload={onUploadRoutine} />}
 
       {/* Dashboard Live Hero Clock Banner */}

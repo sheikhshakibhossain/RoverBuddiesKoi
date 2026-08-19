@@ -61,15 +61,15 @@ export function roleLabel(role: UserRole): string {
 export function canAccessPage(role: UserRole, page: string): boolean {
   const norm = normalizeRole(role)
   const matrix: Record<string, UserRole[]> = {
-    dashboard: ["org-owner", "team-manager", "subteam-manager", "member"],
-    members:   ["org-owner", "team-manager", "subteam-manager", "member"],
-    search:    ["org-owner", "team-manager", "subteam-manager", "member"],
-    heatmap:   ["org-owner", "team-manager", "subteam-manager"],
-    skills:    ["org-owner", "team-manager", "subteam-manager", "member"],
-    projects:  ["org-owner", "team-manager", "subteam-manager", "member"],
-    "meeting-planner": ["org-owner", "team-manager"],
-    portfolio: ["org-owner", "team-manager", "subteam-manager", "member"],
-    settings:  ["org-owner", "team-manager", "member"],
+    dashboard:         ["org-owner", "team-manager", "subteam-manager", "member"],
+    members:           ["org-owner", "team-manager", "subteam-manager", "member"],
+    search:            ["org-owner", "team-manager", "subteam-manager", "member"],
+    heatmap:           ["org-owner", "team-manager", "subteam-manager", "member"],
+    skills:            ["org-owner", "team-manager", "subteam-manager", "member"],
+    projects:          ["org-owner", "team-manager", "subteam-manager", "member"],
+    "meeting-planner": ["org-owner", "team-manager", "subteam-manager", "member"],
+    portfolio:         ["org-owner", "team-manager", "subteam-manager", "member"],
+    settings:          ["org-owner", "team-manager", "subteam-manager", "member"],
   }
   return (matrix[page] ?? []).includes(norm)
 }
